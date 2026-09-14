@@ -1,0 +1,690 @@
+{
+  "overview": {
+    "posts": 12000,
+    "users": 1500,
+    "platforms": 5,
+    "date_start": "2024-05-01",
+    "date_end": "2025-04-30",
+    "days": 365,
+    "complete_rows": 7366,
+    "platform_counts_known": {
+      "Facebook": 2074,
+      "YouTube": 2073,
+      "Twitter": 2049,
+      "Reddit": 2031,
+      "Instagram": 1989
+    },
+    "platform_count_chi2_uniform_p": 0.658
+  },
+  "missingness": {
+    "tests": {
+      "likes missing": {
+        "rate_pct": 15.12,
+        "chi2_p_by_source_format": 0.145,
+        "chi2_p_by_platform": 0.604,
+        "chi2_p_by_month": 0.734
+      },
+      "text missing": {
+        "rate_pct": 14.82,
+        "chi2_p_by_source_format": 0.836,
+        "chi2_p_by_platform": 0.957,
+        "chi2_p_by_month": 0.592
+      },
+      "platform missing": {
+        "rate_pct": 14.87,
+        "chi2_p_by_source_format": 0.786,
+        "chi2_p_by_platform": null,
+        "chi2_p_by_month": 0.506
+      },
+      "likes sign-flipped": {
+        "rate_pct": 4.24,
+        "chi2_p_by_source_format": 0.326,
+        "chi2_p_by_platform": 0.154,
+        "chi2_p_by_month": 0.702
+      },
+      "text artifact": {
+        "rate_pct": 13.41,
+        "chi2_p_by_source_format": 0.28,
+        "chi2_p_by_platform": 0.413,
+        "chi2_p_by_month": 0.747
+      },
+      "duplicated on ingest": {
+        "rate_pct": 2.93,
+        "chi2_p_by_source_format": 0.422,
+        "chi2_p_by_platform": 0.495,
+        "chi2_p_by_month": 0.679
+      }
+    },
+    "n_tests": 17,
+    "by_source_format_pct": {
+      "likes missing": {
+        "dd-mm-yyyy": 16.0,
+        "iso8601": 14.5,
+        "unix_epoch": 15.1
+      },
+      "text missing": {
+        "dd-mm-yyyy": 14.9,
+        "iso8601": 14.6,
+        "unix_epoch": 15.1
+      },
+      "platform missing": {
+        "dd-mm-yyyy": 15.0,
+        "iso8601": 15.0,
+        "unix_epoch": 14.5
+      },
+      "likes sign-flipped": {
+        "dd-mm-yyyy": 4.0,
+        "iso8601": 4.6,
+        "unix_epoch": 4.0
+      },
+      "text artifact": {
+        "dd-mm-yyyy": 12.9,
+        "iso8601": 13.3,
+        "unix_epoch": 14.1
+      },
+      "duplicated on ingest": {
+        "dd-mm-yyyy": 2.7,
+        "iso8601": 2.9,
+        "unix_epoch": 3.2
+      }
+    },
+    "by_platform_pct": {
+      "likes missing": {
+        "Facebook": 15.4,
+        "Instagram": 14.9,
+        "Reddit": 14.2,
+        "Twitter": 15.8,
+        "YouTube": 15.7
+      },
+      "text missing": {
+        "Facebook": 15.0,
+        "Instagram": 15.1,
+        "Reddit": 15.5,
+        "Twitter": 15.0,
+        "YouTube": 14.6
+      },
+      "likes sign-flipped": {
+        "Facebook": 3.4,
+        "Instagram": 4.8,
+        "Reddit": 3.9,
+        "Twitter": 4.5,
+        "YouTube": 4.0
+      },
+      "text artifact": {
+        "Facebook": 14.0,
+        "Instagram": 14.3,
+        "Reddit": 13.1,
+        "Twitter": 12.4,
+        "YouTube": 13.6
+      },
+      "duplicated on ingest": {
+        "Facebook": 2.9,
+        "Instagram": 2.5,
+        "Reddit": 2.7,
+        "Twitter": 3.4,
+        "YouTube": 2.9
+      }
+    },
+    "co_missing_observed_vs_expected_if_independent": {
+      "likes&platform": [
+        260,
+        270.0
+      ],
+      "likes&text": [
+        282,
+        269.0
+      ],
+      "platform&text": [
+        243,
+        264.0
+      ]
+    },
+    "empty_vs_NULL_token_ratio": {
+      "platform": {
+        "<empty>": 1177,
+        "NULL": 607
+      },
+      "likes": {
+        "<empty>": 1199,
+        "NULL": 615
+      },
+      "text_content": {
+        "<empty>": 1154,
+        "NULL": 534
+      }
+    }
+  },
+  "hour_of_day": {
+    "timed_rows": 8474,
+    "date_only_rows": 3526,
+    "true_hour0": 376,
+    "true_mean_per_hour": 353.1,
+    "true_min_hour": [
+      16,
+      311
+    ],
+    "true_max_hour": [
+      23,
+      388
+    ],
+    "chi2_uniform_p": 0.475,
+    "naive_hour0_if_padded_midnight": 3902,
+    "naive_hour0_multiple_of_mean": 11.1,
+    "naive_hour0_share_pct": 32.5
+  },
+  "likes": {
+    "n_available": 10186,
+    "n_missing": 1814,
+    "negatives_all_float_formatted": true,
+    "mean_positive": 2493.5,
+    "mean_abs_negative": 2460.7,
+    "ks_abs_negative_vs_positive_p": 0.626,
+    "ks_uniform_0_5000_p": 0.407,
+    "median_available": 2498.0,
+    "if_median_imputed": {
+      "rows_at_single_value": 1817,
+      "std_available": 1437.8,
+      "std_imputed": 1324.7,
+      "std_shrink_pct": 7.9
+    }
+  },
+  "daily_anomalies": {
+    "method": "Poisson tail with lambda = mean daily posts; Bonferroni alpha = 0.05/365",
+    "lambda": 32.88,
+    "bonferroni_alpha": 0.00013698630136986303,
+    "high_days": {},
+    "low_days": {},
+    "days_z_above_3": 2,
+    "days_z_below_minus_3": 0,
+    "expected_days_z_above_3_if_poisson": 0.74
+  },
+  "time": {
+    "daily_mean": 32.9,
+    "daily_std": 5.9,
+    "daily_min": 18,
+    "daily_max": 54,
+    "poisson_dispersion_var_over_mean": 1.07,
+    "monthly_counts": {
+      "2024-05": 1038,
+      "2024-06": 979,
+      "2024-07": 996,
+      "2024-08": 1015,
+      "2024-09": 974,
+      "2024-10": 1029,
+      "2024-11": 1025,
+      "2024-12": 1035,
+      "2025-01": 1007,
+      "2025-02": 914,
+      "2025-03": 1013,
+      "2025-04": 975
+    },
+    "monthly_posts_per_day": {
+      "2024-05": 33.5,
+      "2024-06": 32.6,
+      "2024-07": 32.1,
+      "2024-08": 32.7,
+      "2024-09": 32.5,
+      "2024-10": 33.2,
+      "2024-11": 34.2,
+      "2024-12": 33.4,
+      "2025-01": 32.5,
+      "2025-02": 32.6,
+      "2025-03": 32.7,
+      "2025-04": 32.5
+    },
+    "busiest_month_raw": [
+      "2024-05",
+      1038
+    ],
+    "busiest_month_per_day": [
+      "2024-11",
+      34.2
+    ],
+    "quietest_month_raw": [
+      "2025-02",
+      914
+    ],
+    "chi2_month_counts_vs_calendar_days_p": 0.986,
+    "day_of_week": {
+      "Monday": 1720,
+      "Tuesday": 1677,
+      "Wednesday": 1771,
+      "Thursday": 1718,
+      "Friday": 1723,
+      "Saturday": 1675,
+      "Sunday": 1716
+    },
+    "chi2_dow_uniform_p": 0.722,
+    "top_days": {
+      "2024-06-16": 54,
+      "2024-05-30": 51,
+      "2024-08-14": 50
+    }
+  },
+  "engagement": {
+    "likes": {
+      "mean": 2491.9,
+      "median": 2498.0,
+      "min": 0,
+      "max": 5000
+    },
+    "shares": {
+      "mean": 1007.2,
+      "median": 1018.0,
+      "min": 0,
+      "max": 2000,
+      "ks_uniform_p": 0.173
+    },
+    "comments": {
+      "mean": 504.3,
+      "median": 503.0,
+      "min": 0,
+      "max": 1000,
+      "ks_uniform_p": 0.195
+    },
+    "spearman": {
+      "likes_shares": -0.001,
+      "likes_comments": 0.01,
+      "shares_comments": 0.024
+    },
+    "by_platform": {
+      "likes_f": {
+        "kruskal_p": 0.371,
+        "significant_after_bonferroni": false,
+        "epsilon_squared": 0.0005,
+        "spread_pct_of_mean": 3.7,
+        "means": {
+          "Facebook": 2528.9,
+          "Instagram": 2500.9,
+          "Reddit": 2488.1,
+          "Twitter": 2437.7,
+          "YouTube": 2517.8
+        },
+        "ci95": {
+          "Facebook": 68.4,
+          "Instagram": 67.6,
+          "Reddit": 67.6,
+          "Twitter": 68.4,
+          "YouTube": 66.1
+        },
+        "spread_max_minus_min": 91.2
+      },
+      "shares": {
+        "kruskal_p": 0.035,
+        "significant_after_bonferroni": false,
+        "epsilon_squared": 0.001,
+        "spread_pct_of_mean": 5.6,
+        "means": {
+          "Facebook": 984.2,
+          "Instagram": 1040.8,
+          "Reddit": 1002.2,
+          "Twitter": 1005.4,
+          "YouTube": 1011.8
+        },
+        "ci95": {
+          "Facebook": 24.5,
+          "Instagram": 25.5,
+          "Reddit": 24.8,
+          "Twitter": 24.8,
+          "YouTube": 24.7
+        },
+        "spread_max_minus_min": 56.7
+      },
+      "comments": {
+        "kruskal_p": 0.796,
+        "significant_after_bonferroni": false,
+        "epsilon_squared": 0.0002,
+        "spread_pct_of_mean": 2.3,
+        "means": {
+          "Facebook": 506.9,
+          "Instagram": 499.8,
+          "Reddit": 511.2,
+          "Twitter": 506.1,
+          "YouTube": 504.4
+        },
+        "ci95": {
+          "Facebook": 12.4,
+          "Instagram": 12.6,
+          "Reddit": 12.6,
+          "Twitter": 12.5,
+          "YouTube": 12.5
+        },
+        "spread_max_minus_min": 11.4
+      },
+      "engagement": {
+        "kruskal_p": 0.562,
+        "significant_after_bonferroni": false,
+        "epsilon_squared": 0.0003,
+        "spread_pct_of_mean": 2.2,
+        "means": {
+          "Facebook": 4016.0,
+          "Instagram": 4040.0,
+          "Reddit": 4003.9,
+          "Twitter": 3951.9,
+          "YouTube": 4031.8
+        },
+        "ci95": {
+          "Facebook": 74.3,
+          "Instagram": 74.2,
+          "Reddit": 74.6,
+          "Twitter": 74.9,
+          "YouTube": 73.0
+        },
+        "spread_max_minus_min": 88.1
+      }
+    },
+    "engagement_mean": 4002.0,
+    "bonferroni_alpha": 0.0125
+  },
+  "users": {
+    "posts_per_user": {
+      "mean": 8.0,
+      "median": 8.0,
+      "min": 1,
+      "max": 22,
+      "variance_over_mean": 1.02
+    },
+    "users_on_2plus_platforms": 1479,
+    "mean_platforms_per_user": 3.73,
+    "expected_mean_platforms_if_random": 3.71,
+    "expected_users_2plus_if_random": 1475.0,
+    "spearman_posts_vs_total_engagement": 0.841,
+    "spearman_followers_vs_mean_engagement": [
+      0.011,
+      0.666
+    ],
+    "spearman_followers_vs_posts": [
+      -0.01,
+      0.687
+    ],
+    "top10_by_total": [
+      {
+        "user_id": "user_zqv2vrf5",
+        "posts": 22,
+        "engagement_total": 81326,
+        "engagement_mean": 4280.3,
+        "followers": 13531
+      },
+      {
+        "user_id": "user_nfo3ih5u",
+        "posts": 19,
+        "engagement_total": 69109,
+        "engagement_mean": 4065.2,
+        "followers": 40429
+      },
+      {
+        "user_id": "user_0irp4abu",
+        "posts": 17,
+        "engagement_total": 64133,
+        "engagement_mean": 4580.9,
+        "followers": 44206
+      },
+      {
+        "user_id": "user_2ytzut7i",
+        "posts": 14,
+        "engagement_total": 63888,
+        "engagement_mean": 4914.5,
+        "followers": 17064
+      },
+      {
+        "user_id": "user_fgjkkrie",
+        "posts": 14,
+        "engagement_total": 62690,
+        "engagement_mean": 4477.9,
+        "followers": 2211
+      },
+      {
+        "user_id": "user_d4eat3v3",
+        "posts": 15,
+        "engagement_total": 62588,
+        "engagement_mean": 4470.6,
+        "followers": 49914
+      },
+      {
+        "user_id": "user_9mtets0p",
+        "posts": 14,
+        "engagement_total": 62414,
+        "engagement_mean": 4458.1,
+        "followers": 8262
+      },
+      {
+        "user_id": "user_y9bjiho1",
+        "posts": 13,
+        "engagement_total": 61956,
+        "engagement_mean": 4765.8,
+        "followers": 24858
+      },
+      {
+        "user_id": "user_i1e1kek5",
+        "posts": 16,
+        "engagement_total": 61112,
+        "engagement_mean": 4074.1,
+        "followers": 46765
+      },
+      {
+        "user_id": "user_gq0rypar",
+        "posts": 15,
+        "engagement_total": 60450,
+        "engagement_mean": 4650.0,
+        "followers": 17672
+      }
+    ],
+    "top10_by_mean_min5_known": [
+      {
+        "user_id": "user_py6fq7ii",
+        "posts": 6,
+        "engagement_mean": 6339.6,
+        "followers": 18940,
+        "location": "Delhi, India"
+      },
+      {
+        "user_id": "user_mcchsnr8",
+        "posts": 7,
+        "engagement_mean": 5969.5,
+        "followers": 2602,
+        "location": "Munich, Germany"
+      },
+      {
+        "user_id": "user_3318o2cp",
+        "posts": 7,
+        "engagement_mean": 5713.3,
+        "followers": 2374,
+        "location": "Cairo, Egypt"
+      },
+      {
+        "user_id": "user_5s9ifp0y",
+        "posts": 11,
+        "engagement_mean": 5566.3,
+        "followers": 28412,
+        "location": "Barcelona, Spain"
+      },
+      {
+        "user_id": "user_0e2how9t",
+        "posts": 6,
+        "engagement_mean": 5538.0,
+        "followers": 23563,
+        "location": "Melbourne, Australia"
+      },
+      {
+        "user_id": "user_ubmd2e2f",
+        "posts": 6,
+        "engagement_mean": 5523.6,
+        "followers": 40338,
+        "location": "Madrid, Spain"
+      },
+      {
+        "user_id": "user_01mu2x1s",
+        "posts": 9,
+        "engagement_mean": 5490.9,
+        "followers": 25887,
+        "location": "Toronto, Canada"
+      },
+      {
+        "user_id": "user_w8tmoixg",
+        "posts": 10,
+        "engagement_mean": 5478.5,
+        "followers": 26227,
+        "location": "Dubai, UAE"
+      },
+      {
+        "user_id": "user_8t4e9hnl",
+        "posts": 7,
+        "engagement_mean": 5453.4,
+        "followers": 18137,
+        "location": "Paris, France"
+      },
+      {
+        "user_id": "user_pe5yckyb",
+        "posts": 8,
+        "engagement_mean": 5442.2,
+        "followers": 33737,
+        "location": "Madrid, Spain"
+      }
+    ],
+    "top10_total_mean_posts": 15.9,
+    "top10_overlap_total_vs_mean": 0,
+    "followers": {
+      "min": 109,
+      "max": 49944,
+      "mean": 24964.0,
+      "median": 24741.5,
+      "ks_uniform_p": 0.87
+    },
+    "account_created_by_quarter": {
+      "1": 364,
+      "2": 380,
+      "3": 365,
+      "4": 391
+    }
+  },
+  "language": {
+    "counts": {
+      "zh": 168,
+      "ja": 156,
+      "hi": 156,
+      "en": 153,
+      "fr": 150,
+      "es": 146,
+      "ru": 144,
+      "ar": 143,
+      "pt": 143,
+      "de": 141
+    },
+    "chi2_uniform_p": 0.895,
+    "country_language_chi2_p": 0.419,
+    "cramers_v": 0.111,
+    "national_language_match_pct": 12.8,
+    "expected_match_pct_if_random": 12.4,
+    "binomial_p": 0.667,
+    "users_in_countries_without_language_code": 132,
+    "example_mismatches": [
+      {
+        "user_id": "user_guglt5jp",
+        "location": "Berlin, Germany",
+        "language": "ja"
+      },
+      {
+        "user_id": "user_b1p3wz81",
+        "location": "Munich, Germany",
+        "language": "zh"
+      },
+      {
+        "user_id": "user_9vo7he3z",
+        "location": "Rio de Janeiro, Brazil",
+        "language": "en"
+      },
+      {
+        "user_id": "user_4y5xrp4d",
+        "location": "S\u00e3o Paulo, Brazil",
+        "language": "ar"
+      }
+    ],
+    "top_country": [
+      "USA",
+      203
+    ],
+    "countries": 19,
+    "cities": 33
+  },
+  "text": {
+    "posts_with_text": 10221,
+    "distinct_texts": 10219,
+    "mean_chars": 117.7,
+    "mean_words": 17.3,
+    "brand_mentions": {
+      "Apple": 1023,
+      "Google": 1023,
+      "Samsung": 1045,
+      "Nike": 1046,
+      "Adidas": 1070,
+      "Amazon": 980,
+      "Microsoft": 1037,
+      "Toyota": 993,
+      "Coca-Cola": 977,
+      "Pepsi": 1027
+    },
+    "distinct_hashtags": 29,
+    "top_hashtags": {
+      "#Fitness": 753,
+      "#Reviews": 752,
+      "#BestValue": 735,
+      "#SpecialOffer": 728,
+      "#Eco": 727
+    },
+    "hashtags_per_post_mean": 2.01,
+    "posts_with_mentions_pct": 13.5,
+    "distinct_mentions": 15,
+    "template_openers": {
+      "Just unboxed": 1052,
+      "Just saw an ad": 1047,
+      "Has anyone else": 1015,
+      "Comparing": 1014,
+      "Just tried": 1000,
+      "Attended the": 980,
+      "Should I upgrade": 227,
+      "How do I fix": 209
+    },
+    "verdict_counts": {
+      "negative": 3306,
+      "positive": 3268,
+      "none": 2066,
+      "neutral": 1581
+    },
+    "contradictory_sentiment_posts": 617,
+    "contradiction_pct_of_emotional_posts": 40.9,
+    "emotional_posts": 1509,
+    "contradiction_examples": [
+      "Bummed out with my new Air Max from Nike! Absolutely loving it. #Travel, #CustomerService, #Fashion",
+      "Fed up with my new iPhone 15 from Apple! Best purchase ever. #Fashion, #Eco, #CustomerService",
+      "Sad to report with my new Eero WiFi from Amazon! Highly recommend. #Travel, #Promo, #TrendAlert"
+    ],
+    "engagement_mean_by_verdict": {
+      "negative": 4047.9,
+      "neutral": 3950.2,
+      "none": 3978.4,
+      "positive": 3978.3
+    },
+    "kruskal_engagement_by_verdict_p": 0.221,
+    "seasonal_campaign_month_chi2_p": {
+      "BlackFriday": 0.149,
+      "CyberMonday": 0.11,
+      "ValentinesDeals": 0.122,
+      "BackToSchool": 0.908,
+      "SummerSale": 0.376,
+      "HolidaySpecial": 0.149,
+      "NewYearNewYou": 0.885,
+      "EarthDay": 0.99,
+      "SpringBlast2025": 0.765,
+      "WinterWonders": 0.946,
+      "FallCollection": 0.659
+    },
+    "springblast2025_mentions_in_2024": 96,
+    "seasonal_mentions_total": 1495,
+    "seasonal_in_season_observed": 217,
+    "seasonal_in_season_expected_if_random": 225.0,
+    "seasonal_in_season_pct": 14.5,
+    "seasonal_in_season_expected_pct": 15.0,
+    "blackfriday_share_in_nov_pct": 7.9,
+    "valentines_share_in_feb_pct": 3.7
+  }
+}
