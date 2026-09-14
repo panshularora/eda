@@ -1,0 +1,11 @@
+# Keep data files byte-identical across operating systems so SHA-256 checks hold after cloning.
+*.csv   -text
+*.json  text eol=lf
+*.md    text eol=lf
+*.py    text eol=lf
+*.sql   text eol=lf
+*.ipynb text eol=lf
+*.html  text eol=lf
+*.pdf   binary
+*.png   binary
+*.db    binary

@@ -1,0 +1,10 @@
+# Python 3.11 (tested). Pinned for byte-identical outputs.
+pandas==2.2.2
+numpy==1.26.4
+scipy==1.17.1
+matplotlib==3.10.9
+
+# Only needed to re-execute the walkthrough notebook
+nbformat>=5.10
+nbclient>=0.10
+ipykernel>=6.29
