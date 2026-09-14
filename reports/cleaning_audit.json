@@ -1,0 +1,240 @@
+{
+  "inputs": {
+    "Social_Engine_Posts_Corrupted.csv": {
+      "sha256": "49a460d6b6d8b7f5bbbc1605852e555611adffdc9d7248c2d33910e2dd5dce42",
+      "matches_recovered_archive": true,
+      "shape": [
+        12360,
+        8
+      ]
+    },
+    "Social_Engine_Users.csv": {
+      "sha256": "d30efe470a4dd5612266c3b3ebcc5e84528ef12dc5d832698a6e2a64283f7fd8",
+      "matches_recovered_archive": true,
+      "shape": [
+        1500,
+        5
+      ]
+    }
+  },
+  "raw_file_counts_before_dedup": {
+    "rows": 12360,
+    "platform_missing": 1846,
+    "likes_missing": 1858,
+    "likes_negative": 525,
+    "text_missing_token": 1746,
+    "text_missing_including_hidden": 1840,
+    "text_suffix_artifact": 1657,
+    "timestamp_unix_epoch": 3788,
+    "timestamp_dd_mm_yyyy": 3622,
+    "timestamp_iso8601": 4950
+  },
+  "duplicates": {
+    "raw_rows": 12360,
+    "duplicated_post_ids": 352,
+    "group_size_distribution": {
+      "2_copies": 344,
+      "3_copies": 8
+    },
+    "rows_removed": 360,
+    "rows_after_dedup": 12000,
+    "all_copies_identical_in_every_column": true,
+    "exact_full_row_duplicates_in_raw": 360
+  },
+  "timestamps": {
+    "format_counts": {
+      "iso8601": 4805,
+      "unix_epoch": 3669,
+      "dd-mm-yyyy": 3526
+    },
+    "range_by_format_utc": {
+      "iso8601": [
+        "2024-05-01 01:35:53",
+        "2025-04-30 21:57:10"
+      ],
+      "unix_epoch": [
+        "2024-05-01 04:39:36",
+        "2025-04-30 21:21:15"
+      ],
+      "dd-mm-yyyy": [
+        "2024-05-01",
+        "2025-04-30"
+      ]
+    },
+    "dd_mm_evidence": {
+      "max_first_field": 31,
+      "max_second_field": 12,
+      "rows_with_first_field_gt_12": 2113
+    },
+    "date_only_rows_time_unknown": 3526,
+    "unparseable": 0,
+    "outside_window": 0
+  },
+  "platform": {
+    "missing_tokens": {
+      "<empty>": 1177,
+      "NULL": 607
+    },
+    "missing_total": 1784,
+    "recased_or_trimmed": 0,
+    "decision": "NULL (not imputed)"
+  },
+  "likes": {
+    "missing_tokens": {
+      "<empty>": 1199,
+      "NULL": 615
+    },
+    "missing_total": 1814,
+    "negative_values": 509,
+    "negative_values_float_formatted": 509,
+    "non_negative_values_float_formatted": 0,
+    "range_after_fix": [
+      0,
+      5000
+    ],
+    "decision_missing": "NULL (not imputed)"
+  },
+  "shares": {
+    "missing_total": 0,
+    "negative_values": 0,
+    "range": [
+      0,
+      2000
+    ],
+    "decision": "validated, unchanged"
+  },
+  "comments": {
+    "missing_total": 0,
+    "negative_values": 0,
+    "range": [
+      0,
+      1000
+    ],
+    "decision": "validated, unchanged"
+  },
+  "text_content": {
+    "missing_tokens_raw": {
+      "<empty>": 1154,
+      "NULL": 534
+    },
+    "missing_token_hidden_behind_artifact": 91,
+    "missing_total_after_cleaning": 1779,
+    "artifact_counts": {
+      "html_entity_amp": 328,
+      "html_tag_br": 311,
+      "html_tag_div": 335,
+      "mojibake_e_acute": 306,
+      "trailing_newlines": 329
+    },
+    "rows_with_artifact": 1609,
+    "artifact_evidence": {
+      "html_entity_amp": {
+        "rows_anywhere": 328,
+        "rows_as_suffix": 328
+      },
+      "html_tag_br": {
+        "rows_anywhere": 311,
+        "rows_as_suffix": 311
+      },
+      "html_tag_div": {
+        "rows_anywhere": 335,
+        "rows_as_suffix": 335
+      },
+      "mojibake_e_acute": {
+        "rows_anywhere": 306,
+        "rows_as_suffix": 306
+      },
+      "trailing_newlines": {
+        "rows_anywhere": 329,
+        "rows_as_suffix": 329
+      }
+    },
+    "residual_after_suffix_strip": {
+      "html_entities": 0,
+      "html_tags": 0,
+      "mojibake_sequences": 0
+    },
+    "whitespace_collapsed_rows": 680,
+    "decision_missing": "NULL (no placeholder text)"
+  },
+  "users": {
+    "rows": 1500,
+    "column_checks": {
+      "user_id": {
+        "missing": 0,
+        "padded": 0
+      },
+      "location": {
+        "missing": 0,
+        "padded": 0
+      },
+      "language": {
+        "missing": 0,
+        "padded": 0
+      },
+      "account_created": {
+        "missing": 0,
+        "padded": 0
+      },
+      "follower_count": {
+        "missing": 0,
+        "padded": 0
+      }
+    },
+    "duplicate_user_ids": 0,
+    "account_created_range": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "follower_count_range": [
+      109,
+      49944
+    ],
+    "distinct_locations": 33,
+    "distinct_countries": 19,
+    "languages": [
+      "ar",
+      "de",
+      "en",
+      "es",
+      "fr",
+      "hi",
+      "ja",
+      "pt",
+      "ru",
+      "zh"
+    ],
+    "changes": "none required; added city, country, language_name"
+  },
+  "referential_integrity": {
+    "posts_user_ids_missing_from_users": 0,
+    "users_without_posts": 0,
+    "posts_dated_before_account_creation": 0
+  },
+  "output": {
+    "posts_rows": 12000,
+    "users_rows": 1500,
+    "posts_null_counts": {
+      "platform": 1784,
+      "text_content": 1779,
+      "post_datetime_utc": 3526,
+      "likes": 1814
+    },
+    "change_log_rows": 15730,
+    "change_log_by_rule": {
+      "*row*:drop_exact_duplicate": 360,
+      "likes:missing_token_to_null": 1814,
+      "likes:sign_flip_abs": 509,
+      "platform:missing_token_to_null": 1784,
+      "text_content:collapse_whitespace": 680,
+      "text_content:missing_token_to_null": 1779,
+      "text_content:strip_suffix_artifact": 1609,
+      "timestamp:dd-mm-yyyy_to_date_time_unknown": 3526,
+      "timestamp:unix_epoch_to_utc_datetime": 3669
+    },
+    "sha256": {
+      "posts_cleaned.csv": "01c8373c048b97fb64a5f12d5f585927a9f8f00aaffee4605023612d48ed4d17",
+      "users_cleaned.csv": "9e7c1e650dd86984f91e729ee9fd193ce27b900306f4117bae1aab6cfb4e9280"
+    }
+  }
+}
