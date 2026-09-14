@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Rebuilding the Social Engine — Phase 1 Report · Team SE7EN</title>
+<meta name="author" content="Team SE7EN: Tanmay Singh · Panshul Arora">
+<style>
+@page { size: A4; margin: 17mm 16mm 18mm 16mm;
+  @bottom-left { content: "Team SE7EN (Tanmay Singh · Panshul Arora) · Data Vortex, Aaruush '26 · Round 1, Phase 1"; font: 7.5pt 'Segoe UI', sans-serif; color: #898781; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 7.5pt 'Segoe UI', sans-serif; color: #898781; } }
+@page :first { @bottom-left { content: none; } @bottom-right { content: none; } }
+:root { --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --blue:#2a78d6; --blue-wash:#eef4fc; --orange:#eb6834; --surface:#fcfcfb; }
+* { box-sizing: border-box; }
+html { background: #fff; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--ink); font-size: 9.6pt; line-height: 1.5; margin: 0; }
+.wrap { max-width: 178mm; margin: 0 auto; padding-inline: 4mm; }
+h1 { font-size: 25pt; line-height: 1.15; margin: 0 0 6pt; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 14.5pt; margin: 20pt 0 6pt; padding-top: 4pt; border-top: 2px solid var(--ink); break-after: avoid; }
+h2 .num { color: var(--blue); margin-right: 6pt; }
+h3 { font-size: 11pt; margin: 14pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 7pt; }
+.lead { font-size: 10.5pt; color: var(--ink2); }
+.small { font-size: 8.2pt; color: var(--ink2); }
+code, .mono { font-family: 'Cascadia Mono', Consolas, monospace; font-size: 8.4pt; background: #f2f1ee; padding: 0 3px; border-radius: 3px; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 8.4pt; break-inside: auto; }
+th { text-align: left; font-weight: 600; color: var(--ink2); border-bottom: 1.2px solid var(--ink); padding: 4pt 5pt; vertical-align: bottom; }
+td { border-bottom: 0.6px solid var(--grid); padding: 4pt 5pt; vertical-align: top; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr { break-inside: avoid; }
+figure { margin: 8pt 0 12pt; break-inside: avoid; }
+figure img { width: 100%; display: block; }
+figcaption { font-size: 8pt; color: var(--muted); margin-top: 3pt; }
+.phase2 { background: var(--blue-wash); border-left: 3px solid var(--blue); padding: 6pt 9pt; margin: 6pt 0 12pt; font-size: 9pt; break-inside: avoid; }
+.warn { background: #fdf1ec; border-left: 3px solid var(--orange); padding: 6pt 9pt; margin: 6pt 0 12pt; font-size: 9pt; break-inside: avoid; }
+.cover { height: 257mm; display: flex; flex-direction: column; break-after: page; padding-top: 18mm; }
+.eyebrow { font-size: 9pt; letter-spacing: 0.16em; text-transform: uppercase; color: var(--blue); font-weight: 600; margin-bottom: 10pt; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin: 22pt 0; }
+.tile { border: 1px solid var(--grid); border-radius: 6px; padding: 9pt 11pt; background: var(--surface); }
+.tile .v { font-size: 19pt; font-weight: 650; line-height: 1.1; }
+.tile .l { font-size: 8.2pt; color: var(--ink2); margin-top: 2pt; }
+.meta { margin-top: auto; font-size: 9pt; color: var(--ink2); border-top: 1px solid var(--grid); padding-top: 10pt; }
+.meta b { color: var(--ink); }
+.summary li { margin-bottom: 5pt; }
+.insight { break-inside: avoid; margin: 10pt 0 4pt; }
+.insight h3 { margin-top: 0; }
+.tag { display: inline-block; font-size: 7.5pt; font-weight: 600; color: var(--ink2); border: 1px solid var(--grid); border-radius: 3px; padding: 0 4px; margin-left: 4pt; vertical-align: 1px; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 4pt 0 10pt; }
+.steps li { counter-increment: s; padding-left: 20pt; position: relative; margin-bottom: 3pt; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 13pt; height: 13pt; border-radius: 50%; background: var(--ink); color: #fff; font-size: 7.5pt; text-align: center; line-height: 13pt; font-weight: 600; }
+.pagebreak { break-before: page; }
+.toc { columns: 2; font-size: 9pt; margin: 8pt 0 0; padding-left: 14pt; }
+</style></head><body><div class="wrap">
+
+<section class="cover">
+  <div class="eyebrow">Data Vortex · Aaruush '26 · Round 1 · Phase 1</div>
+  <h1>Rebuilding the Social Engine</h1>
+  <p class="lead">Data recovery, cleaning and exploratory analysis of the corrupted Social Engine intake dataset.</p>
+  <div class="tiles">
+    <div class="tile"><div class="v">12,000</div><div class="l">unique, clean posts (from 12,360 raw rows)</div></div>
+    <div class="tile"><div class="v">9</div><div class="l">corruption types detected and fixed</div></div>
+    <div class="tile"><div class="v">15,730</div><div class="l">value-level changes, each logged with a rule</div></div>
+    <div class="tile"><div class="v">0</div><div class="l">values imputed or invented</div></div>
+    <div class="tile"><div class="v">53 / 53</div><div class="l">automated validation checks passed</div></div>
+    <div class="tile"><div class="v">8</div><div class="l">statistically tested insights</div></div>
+  </div>
+  <p><b>Contents</b></p>
+  <ol class="toc">
+    <li>Executive summary</li><li>Recovering the dataset</li><li>Dataset overview</li><li>Corruption audit &amp; fixes</li>
+    <li>Decisions, assumptions &amp; alternatives</li><li>Validation</li><li>Exploratory analysis</li><li>Key insights</li>
+    <li>Limitations &amp; Phase 2 readiness</li><li>Reproducibility</li>
+  </ol>
+  <div class="meta">
+    <b>Team SE7EN</b> — Tanmay Singh · Panshul Arora<br>
+    Repository: <b>https://github.com/panshularora/eda</b><br>
+    Theme: Rebuilding the Social Engine · Submission deadline 14 September 2026, 11:59 PM<br>
+    Generated by <code>src/build_report.py</code> from pipeline outputs; every figure and number is reproducible with <code>python run_all.py</code>.
+  </div>
+</section>
+
+<h2><span class="num">1</span>Executive summary</h2>
+<ul class="summary">
+  <li><b>Recovered the exact dataset.</b> Following the recovery-log clue to <code>node_07</code> through the recovery shell yielded
+  <code>Social_Engine_Posts_Corrupted.csv</code> (12,360 × 8) and <code>Social_Engine_Users.csv</code> (1,500 × 5).
+  SHA-256 hashes are pinned in the pipeline, so any altered input is detected.</li>
+  <li><b>Found nine corruption types, including four that are easy to miss:</b> timestamps that lost their time of day
+  (3,526 posts), two different spellings of missing values, five kinds of injected text suffixes
+  (<code>&amp;amp;</code>, <code>&lt;br&gt;</code>, <code>&lt;div&gt;</code>, <code>Ã©</code>, trailing newlines), and <code>NULL</code> tokens hidden behind those suffixes.</li>
+  <li><b>Cleaned without inventing data.</b> Values are corrected only where the original is deterministically recoverable. Unrecoverable values stay NULL, since they are
+  missing completely at random (every χ² test p ≥ 0.145). Imputation would add false spikes and bias Phase 2 correlations.</li>
+  <li><b>Avoided the “midnight spike” trap.</b> Padding date-only timestamps with 00:00:00 would put 32.5% of all posts at midnight (11.1× any other hour).
+  Real posting activity is flat across the day (p = 0.475).</li>
+  <li><b>What the data says:</b> volume is stationary (~33 posts/day), engagement metrics are independent and uniform, no platform has a real engagement edge,
+  followers do not predict engagement (Spearman ρ = 0.011), totals simply track post count (Spearman ρ = 0.841),
+  user language is unrelated to location, and seasonal campaigns are not mentioned in season. Each claim is backed by a test in Section 7.</li>
+</ul>
+
+<h2><span class="num">2</span>Recovering the dataset</h2>
+<p>The rulebook withholds the dataset; it had to be recovered from the corrupted Social Engine site. Our path:</p>
+<ol class="steps">
+  <li>The landing terminal boots and reports <code>data_intake.service … FAILED</code>. <i>Enter Recovery Mode</i> asks for a locally stored operator identity.</li>
+  <li>All ten dashboard modules fail in different ways (hang, signal lost, page error, access denied, no response). The ARCHIVE module shows <code>ARCH_LINKLOST_07</code>. After a few failures the site hints: <i>“Nothing responding? There may be another way in.”</i></li>
+  <li>Each <b>system log</b> line <b>begins</b> with a timestamp and the component reporting it. Only one component is healthy:
+  <code>node_07 responded 200 (intermittent)</code>, then <code>watchdog last known good node: node_07</code> and <code>dashboard link to node_07: severed</code>.</li>
+  <li>The recovery shell (terminal button) accepts <code>help</code>, <code>status</code>, <code>scan</code>, <code>logs</code>. <code>scan</code> confirms <i>“node_07 responding intermittently, outside normal routing. Manual reconnection may be possible.”</i></li>
+  <li><code>connect node_07</code> stabilises the link and opens <b>ARCHIVE NODE 07</b>. We recovered both files listed under <i>Dataset 01</i>.</li>
+</ol>
+<p class="small"><b>Integrity note.</b> The site builds both CSVs in the browser and downloads them as Blobs, so they never show up as separate requests in the Network tab.
+We confirmed our downloads match the copies embedded in the site bundle byte-for-byte. SHA-256: posts <code>49a460d6b6d8b7f5…</code>, users <code>d30efe470a4dd561…</code>.
+A <code>.gitattributes</code> rule keeps git from rewriting their line endings, so the hashes still match after a clone on any OS.</p>
+
+<h2><span class="num">3</span>Dataset overview</h2>
+<table>
+<thead><tr><th>Table</th><th>Grain</th><th class="r">Raw rows</th><th class="r">Clean rows</th><th>Columns (raw)</th></tr></thead>
+<tbody>
+<tr><td><b>Posts</b></td><td>one post</td><td class="r">12,360</td><td class="r">12,000</td><td><code>post_id, user_id, platform, text_content, timestamp, likes, shares, comments</code></td></tr>
+<tr><td><b>Users</b></td><td>one account</td><td class="r">1,500</td><td class="r">1,500</td><td><code>user_id, location, language, account_created, follower_count</code></td></tr>
+</tbody></table>
+<p>The posts cover <b>2024-05-01 → 2025-04-30</b> (365 days) across 5 platforms, written by 1,500 users in 33 cities and 19 countries using 10 languages.
+All users signed up during 2023 (2023-01-01 → 2023-12-31). No post predates its author's account.
+Every post's <code>user_id</code> exists in Users and every user has at least one post, so referential integrity holds in both directions.
+<b>Only 7,366 posts (61.4%) have platform, text and likes all present.</b>
+Dropping incomplete rows would therefore discard 39% of the data. We keep every row and let each analysis use the fields it needs.</p>
+
+<h2><span class="num">4</span>Corruption audit &amp; fixes</h2>
+<p>Every cell is read as raw text (<code>keep_default_na=False</code>), so nothing is silently converted.
+Each corruption is detected by an explicit rule, its <b>evidence is computed and asserted in code</b> (the pipeline stops if an assumption breaks), then the fix is applied and logged.
+Counts are shown for the raw file and after de-duplication, so they reconcile exactly.</p>
+<table><thead><tr><th>#</th><th>Corruption</th><th>Evidence (computed)</th><th>Action</th><th class='r'>Raw file</th><th class='r'>After dedup</th></tr></thead><tbody><tr><td>1</td><td><b>Exact duplicate rows</b></td><td>352 post_ids appear 2–3 times (8 triplicates); every copy identical in all 8 columns</td><td>Keep first occurrence, drop the rest</td><td class='r'>360</td><td class='r'>—</td></tr><tr><td>2</td><td><b>Timestamp as Unix epoch</b></td><td>10-digit integers; decoded as UTC they fall in the same 2024-05-01 → 2025-04-30 window as ISO values</td><td>Convert to UTC <code>YYYY-MM-DD HH:MM:SS</code></td><td class='r'>3,788</td><td class='r'>3,669</td></tr><tr><td>3</td><td><b>Timestamp as dd-mm-yyyy (time of day lost)</b></td><td>2nd field never &gt; 12, 1st field &gt; 12 in 2,113 rows ⇒ day-first; no time component exists</td><td>Keep <code>post_date</code>; <code>post_datetime_utc</code> = NULL; <code>timestamp_precision</code> = 'day'</td><td class='r'>3,622</td><td class='r'>3,526</td></tr><tr><td>4</td><td><b>Missing platform, two spellings</b></td><td>'' and 'NULL' in a ~2:1 ratio (1,177 : 607)</td><td>Unify to NULL. Not imputed (no signal predicts it)</td><td class='r'>1,846</td><td class='r'>1,784</td></tr><tr><td>5</td><td><b>Missing likes, two spellings</b></td><td>'' and 'NULL' (1,199 : 615)</td><td>Unify to NULL. Not imputed</td><td class='r'>1,858</td><td class='r'>1,814</td></tr><tr><td>6</td><td><b>Negative likes (sign flip)</b></td><td>All 509 negatives are float-formatted (<code>-2388.0</code>) while every other value is an integer; |negative| has the same distribution as positives (KS p = 0.626)</td><td><code>abs()</code>, cast to integer, flag <code>dq_likes_sign_corrected</code></td><td class='r'>525</td><td class='r'>509</td></tr><tr><td>7</td><td><b>Missing text, two spellings</b></td><td>'' and 'NULL' (1,154 : 534), plus 91 'NULL' tokens hidden behind an artifact (e.g. <code>NULLÃ©</code>)</td><td>Unify to NULL (no placeholder text)</td><td class='r'>1,840</td><td class='r'>1,779</td></tr><tr><td>8</td><td><b>Text suffix artifacts (5 kinds)</b></td><td><code>&amp;amp;</code> 328, <code>&lt;div&gt;</code> 335, <code>&lt;br&gt;</code> 311, <code>\n\n</code> 329, mojibake <code>Ã©</code> 306. Each occurs only as the final characters, never mid-text, at most one per post</td><td>Strip the suffix; flag the kind in <code>dq_text_artifact_removed</code></td><td class='r'>1,657</td><td class='r'>1,609</td></tr><tr><td>9</td><td><b>Double spaces inside text</b></td><td>Gaps where a template slot was empty (e.g. <i>“recommend.&nbsp;&nbsp;#Beauty”</i>)</td><td>Collapse runs of whitespace to one space</td><td class='r'>—</td><td class='r'>680</td></tr></tbody></table>
+<figure><img src="figures/fig01_corruption_profile.png" alt="Figure 1. Size of each corruption after de-duplication. Percentages are shares of the 12,000 unique posts; duplicates are a share of raw rows."><figcaption>Figure 1. Size of each corruption after de-duplication. Percentages are shares of the 12,000 unique posts; duplicates are a share of raw rows.</figcaption></figure>
+<p><b>Lineage.</b> <code>reports/change_log.csv</code> records all 15,730 changed values as (post_id, column, rule, old value, new value).
+The cleaned posts table also carries three data-quality flags (<code>dq_duplicate_copies_removed</code>, <code>dq_likes_sign_corrected</code>, <code>dq_text_artifact_removed</code>), so corrections stay queryable in SQL.
+<b>Users</b> passed every check (no missing, padded, duplicate or malformed values), so it needed no corrections. We only added <code>city</code>, <code>country</code> and <code>language_name</code> for grouping.
+ISO timestamps were already correct and were only re-rendered in the common output format.</p>
+
+<h2><span class="num">5</span>Decisions, assumptions &amp; alternatives</h2>
+<h3>5.1 Date-only timestamps keep their date and get no invented time</h3>
+<p>3,526 posts (29.4%) carry only a date. The obvious conversion (<code>pd.to_datetime</code> → <code>2024-09-25 00:00:00</code>) invents a time.
+The cleaned table therefore has <code>post_date</code> (always present), <code>post_datetime_utc</code> (NULL when unknown), <code>timestamp_precision</code> and <code>timestamp_source_format</code>.</p>
+<figure><img src="figures/fig03_midnight_artifact.png" alt="Figure 2. Left: the hour-of-day profile if date-only posts are padded to midnight. Right: the true profile using only posts with a real time."><figcaption>Figure 2. Left: the hour-of-day profile if date-only posts are padded to midnight. Right: the true profile using only posts with a real time.</figcaption></figure>
+
+<h3>5.2 Negative likes are sign flips; missing likes stay NULL</h3>
+<p>Two independent pieces of evidence show a sign-flip corruption rather than “dislikes”. First, the format: every negative value is a float string while every other value is an integer. Second, the distribution: the absolute values of negatives match positives (KS p = 0.626; means 2,460.7 vs 2,493.5).
+Missing likes cannot be recovered. They correlate with nothing, so any model reduces to the median, and median imputation would put
+1,817 posts on one value (2,498) and shrink the standard deviation by 7.9%.</p>
+<figure><img src="figures/fig04_likes_signflip_and_imputation.png" alt="Figure 3. Left: the cumulative distribution of |negative likes| overlaps positive likes. Right: median imputation would create a spike that later analysis could mistake for an anomaly."><figcaption>Figure 3. Left: the cumulative distribution of |negative likes| overlaps positive likes. Right: median imputation would create a spike that later analysis could mistake for an anomaly.</figcaption></figure>
+
+<h3>5.3 Missing values are missing completely at random</h3>
+<p>We tested each corruption flag against platform, timestamp source format and month (17 χ² tests). None is significant; the smallest p-value is 0.145.
+Missingness in one column does not predict missingness in another: likes and platform are both missing in 260 posts vs 270 expected under independence, likes and text in 282 vs 269.
+Because the data is MCAR, analyses that simply skip missing values are unbiased, and filling values in would add nothing but false precision.</p>
+<figure><img src="figures/fig02_missingness_mcar.png" alt="Figure 4. Corruption rate per platform (rows with a known platform), with χ² p-values. Flat rows mean the corruption is independent of platform."><figcaption>Figure 4. Corruption rate per platform (rows with a known platform), with χ² p-values. Flat rows mean the corruption is independent of platform.</figcaption></figure>
+
+<h3>5.4 Assumptions register</h3>
+<table><thead><tr><th>#</th><th>Assumption</th><th>Support</th><th>If wrong</th></tr></thead><tbody>
+<tr><td>A1</td><td>Unix epochs are UTC; naive ISO strings use the same UTC clock</td><td>Epoch is UTC by definition. Both formats span the same window (2024-05-01 → 2025-04-30) with matching flat hour profiles</td><td>Hour-of-day shifts by a constant offset; daily and monthly results barely change</td></tr>
+<tr><td>A2</td><td><code>dd-mm-yyyy</code> is day-first</td><td>Proven: month field max = 12, day field max = 31</td><td>The pipeline raises an error</td></tr>
+<tr><td>A3</td><td>Negative likes are sign-flipped, not downvotes</td><td>Format fingerprint plus identical distribution (5.2)</td><td>509 posts (4.2%) would carry the wrong sign; flagged, so they can be excluded</td></tr>
+<tr><td>A4</td><td>The five suffixes are injected, not user-written</td><td>Asserted: never mid-text, never stacked, only at the end. Decoding <code>&amp;amp;</code> or <code>Ã©</code> would leave a stray <code>&amp;</code> or <code>é</code> glued to punctuation</td><td>The pipeline raises an error if a suffix appears mid-text</td></tr>
+<tr><td>A5</td><td>Duplicate post_ids are repeated ingestions of one post</td><td>Asserted: every copy identical in all columns</td><td>The pipeline raises an error on conflicting copies</td></tr>
+<tr><td>A6</td><td>Template oddities (“How do I fix about…”, “Pepsi Pepsi Zero Sugar”) are original content</td><td>They occur at template scale, not at corruption rates, and are not suffix-like</td><td>Rewriting them would be fabrication, so they are kept verbatim</td></tr>
+</tbody></table>
+
+<h3>5.5 Alternatives we rejected</h3>
+<table><thead><tr><th>Alternative</th><th>Why rejected</th></tr></thead><tbody>
+<tr><td>Mode-impute platform</td><td>With five near-equal platforms the mode is right only ~20% of the time. It would push Facebook from 17.3% to 32.1% of posts (3,858) and fabricate a “dominant platform”.</td></tr>
+<tr><td>Median-impute likes</td><td>Creates a 1,817-post spike, shrinks variance and biases correlations toward 0 (Figure 3).</td></tr>
+<tr><td><code>html.unescape()</code> the text</td><td>Fixes only 1 of 5 artifact kinds and turns <code>&amp;amp;</code> into a stray trailing <code>&amp;</code>. <code>&lt;br&gt;</code>, <code>&lt;div&gt;</code>, <code>Ã©</code> and newlines would survive.</td></tr>
+<tr><td>Placeholder text such as “[CONTENT UNAVAILABLE]”</td><td>Pollutes word counts and text search, and SQL cannot tell it apart from real content. NULL is the honest encoding.</td></tr>
+<tr><td>Drop incomplete rows</td><td>Discards 39% of posts for no bias reduction, since the data is MCAR.</td></tr>
+<tr><td>“Fix” language to match location</td><td>The true language is unknowable. The mismatch is itself a finding (Insight 7).</td></tr>
+</tbody></table>
+
+<h2><span class="num">6</span>Validation</h2>
+<p><code>src/validate.py</code> re-reads the written CSVs and asserts <b>53 contracts; 53 pass</b>. They cover schema and key uniqueness, the foreign key,
+no leftover missing-value tokens, platform vocabulary, date window and precision consistency, integer ranges (likes 0–5,000, shares 0–2,000, comments 0–1,000),
+zero HTML, mojibake, newlines or double spaces left in text, and no post before account creation. It also <b>re-runs the full pipeline and confirms the outputs are byte-identical</b>.
+The full table is in <code>reports/validation_report.md</code>.</p>
+
+<h2><span class="num">7</span>Exploratory analysis</h2>
+<p class="small">Conventions: we report the test and p-value for every pattern. p ≥ 0.05 is reported as “no evidence”, never as a finding. Likes-based statistics use the 10,186 posts with known likes.
+Hour-of-day uses the 8,474 posts with a real time.</p>
+
+<h3>7.1 Volume over time</h3>
+<figure><img src="figures/fig05_volume_over_time.png" alt="Figure 5. Daily posts with a 28-day mean (top) and posts per day by month, labelled with monthly totals (bottom)."><figcaption>Figure 5. Daily posts with a 28-day mean (top) and posts per day by month, labelled with monthly totals (bottom).</figcaption></figure>
+<p>Volume is flat at <b>32.9 posts/day</b> (range 18–54). Variance/mean is 1.07, i.e. Poisson noise around a constant rate.
+The largest month (2024-05, 1,038) and smallest (2025-02, 914) differ only by calendar length.
+Per-day rates run 32.1–34.2, and a χ² test of monthly totals against days-in-month gives p = 0.986.
+Day of week is also flat (p = 0.722). <b>No single day is anomalous</b> after correcting for 365 tests (Poisson tail, α = 0.05/365).
+Only 2 days exceed z = 3, against 0.74 expected by chance.</p>
+
+<h3>7.2 Engagement distributions</h3>
+<figure><img src="figures/fig07_engagement_distributions.png" alt="Figure 6. Histograms of likes, shares and comments; the orange line is the count expected under a uniform distribution."><figcaption>Figure 6. Histograms of likes, shares and comments; the orange line is the count expected under a uniform distribution.</figcaption></figure>
+<p>Likes, shares and comments are each <b>uniform</b> on [0, 5,000], [0, 2,000] and [0, 1,000] (KS vs uniform: p = 0.407, p = 0.173, p = 0.195), and <b>mutually independent</b>
+(Spearman ρ: likes–shares -0.001, likes–comments 0.01, shares–comments 0.024).
+The means (2,491.9 / 1,007.2 / 504.3) sit at the midpoints, so expected engagement splits about 5 : 2 : 1.
+There is no heavy tail and no viral outlier: the maxima are hard caps.</p>
+
+<h3>7.3 Platforms</h3>
+<figure><img src="figures/fig06_platform_engagement.png" alt="Figure 7. Mean engagement per platform with 95% confidence intervals."><figcaption>Figure 7. Mean engagement per platform with 95% confidence intervals.</figcaption></figure>
+<p>Platform volumes are balanced (Facebook 2,074, YouTube 2,073, Twitter 2,049, Reddit 2,031, Instagram 1,989; largest vs smallest 4.3%, χ² vs uniform p = 0.658). Mean likes differ by at most 3.7% of the overall mean (p = 0.371) and comments by 2.3% (p = 0.796).
+Shares are the only nominal difference: Instagram 1,040.8 vs Facebook 984.2, p = 0.035. That does not survive a Bonferroni correction for four metrics (α = 0.0125), and the effect size is negligible (ε² = 0.001).</p>
+
+<h3>7.4 Users: activity, reach and engagement</h3>
+<figure><img src="figures/fig08_user_activity.png" alt="Figure 8. Posts per user against a Poisson(8) curve; total engagement vs post count; mean engagement per post vs followers."><figcaption>Figure 8. Posts per user against a Poisson(8) curve; total engagement vs post count; mean engagement per post vs followers.</figcaption></figure>
+<p>Posts per user follow a <b>Poisson(λ = 8.0)</b> distribution (variance/mean 1.02, range 1–22).
+1,479 users (98.6%) post on 2+ platforms, averaging 3.73. A null model that assigns each post a random platform predicts 1,475 and 3.71, so cross-platform posting is not a behaviour, just chance.
+Followers (uniform 109–49,944, KS p = 0.870) do not predict engagement per post (ρ = 0.011, p = 0.666) or activity (ρ = -0.01).</p>
+<p>Ranking users by <b>total</b> engagement mostly ranks post counts (ρ = 0.841). The top 10 by total average 15.9 posts, twice the norm,
+and <b>none of them</b> appears in the top 10 by <b>mean engagement per post</b> (minimum 5 posts with known likes). The per-post leaders are:</p>
+<table><thead><tr><th>#</th><th>user_id</th><th class='r'>posts</th><th class='r'>mean engagement / post</th><th class='r'>followers</th><th>location</th></tr></thead><tbody><tr><td>1</td><td class='mono'>user_py6fq7ii</td><td class='r'>6</td><td class='r'>6,339.6</td><td class='r'>18,940</td><td>Delhi, India</td></tr><tr><td>2</td><td class='mono'>user_mcchsnr8</td><td class='r'>7</td><td class='r'>5,969.5</td><td class='r'>2,602</td><td>Munich, Germany</td></tr><tr><td>3</td><td class='mono'>user_3318o2cp</td><td class='r'>7</td><td class='r'>5,713.3</td><td class='r'>2,374</td><td>Cairo, Egypt</td></tr><tr><td>4</td><td class='mono'>user_5s9ifp0y</td><td class='r'>11</td><td class='r'>5,566.3</td><td class='r'>28,412</td><td>Barcelona, Spain</td></tr><tr><td>5</td><td class='mono'>user_0e2how9t</td><td class='r'>6</td><td class='r'>5,538</td><td class='r'>23,563</td><td>Melbourne, Australia</td></tr></tbody></table>
+
+<h3>7.5 Language and location</h3>
+<figure><img src="figures/fig09_language_vs_country.png" alt="Figure 9. Users by country × language. Colour is the share of each country's users; outlined cells are a national language of that country."><figcaption>Figure 9. Users by country × language. Colour is the share of each country's users; outlined cells are a national language of that country.</figcaption></figure>
+<p>The ten languages are equally common (p = 0.895 vs uniform) and <b>statistically independent of country</b> (χ² p = 0.419, Cramér's V = 0.111).
+Only 12.8% of users speak a national language of their country, against 12.4% expected from random assignment (binomial p = 0.667).
+Examples: <code>Berlin, Germany → ja</code>, <code>Munich, Germany → zh</code>, <code>São Paulo, Brazil → ar</code>.
+The 132 users in Italy and South Korea cannot match at all, since <code>it</code> and <code>ko</code> are absent. The most represented country is the USA (203 users).</p>
+
+<h3>7.6 Text content</h3>
+<figure><img src="figures/fig10_text_brands_campaigns.png" alt="Figure 10. Left: posts mentioning each brand. Right: when each seasonal campaign is mentioned; outlined cells are its real season."><figcaption>Figure 10. Left: posts mentioning each brand. Right: when each seasonal campaign is mentioned; outlined cells are its real season.</figcaption></figure>
+<p>The 10,221 texts are near-unique (10,219 distinct) but built from templates: six openers such as “Just unboxed my new…”, “Just saw an ad for…” and “Comparing…” each start 980–1,052 posts.
+Mentions spread evenly over 10 brands (977–1,070 posts each), 29 hashtags (2.01 per post) and 15 @handles (in 13.5% of posts).
+Verdict phrases split into positive 3,268, negative 3,306 and neutral 1,581.
+Engagement does not differ by verdict (p = 0.221).
+<b>40.9% of posts that state an emotion contradict their own verdict</b>, e.g. <i>“Bummed out with my new Air Max from Nike! Absolutely loving it. #Travel, #CustomerService, #Fashion”</i>.
+Seasonal campaigns land in their season 14.5% of the time vs 15.0% by chance; <i>SpringBlast2025</i> even appears in 96 posts dated 2024.</p>
+
+<h2><span class="num">8</span>Key insights</h2>
+
+<div class="insight"><h3>1 · The corruption is machine-injected at fixed rates, uniformly at random <span class="tag">data quality</span></h3>
+<p>~15% missing in each of platform, likes and text; 13.41% text suffixes (five kinds of ~2.7% each); 4.24% sign flips; 2.93% duplicates.
+All 17 dependence tests are non-significant, co-missingness matches independence, and each missing column mixes <code>''</code> and <code>NULL</code> at the same ~2:1 ratio. That points to a single random corruption process, not a failing source.</p>
+<div class="phase2"><b>So what / Phase 2:</b> Available-case SQL (<code>WHERE likes IS NOT NULL</code>) is unbiased. Keep NULLs; do not <code>COALESCE</code> to a median.</div></div>
+
+<div class="insight"><h3>2 · The “midnight posting spike” is an artifact of bad parsing <span class="tag">anomaly</span></h3>
+<p>29.4% of timestamps have no time of day. Defaulting them to 00:00 makes hour 0 hold 3,902 posts (11.1× any other hour). With real times only, posting is flat across all 24 hours (311–388 per hour, p = 0.475).</p>
+<div class="phase2"><b>So what / Phase 2:</b> Any hour-of-day query must filter <code>timestamp_precision = 'second'</code>; day, week and month queries can use <code>post_date</code> for all rows.</div></div>
+
+<div class="insight"><h3>3 · Activity is stationary: no trend, seasonality or anomalous day <span class="tag">trend</span></h3>
+<p>32.9 posts/day with Poisson noise. Monthly totals are explained by days-in-month (p = 0.986), weekdays are flat (p = 0.722), and no day survives a Bonferroni-corrected Poisson test.
+The “May peak” and “February dip” are 31-day and 28-day months.</p>
+<div class="phase2"><b>So what / Phase 2:</b> Normalise counts by days (posts/day) before comparing periods, and test spikes against Poisson noise before calling them anomalies.</div></div>
+
+<div class="insight"><h3>4 · Likes, shares and comments are independent uniform variables <span class="tag">correlation</span></h3>
+<p>Uniform on fixed caps (KS p ≥ 0.17), |ρ| ≤ 0.024, no long tail.
+Real social data is heavy-tailed and positively correlated, so this looks like synthetic generation. A post with many likes is no more likely to be shared.</p>
+<div class="phase2"><b>So what / Phase 2:</b> Expect near-zero correlations. Define “high engagement” by percentile (e.g. top 10%) rather than absolute thresholds, and use rank-based statistics.</div></div>
+
+<div class="insight"><h3>5 · No platform has a real engagement advantage <span class="tag">grouping</span></h3>
+<p>Gaps are ≤ 5.6% of the mean. The one nominal result (shares, Instagram vs Facebook, p = 0.035) fails multiple-testing correction, with ε² = 0.001.</p>
+<div class="phase2"><b>So what / Phase 2:</b> Platform-level rankings will be driven by noise. Report confidence intervals alongside any <code>GROUP BY platform</code> result.</div></div>
+
+<div class="insight"><h3>6 · Volume, not reach, drives total engagement <span class="tag">behaviour</span></h3>
+<p>Followers show no relationship to per-post engagement (ρ = 0.011). Total engagement tracks post count (ρ = 0.841), and the top-10 by total and top-10 by per-post average share <b>zero</b> users.
+Cross-platform posting (98.6% of users) matches a random-assignment null model.</p>
+<div class="phase2"><b>So what / Phase 2:</b> For behavioural grouping, rank by per-post rates with a minimum-activity threshold (window functions such as <code>NTILE</code>/<code>PERCENT_RANK</code>), not by <code>SUM()</code>. “Influencer” cannot be inferred from follower_count.</div></div>
+
+<div class="insight"><h3>7 · User language is not a location signal <span class="tag">consistency</span></h3>
+<p>Language is independent of country (V = 0.111), with a national-language match of 12.8% vs 12.4% by chance. 132 users live in countries whose language is not coded at all.</p>
+<div class="phase2"><b>So what / Phase 2:</b> Treat language and country as separate dimensions. Do not derive regional language claims (e.g. “Asia-Pacific language dominance”) from this field.</div></div>
+
+<div class="insight"><h3>8 · Post text is templated and carries no temporal or engagement signal <span class="tag">text</span></h3>
+<p>Brands, hashtags and verdicts are evenly balanced. 40.9% of emotional posts contradict their own verdict, engagement does not vary by sentiment (p = 0.221), and campaigns are mentioned out of season (e.g. SpringBlast2025 in 2024).</p>
+<div class="phase2"><b>So what / Phase 2:</b> Text features (brand, campaign, sentiment) suit descriptive counts only. Do not expect them to explain engagement or timing.</div></div>
+
+<h2><span class="num">9</span>Limitations &amp; Phase 2 readiness</h2>
+<ul>
+  <li><b>Unrecoverable values remain NULL</b>: platform 14.9%, likes 15.1%, text 14.8%, time of day 29.4%. This is a deliberate trade of completeness for correctness.</li>
+  <li><b>Timezone:</b> A1 cannot be proven for naive ISO strings. Hour-of-day findings would shift by a constant if the source clock were not UTC.</li>
+  <li><b>Sentiment</b> relies on the dataset's fixed verdict phrases, not a general NLP model. It is exact for these templates but not transferable.</li>
+  <li><b>SQL-ready:</b> the cleaned CSVs load directly into a two-table schema (<code>users</code> 1—N <code>posts</code>) with typed columns, primary and foreign keys, and CHECK constraints that mirror our validation (<code>sql/schema.sql</code>, loaded by <code>src/build_sqlite.py</code>).</li>
+</ul>
+
+<h2><span class="num">10</span>Reproducibility</h2>
+<table><thead><tr><th>Step</th><th>Command</th><th>Output</th></tr></thead><tbody>
+<tr><td>Environment</td><td><code>pip install -r requirements.txt</code></td><td>pandas 2.2.2, numpy 1.26.4, scipy 1.17.1, matplotlib 3.10.9</td></tr>
+<tr><td>Everything</td><td><code>python run_all.py</code></td><td>Runs the six steps below in order (~15 s on a laptop)</td></tr>
+<tr><td>1 Clean</td><td><code>python src/clean.py</code></td><td><code>data/cleaned/*.csv</code>, <code>reports/cleaning_audit.json</code>, <code>reports/change_log.csv</code></td></tr>
+<tr><td>2 Validate</td><td><code>python src/validate.py</code></td><td><code>reports/validation_report.md</code> (exits non-zero on failure)</td></tr>
+<tr><td>3 JSON</td><td><code>python src/export_json.py</code></td><td><code>data/cleaned/social_engine_cleaned.json</code> (both tables in one file)</td></tr>
+<tr><td>4 EDA</td><td><code>python src/eda.py</code></td><td><code>reports/figures/*.png</code>, <code>reports/eda_stats.json</code></td></tr>
+<tr><td>5 SQL</td><td><code>python src/build_sqlite.py</code></td><td><code>data/social_engine.db</code> + SQL cross-checks</td></tr>
+<tr><td>6 Report</td><td><code>python src/build_report.py</code></td><td>This document (HTML + PDF)</td></tr>
+</tbody></table>
+<p class="small">Walkthrough notebook: <code>notebooks/Phase1_Walkthrough.ipynb</code> (executed, with outputs). Column definitions: <code>data/cleaned/DATA_DICTIONARY.md</code>. Decision log: <code>docs/CLEANING_DECISIONS.md</code>.
+Output hashes: posts <code>01c8373c048b97fb…</code>, users <code>9e7c1e650dd86984…</code>.</p>
+
+</div></body></html>
