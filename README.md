@@ -1,7 +1,27 @@
-# Rebuilding the Social Engine: Data Vortex · Round 1 · Phase 1
+# Rebuilding the Social Engine: Data Vortex · Round 1
 
 **Team SE7EN**: Tanmay Singh · Panshul Arora
 Data Vortex @ Aaruush '26, SRM Institute of Science & Technology
+
+Phase 1 restored the intake pipeline. Phase 2 rebuilds the analytical core in MySQL:
+one question from each band of the questionnaire (**E3**, **M2**, **H4**).
+
+## Phase 2 — SQL analytical core
+
+| Deliverable (form) | File |
+|---|---|
+| SQL queries | [`phase2/SUBMISSION/1_SQL_Queries.pdf`](phase2/SUBMISSION/1_SQL_Queries.pdf) |
+| Output screenshot | [`phase2/SUBMISSION/2_Output_Screenshot.jpeg`](phase2/SUBMISSION/2_Output_Screenshot.jpeg) |
+| Logic explanation | [`phase2/SUBMISSION/3_Logic_Explanation.pdf`](phase2/SUBMISSION/3_Logic_Explanation.pdf) |
+| Insight report | [`phase2/SUBMISSION/4_Phase2_Insight_Report.pdf`](phase2/SUBMISSION/4_Phase2_Insight_Report.pdf) |
+
+Runnable SQL: [`phase2/sql/00_schema.sql`](phase2/sql/00_schema.sql), [`phase2/sql/01_queries.sql`](phase2/sql/01_queries.sql). Workbench steps: [`phase2/MYSQL_WORKBENCH_STEPS.md`](phase2/MYSQL_WORKBENCH_STEPS.md). Notes: [`phase2/README.md`](phase2/README.md).
+
+What the three queries say, in one line each: Instagram leads on average total engagement because of shares, not volume (E3). High- vs low-follower posts have the same engagement per post, 4,000.91 vs 4,003.01 (M2). Fifteen accounts with fewer than 5,000 followers sit in the top 10% of total engagement; the list is a mix of posting volume and a few high-rate tails, not a fraud ring (H4).
+
+---
+
+## Phase 1 — cleaned extract and EDA
 
 Recovery, cleaning and exploratory analysis of the corrupted Social Engine intake dataset: evidence-first,
 fully reproducible, and with **zero invented values**.
@@ -95,13 +115,14 @@ Raw inputs are hash-pinned to the files recovered from the site; `.gitattributes
 ├── notebooks/Phase1_Walkthrough.ipynb   executed step-by-step walkthrough
 ├── reports/                      PDF/HTML report, figures, audit JSON, change log, validation report
 ├── docs/                         CLEANING_DECISIONS.md, DATA_RECOVERY.md
+├── phase2/                       Round 1 Phase 2 SQL pack (E3, M2, H4)
+│   ├── sql/                      MySQL 8 schema, verify-load, queries
+│   ├── SUBMISSION/               PDFs + JPEG for the Google Form
+│   └── MYSQL_WORKBENCH_STEPS.md
 ├── run_all.py
 └── requirements.txt
 ```
 
-## Phase 2 readiness
+## Phase 2 notes (how we queried)
 
-The cleaned CSVs load directly into a two-table schema (`users` 1—N `posts`) with primary and foreign keys and CHECK
-constraints that mirror the validation suite ([`sql/schema.sql`](sql/schema.sql)). Guidance baked into the schema notes:
-filter `timestamp_precision = 'second'` for hour-level questions, keep NULL likes out of averages rather than
-`COALESCE`-ing them, and rank users by per-post rates with an activity threshold.
+NULL likes stay NULL — `AVG()` skips them; we never `COALESCE` to 0. Platform-missing rows are dropped only when the question is about a platform. User totals use `NTILE(10)` over all 1,500 accounts rather than a hardcoded cutoff. Details: [`phase2/README.md`](phase2/README.md).

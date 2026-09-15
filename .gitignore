@@ -7,6 +7,8 @@ venv/
 
 # Generated database (rebuild with: python src/build_sqlite.py)
 data/social_engine.db
+phase2/social_engine_phase2.db
+phase2/preview/
 
 # OS / editor
 .DS_Store
