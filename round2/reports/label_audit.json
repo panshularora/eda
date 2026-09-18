@@ -1,0 +1,119 @@
+{
+  "blind_rediscovery": {
+    "priority": [
+      "Technical_Issues",
+      "Account_Security",
+      "Feature_Feedback"
+    ],
+    "default": "Community_Discussion",
+    "keywords": {
+      "Technical_Issues": [
+        "app",
+        "down",
+        "pda",
+        "cras",
+        "creen",
+        "slow",
+        "cpe"
+      ],
+      "Account_Security": [
+        "ban",
+        "accoun",
+        "uspend",
+        "hack",
+        "assw"
+      ],
+      "Feature_Feedback": [
+        "ui",
+        "mode",
+        "eature",
+        "ugly",
+        "desig",
+        "button"
+      ]
+    },
+    "trace": [
+      {
+        "class": "Technical_Issues",
+        "keywords": [
+          "app",
+          "down",
+          "pda",
+          "cras",
+          "creen",
+          "slow",
+          "cpe"
+        ],
+        "covered": 814,
+        "of": 815
+      },
+      {
+        "class": "Account_Security",
+        "keywords": [
+          "ban",
+          "accoun",
+          "uspend",
+          "hack",
+          "assw"
+        ],
+        "covered": 136,
+        "of": 136
+      },
+      {
+        "class": "Feature_Feedback",
+        "keywords": [
+          "ui",
+          "mode",
+          "eature",
+          "ugly",
+          "desig",
+          "button"
+        ],
+        "covered": 297,
+        "of": 297
+      }
+    ],
+    "fidelity": 0.9996666666666667,
+    "n_mismatches": 3
+  },
+  "curated_rule": {
+    "fidelity": 1.0,
+    "n_rows": 9000,
+    "n_mismatches": 0,
+    "rule": {
+      "Technical_Issues": [
+        "app",
+        "down",
+        "update",
+        "crash",
+        "screen",
+        "slow",
+        "bug",
+        "glitch"
+      ],
+      "Account_Security": [
+        "ban",
+        "account",
+        "suspend",
+        "hack",
+        "password"
+      ],
+      "Feature_Feedback": [
+        "ui",
+        "mode",
+        "feature",
+        "ugly",
+        "design",
+        "button"
+      ]
+    },
+    "priority": [
+      "Technical_Issues",
+      "Account_Security",
+      "Feature_Feedback"
+    ],
+    "default": "Community_Discussion"
+  },
+  "artefact_rate": 0.13866666666666666,
+  "n_semantic_misfires_sampled": 127
+}
