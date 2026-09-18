@@ -12,16 +12,16 @@
         "down",
         "pdate",
         "cras",
-        "scree",
+        "creen",
         "slow",
-        "mcp"
+        "cpe"
       ],
       "Account_Security": [
         "ban",
-        "accoun",
+        "accou",
         "suspend",
         "hack",
-        "asswo"
+        "assw"
       ],
       "Feature_Feedback": [
         "ui",
@@ -29,7 +29,7 @@
         "eature",
         "ugly",
         "desig",
-        "utto"
+        "butto"
       ]
     },
     "trace": [
@@ -40,9 +40,9 @@
           "down",
           "pdate",
           "cras",
-          "scree",
+          "creen",
           "slow",
-          "mcp"
+          "cpe"
         ],
         "covered": 814,
         "of": 815
@@ -51,10 +51,10 @@
         "class": "Account_Security",
         "keywords": [
           "ban",
-          "accoun",
+          "accou",
           "suspend",
           "hack",
-          "asswo"
+          "assw"
         ],
         "covered": 136,
         "of": 136
@@ -67,7 +67,7 @@
           "eature",
           "ugly",
           "desig",
-          "utto"
+          "butto"
         ],
         "covered": 297,
         "of": 297

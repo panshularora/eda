@@ -166,23 +166,23 @@
           "24-40": 0.38847117794486213
         },
         "error_rate_by_cue": {
-          "has emoticon": {
+          "emoticon": {
             "present": 0.16417910447761194,
             "absent": 0.38153310104529614
           },
-          "has negation": {
+          "negation": {
             "present": 0.41292134831460675,
             "absent": 0.36357292393579904
           },
-          "has hashtag": {
+          "hashtag": {
             "present": 0.3103448275862069,
             "absent": 0.3855903935957305
           },
-          "has @mention": {
+          "@mention": {
             "present": 0.36706349206349204,
             "absent": 0.37587548638132295
           },
-          "ALL CAPS word": {
+          "ALL CAPS": {
             "present": 0.3526570048309179,
             "absent": 0.37963636363636366
           }
@@ -439,23 +439,23 @@
           "24-40": 0.020737327188940093
         },
         "error_rate_by_cue": {
-          "has emoticon": {
+          "emoticon": {
             "present": 0.0,
             "absent": 0.014577259475218658
           },
-          "has negation": {
+          "negation": {
             "present": 0.008571428571428572,
             "absent": 0.015395381385584325
           },
-          "has hashtag": {
+          "hashtag": {
             "present": 0.015723270440251572,
             "absent": 0.013689253935660506
           },
-          "has @mention": {
+          "@mention": {
             "present": 0.01694915254237288,
             "absent": 0.01282051282051282
           },
-          "ALL CAPS word": {
+          "ALL CAPS": {
             "present": 0.011904761904761904,
             "absent": 0.014716703458425313
           }

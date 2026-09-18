@@ -50,13 +50,21 @@ from features import build_features
 # ---------------------------------------------------------------------------
 # Regularisation strength and the character n-gram range were swept per task by
 # the same grouped CV on the *training split only* (see reports/hparam_sweep.md).
-# The two tasks land in opposite regimes, which is itself a finding: sentiment is
-# noisy and semantic and wants heavy regularisation over long character n-grams,
-# while topic is deterministic and orthographic and wants light regularisation
-# over short ones - 2 to 3 characters, the length of the trigger substrings
-# (ui, ban, app, bug) recovered in audit_labels.py.
+# The two tasks land in opposite regimes, which is itself a finding.
+#
+# Regularisation: sentiment is noisy and semantic, so it wants a lot of it and
+# degrades monotonically as C rises (0.6227 -> 0.5814 from C=0.1 to C=32). Topic
+# is deterministic and orthographic, so it wants almost none and improves
+# monotonically over the same sweep (0.5986 -> 0.7287).
+#
+# Character range: both tasks want the range to start at 2, but they part
+# company at the top end. Sentiment keeps gaining from longer n-grams, because
+# meaning lives in morphemes and words. Topic peaks at 2-3 and then *falls*, from
+# 0.9140 to 0.8223 by 3-6 - longer n-grams bury the short triggers (ui, ban, app,
+# bug) that audit_labels.py recovered, which is what a label made of substrings
+# rather than of words looks like from the hyperparameters.
 HPARAMS = {
-    "sentiment": {"C": 0.1, "C_lr": 0.5, "char_ngram": (3, 5), "balanced": None},
+    "sentiment": {"C": 0.1, "C_lr": 0.5, "char_ngram": (2, 4), "balanced": None},
     "topic": {"C": 8.0, "C_lr": 50.0, "char_ngram": (2, 3), "balanced": "balanced"},
 }
 

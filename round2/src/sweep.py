@@ -5,12 +5,13 @@ change: it sweeps regularisation strength and the character n-gram range for
 each task with the same grouped CV, **on the training split only**, and writes
 ``reports/hparam_sweep.md``.
 
-The result is the sharpest single piece of evidence in this submission. On
-sentiment the best character range is 3-5 and the model wants heavy
-regularisation. On topic the best range is 2-3 and the model wants light
-regularisation - and 2-3 characters is exactly the length of the trigger
-substrings (``ui``, ``ban``, ``app``, ``bug``) that ``audit_labels.py``
-recovered. The hyperparameter that wins tells you what the label is made of.
+The result is one of the sharpest pieces of evidence in this submission,
+because the two tasks come out in opposite regimes. Sentiment wants heavy
+regularisation and keeps gaining from longer character n-grams; topic wants
+almost none and peaks at 2-3 characters, then falls away as longer n-grams
+bury the short triggers (``ui``, ``ban``, ``app``, ``bug``) that
+``audit_labels.py`` recovered. A hyperparameter sweep does not usually tell
+you what a label is made of. This one does.
 
     python sweep.py            # both tasks
     python sweep.py topic      # one task
@@ -114,15 +115,27 @@ def main(tasks=None):
     lines += [
         "## Reading",
         "",
-        "The two tasks land in opposite regimes. Sentiment wants heavy",
-        "regularisation over long character n-grams: it is noisy, semantic, and the",
-        "model has to generalise. Topic wants light regularisation over 2-3 character",
-        "n-grams - which is exactly the length of the trigger substrings (`ui`, `ban`,",
-        "`app`, `bug`) that `audit_labels.py` recovered from the labels. The",
-        "hyperparameter that wins is telling you what the label is made of.",
+        "The two tasks land in opposite regimes.",
+        "",
+        "**Regularisation.** Sentiment wants a lot of it and degrades monotonically as",
+        "`C` rises. It is noisy and semantic, so the model has to generalise. Topic wants",
+        "almost none and *improves* monotonically over the same sweep, because its label",
+        "is a deterministic function of the text: there is nothing to generalise past, so",
+        "fitting harder simply recovers more of the rule.",
+        "",
+        "**Character range.** Both tasks want the range to start at 2, but they part",
+        "company at the top end. Sentiment keeps gaining from longer n-grams, because",
+        "meaning lives in morphemes and words. Topic peaks at 2-3 and then falls away as",
+        "longer n-grams are added - they bury the short triggers (`ui`, `ban`, `app`,",
+        "`bug`) that `audit_labels.py` recovered. A hyperparameter sweep does not usually",
+        "tell you what a label is made of. This one does.",
         "",
     ]
-    out = REPORTS / "hparam_sweep.md"
+    # A partial run must not overwrite the full report with half of it, so the
+    # filename carries the subset when one was asked for.
+    full = set(tasks) == set(TASKS)
+    out = REPORTS / ("hparam_sweep.md" if full
+                     else f"hparam_sweep_{'_'.join(sorted(tasks))}.md")
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nwritten: {out.name}")
 
