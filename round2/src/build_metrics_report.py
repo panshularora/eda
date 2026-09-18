@@ -12,7 +12,7 @@ import pandas as pd
 from reportlab.lib.units import mm
 from reportlab.platypus import PageBreak, Spacer
 
-from config import CV_FOLDS, REPORTS, SEED, SUBMISSION, TASKS
+from config import CV_FOLDS, REPORTS, SEED, TASKS
 from report_style import (
     CONTENT_W, S, bullets, build, callout, cover, figure, h1, h2, h3,
     metric_cards, p, reset_figures, table,
@@ -361,8 +361,6 @@ def main():
     flow += section_repro(m)
 
     build(OUT, "Evaluation Metrics Report", flow)
-    import shutil
-    shutil.copy(OUT, SUBMISSION / OUT.name)
     print(f"built {OUT.name} ({OUT.stat().st_size / 1e6:.2f} MB)")
     return OUT
 

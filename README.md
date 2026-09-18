@@ -1,12 +1,40 @@
-# Rebuilding the Social Engine: Data Vortex · Round 1
+# Rebuilding the Social Engine: Data Vortex
 
 **Team SE7EN**: Tanmay Singh · Panshul Arora
 Data Vortex @ Aaruush '26, SRM Institute of Science & Technology
 
-Phase 1 restored the intake pipeline. Phase 2 rebuilds the analytical core in MySQL:
-one question from each band of the questionnaire (**E3**, **M2**, **H4**).
+Round 1 phase 1 restored the intake pipeline; phase 2 rebuilt the analytical core in
+MySQL. **Round 2 rebuilds the semantic comprehension layer with NLP** — everything for
+it is in [`round2/`](round2/README.md).
 
-## Phase 2 — SQL analytical core
+---
+
+## Round 2 — NLP comprehension layer
+
+Two supervised tasks over 9,000 labelled social posts: sentiment (3 classes) and topic
+(4 classes). TF-IDF word + character + surface features into regularised linear
+classifiers, selected under grouped cross-validation that never splits a duplicated
+post across folds.
+
+| Deliverable (form) | File |
+|---|---|
+| NLP model notebook | [`round2/SUBMISSION/Round2_NLP_Model_Notebook_Team_SE7EN.ipynb`](round2/SUBMISSION/Round2_NLP_Model_Notebook_Team_SE7EN.ipynb) |
+| Trained models | [`round2/SUBMISSION/Round2_Trained_Models_Team_SE7EN.pkl`](round2/SUBMISSION/Round2_Trained_Models_Team_SE7EN.pkl) |
+| Evaluation metrics report | [`round2/SUBMISSION/Round2_Evaluation_Metrics_Report_Team_SE7EN.pdf`](round2/SUBMISSION/Round2_Evaluation_Metrics_Report_Team_SE7EN.pdf) |
+| Technical report | [`round2/SUBMISSION/Round2_Technical_Report_Team_SE7EN.pdf`](round2/SUBMISSION/Round2_Technical_Report_Team_SE7EN.pdf) |
+
+The headline finding is about the data, not the model: **`topic_category` is not an
+annotation.** A case-insensitive substring switch, recovered from the file by greedy
+minimum-cover mining, reproduces **9,000 of 9,000** topic labels exactly — which makes
+*Happy Friday friends!* a `Technical_Issues` post, because "happy" contains "app". We
+report it rather than submitting the rule for a free 1.000. Full write-up and
+reproduction: [`round2/README.md`](round2/README.md).
+
+Rebuild everything from the raw CSV with `python round2/run_round2.py`.
+
+---
+
+## Round 1 phase 2 — SQL analytical core
 
 | Deliverable (form) | File |
 |---|---|
@@ -21,7 +49,7 @@ What the three queries say, in one line each: Instagram leads on average total e
 
 ---
 
-## Phase 1 — cleaned extract and EDA
+## Round 1 phase 1 — cleaned extract and EDA
 
 Recovery, cleaning and exploratory analysis of the corrupted Social Engine intake dataset: evidence-first,
 fully reproducible, and with **zero invented values**.
@@ -123,6 +151,6 @@ Raw inputs are hash-pinned to the files recovered from the site; `.gitattributes
 └── requirements.txt
 ```
 
-## Phase 2 notes (how we queried)
+## Round 1 phase 2 notes (how we queried)
 
 NULL likes stay NULL — `AVG()` skips them; we never `COALESCE` to 0. Platform-missing rows are dropped only when the question is about a platform. User totals use `NTILE(10)` over all 1,500 accounts rather than a hardcoded cutoff. Details: [`phase2/README.md`](phase2/README.md).

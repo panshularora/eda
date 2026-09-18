@@ -14,7 +14,7 @@ import pandas as pd
 from reportlab.lib.units import mm
 from reportlab.platypus import PageBreak, Paragraph, Spacer
 
-from config import CV_FOLDS, REPORTS, SEED, SUBMISSION, TASKS
+from config import CV_FOLDS, REPORTS, SEED, TASKS
 from report_style import (
     CONTENT_W, S, bullets, build, callout, cover, figure, h1, h2, h3,
     metric_cards, p, reset_figures, table,
@@ -93,6 +93,13 @@ def problem_definition(m) -> list:
         "supervised classification problems over the same text, because that is what "
         "the two label columns support, and because a deployed comprehension layer "
         "needs both an affect signal and a routing signal."))
+    flow.append(p(
+        "The rulebook offers topic modelling and entity recognition as alternatives. "
+        "We set both aside deliberately: Dataset 2 carries no entity spans and no "
+        "document-topic distributions, so either would have to be unsupervised, and an "
+        "unsupervised result on a labelled corpus cannot be scored against anything. "
+        "Classification is the framing the data can actually be held to account on, "
+        "and being able to hold a claim to account is the point of Section 2."))
     c = m["corpus"]
     sc, tc = c["class_counts"]["sentiment"], c["class_counts"]["topic"]
     skew = max(tc.values()) / min(tc.values())
@@ -700,8 +707,6 @@ def main():
     flow += limitations(m)
 
     build(OUT, "Round 2 Technical Report", flow)
-    import shutil
-    shutil.copy(OUT, SUBMISSION / OUT.name)
     print(f"built {OUT.name} ({OUT.stat().st_size / 1e6:.2f} MB)")
     return OUT
 
