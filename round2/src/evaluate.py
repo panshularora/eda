@@ -178,7 +178,7 @@ def fig_confusion(block: dict, task: str, idx: int) -> str:
     labels = block["labels"]
     cm = np.array(block["confusion_matrix"], dtype=float)
     norm = cm / cm.sum(axis=1, keepdims=True).clip(min=1)
-    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.2))
     for ax, mat, title, fmt in (
         (axes[0], cm, "counts", "{:.0f}"),
         (axes[1], norm, "row-normalised (recall)", "{:.2f}"),
@@ -200,7 +200,9 @@ def fig_confusion(block: dict, task: str, idx: int) -> str:
                         fontsize=7, color="white" if mat[i, j] > thresh else INK)
         fig.colorbar(im, ax=ax, fraction=0.045, pad=0.03).outline.set_visible(False)
     fig.suptitle(f"{PRETTY[task]} - held-out confusion matrix "
-                 f"(n = {block['n']:,})", fontsize=9.5, fontweight="bold", y=1.03)
+                 f"(n = {block['n']:,})", fontsize=9.5, fontweight="bold", y=1.0)
+    # without this the left colour bar sits on top of the right panel's labels
+    fig.tight_layout(rect=(0, 0, 1, 0.95), w_pad=2.4)
     return save(fig, f"fig0{idx}_confusion_{task}.png")
 
 
@@ -333,14 +335,14 @@ def fig_error_profile(test_df, wrong, conf, task: str) -> tuple[str, dict]:
             centres.append(f"{lo}-{hi}")
             counts.append(int(m.sum()))
     cues = {
-        "has emoticon": test_df[TEXT_COL].str.contains(r"[:;=]-?[\)\(\[\]dpDP]|<3", regex=True).to_numpy(),
-        "has negation": test_df[TEXT_COL].str.lower().str.contains(
+        "emoticon": test_df[TEXT_COL].str.contains(r"[:;=]-?[\)\(\[\]dpDP]|<3", regex=True).to_numpy(),
+        "negation": test_df[TEXT_COL].str.lower().str.contains(
             r"\b(?:not|no|never|don't|dont|can't|cant|isn't|won't)\b", regex=True).to_numpy(),
-        "has hashtag": test_df[TEXT_COL].str.contains("#", regex=False).to_numpy(),
-        "has @mention": test_df[TEXT_COL].str.contains("@", regex=False).to_numpy(),
-        "ALL CAPS word": test_df[TEXT_COL].str.contains(r"\b[A-Z]{3,}\b", regex=True).to_numpy(),
+        "hashtag": test_df[TEXT_COL].str.contains("#", regex=False).to_numpy(),
+        "@mention": test_df[TEXT_COL].str.contains("@", regex=False).to_numpy(),
+        "ALL CAPS": test_df[TEXT_COL].str.contains(r"\b[A-Z]{3,}\b", regex=True).to_numpy(),
     }
-    fig, axes = plt.subplots(1, 3, figsize=(8.2, 2.7))
+    fig, axes = plt.subplots(1, 3, figsize=(8.2, 3.0))
     axes[0].bar(range(len(rates)), rates, color=ACCENT, alpha=0.88, width=0.62)
     axes[0].set_xticks(range(len(rates)))
     axes[0].set_xticklabels(centres, fontsize=7)
@@ -362,7 +364,10 @@ def fig_error_profile(test_df, wrong, conf, task: str) -> tuple[str, dict]:
     axes[1].set_yticklabels(names, fontsize=7)
     axes[1].set_xlabel("error rate")
     axes[1].set_title("Error rate by surface cue")
-    axes[1].legend(loc="lower right")
+    # legend below the axes: the bars reach the right edge, so any in-axes
+    # placement would sit on top of them
+    axes[1].legend(ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.30))
+    axes[1].set_xlim(0, max(with_ + without) * 1.08)
     despine(axes[1])
 
     axes[2].hist([conf[~wrong.astype(bool)], conf[wrong.astype(bool)]], bins=12,
@@ -373,7 +378,8 @@ def fig_error_profile(test_df, wrong, conf, task: str) -> tuple[str, dict]:
     axes[2].legend()
     despine(axes[2])
     fig.suptitle(f"{PRETTY[task]} - where the errors live", fontsize=9.5,
-                 fontweight="bold", y=1.04)
+                 fontweight="bold", y=1.02)
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
     stats = {
         "error_rate_by_length": dict(zip(centres, [float(r) for r in rates])),
         "error_rate_by_cue": {n: {"present": float(a), "absent": float(b)}

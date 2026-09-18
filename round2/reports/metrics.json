@@ -12,6 +12,68 @@
       "topic": 0
     }
   },
+  "corpus": {
+    "n_rows": 9000,
+    "n_columns": 4,
+    "n_nulls": 0,
+    "chars": {
+      "min": 25,
+      "median": 113,
+      "max": 180
+    },
+    "words": {
+      "min": 4,
+      "median": 20,
+      "max": 35
+    },
+    "unicode_escapes": 619,
+    "escaped_quotes": 139,
+    "quote_wrapped": 1219,
+    "mentions": 2730,
+    "hashtags": 1586,
+    "retweets": 99,
+    "truncated": 856,
+    "urls": 16,
+    "class_counts": {
+      "sentiment": {
+        "Negative": 3000,
+        "Neutral": 3000,
+        "Positive": 3000
+      },
+      "topic": {
+        "Account_Security": 136,
+        "Community_Discussion": 7752,
+        "Feature_Feedback": 297,
+        "Technical_Issues": 815
+      }
+    },
+    "majority_share": {
+      "sentiment": 0.3333333333333333,
+      "topic": 0.8613333333333333
+    },
+    "cue_word_polarity": {
+      "love": {
+        "Positive": 0.806,
+        "Neutral": 0.099,
+        "Negative": 0.095
+      },
+      "hate": {
+        "Negative": 0.829,
+        "Positive": 0.098,
+        "Neutral": 0.073
+      },
+      "happy": {
+        "Positive": 0.842,
+        "Negative": 0.086,
+        "Neutral": 0.072
+      },
+      "worst": {
+        "Negative": 0.837,
+        "Neutral": 0.14,
+        "Positive": 0.023
+      }
+    }
+  },
   "figures": {
     "class_distribution": "fig01_class_distribution.png",
     "length_profile": "fig02_length_profile.png",
@@ -91,7 +153,8 @@
       "leakage": {
         "grouped_by_text_f1_macro": 0.6227255714050116,
         "random_row_split_f1_macro": 0.6789746438386042,
-        "inflation": 0.05624907243359256
+        "inflation": 0.05624907243359256,
+        "permuted_labels_f1_macro": 0.33659782757821316
       },
       "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.65      0.69      0.67       597\n     Neutral       0.54      0.55      0.55       590\n    Positive       0.69      0.64      0.67       602\n\n    accuracy                           0.63      1789\n   macro avg       0.63      0.63      0.63      1789\nweighted avg       0.63      0.63      0.63      1789\n",
       "error_profile": {
@@ -363,7 +426,8 @@
       "leakage": {
         "grouped_by_text_f1_macro": 0.9170579382763032,
         "random_row_split_f1_macro": 0.9204229750123213,
-        "inflation": 0.0033650367360180677
+        "inflation": 0.0033650367360180677,
+        "permuted_labels_f1_macro": 0.2481953431997419
       },
       "classification_report": "                      precision    recall  f1-score   support\n\n    Account_Security       1.00      0.88      0.94        26\nCommunity_Discussion       0.99      1.00      0.99      1528\n    Feature_Feedback       0.93      0.84      0.88        62\n    Technical_Issues       0.97      0.94      0.96       163\n\n            accuracy                           0.99      1779\n           macro avg       0.97      0.92      0.94      1779\n        weighted avg       0.99      0.99      0.99      1779\n",
       "error_profile": {

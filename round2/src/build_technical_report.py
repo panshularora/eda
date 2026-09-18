@@ -179,11 +179,17 @@ def data_audit(m) -> list:
                        width=CONTENT_W * 0.66))
 
     flow.append(PageBreak())
+    topic_tbl = pd.read_csv(REPORTS / "model_comparison_topic.csv").set_index("model")
+    char_only = topic_tbl.loc[
+        [i for i in topic_tbl.index if i.startswith("char")], "cv_f1_macro"].max()
+    word_only = topic_tbl.loc["word 1-2gram + LinearSVC", "cv_f1_macro"]
     flow.append(h2("2.2  topic_category is generated, not annotated"))
     flow.append(p(
-        "A character-ngram model beat a word-ngram model on topic_category by 23 "
-        "macro-F1 points. That ordering is backwards for a topical task — topics "
-        "live in words — so we inspected the highest-weighted character features and "
+        "A character-ngram model beat a word-ngram model on topic_category by "
+        f"{(char_only - word_only) * 100:.0f} macro-F1 points "
+        f"({f4(char_only)} against {f4(word_only)}). That ordering is backwards for a "
+        "topical task — topics live in words — so we inspected the "
+        "highest-weighted character features and "
         f"found {code('ban')}, {code('app')}, {code('ui')}, {code('mode')}. Those are "
         "substrings, not words. We then tested the hypothesis directly."))
     flow.append(h3("Method"))
@@ -206,7 +212,9 @@ def data_audit(m) -> list:
         "Run it yourself: " + code("python round2/src/audit_labels.py") + ". The blind "
         "re-mining, given no prior knowledge of the rule, converges on it at fidelity "
         f"{f4(audit['blind_rediscovery']['fidelity'])} "
-        f"({audit['blind_rediscovery']['n_mismatches']} rows short); the curated list "
+        f"({audit['blind_rediscovery']['n_mismatches']} "
+        f"{'row' if audit['blind_rediscovery']['n_mismatches'] == 1 else 'rows'} short); "
+        "the curated list "
         "above closes the remainder and reaches 1.0000.",
         tone="warn"))
     flow.append(p(
@@ -571,7 +579,7 @@ def error_analysis(m) -> list:
          "Crawler-cut posts where the polarity sits in the missing tail.",
          "856 posts end mid-sentence",
          "already flagged with " + code("trunctoken") + "; abstain when confidence is low"],
-    ], widths=[26 * mm, 46 * mm, 48 * mm, CONTENT_W - 120 * mm]))
+    ], widths=[30 * mm, 45 * mm, 46 * mm, CONTENT_W - 121 * mm]))
     flow.append(Spacer(1, 6))
     flow.append(p(
         f"The error profile backs this reading. Errors are not confidence-blind: mean "
@@ -613,11 +621,25 @@ def error_analysis(m) -> list:
         "issue. Re-annotate a stratified sample by hand, measure inter-annotator "
         "agreement, and retrain — the pipeline here transfers unchanged, because "
         "nothing in it was tuned to the rule.", tone="warn"))
+    flow.append(h2("8.3  What the learned lexicon admits"))
+    flow.append(p(
+        "Because the model is linear, its evidence can be read off directly. The word "
+        "weights are the lexicon a human would expect — and they also contain a "
+        "quiet correction to our own preprocessing."))
     flow.append(figure(m["figures"]["top_features_sentiment"],
-                       "Highest-weight word features per sentiment class. The model's "
-                       "learned lexicon is inspectable, and it is the lexicon a human would "
-                       "expect — which is the argument for a linear model on a corpus this "
-                       "size."))
+                       "Highest-weight word features per sentiment class."))
+    flow.append(callout(
+        "The model patched the negation bug we shipped it",
+        "Two of the strongest Positive features are " + code("wait_neg") + " and "
+        + code("can't wait_neg") + " — tokens that exist only because step 10 of the "
+        "preprocessing pipeline marked “can’t wait” as negated. Given enough "
+        "examples the model learned that this particular negated token predicts "
+        "<i>Positive</i> and recovered most of what the rule cost it. That is worth "
+        "saying plainly: the idiomatic-negation failure mode in 8.1 is real, but it is "
+        "self-limiting on frequent idioms and bites hardest on rare ones, where there are "
+        "too few examples to learn the exception. It also means the fix is cheap — an "
+        "exception list would mostly save the model work it is already doing. Being able "
+        "to see this at all is the argument for a linear model on a corpus this size."))
     return flow
 
 
