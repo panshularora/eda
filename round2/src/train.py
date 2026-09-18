@@ -45,49 +45,73 @@ from dataio import duplicate_report, grouped_cv, load, make_split, sha256
 from features import build_features
 
 # ---------------------------------------------------------------------------
-# candidate list - ablation first, then model families
+# candidate list - feature ablation first, then model families
 # ---------------------------------------------------------------------------
+# Regularisation strength and the character n-gram range were swept per task by
+# the same grouped CV on the *training split only* (see reports/hparam_sweep.md).
+# The two tasks land in opposite regimes, which is itself a finding: sentiment is
+# noisy and semantic and wants heavy regularisation over long character n-grams,
+# while topic is deterministic and orthographic and wants light regularisation
+# over short ones - 2 to 3 characters, the length of the trigger substrings
+# (ui, ban, app, bug) recovered in audit_labels.py.
+HPARAMS = {
+    "sentiment": {"C": 0.1, "C_lr": 0.5, "char_ngram": (3, 5), "balanced": None},
+    "topic": {"C": 8.0, "C_lr": 50.0, "char_ngram": (2, 3), "balanced": "balanced"},
+}
+
+
 def candidates(task: str) -> dict[str, Pipeline]:
-    """Ordered candidate registry. Identical for both tasks so the two
-    comparison tables can be read side by side."""
-    balanced = "balanced" if task == "topic" else None
+    """Ordered candidate registry for one task.
+
+    Rows 2-5 hold the classifier fixed and add one feature block at a time;
+    rows 6-8 hold the features fixed and change the model family. Reading the
+    resulting table top to bottom therefore says what each decision bought.
+    """
+    hp = HPARAMS[task]
+    bal, C, C_lr, cng = hp["balanced"], hp["C"], hp["C_lr"], hp["char_ngram"]
+    svc = lambda: LinearSVC(C=C, class_weight=bal, max_iter=20000, random_state=SEED)
+    label = f"char {cng[0]}-{cng[1]}gram"
     return {
         # --- floor ---------------------------------------------------------
         "baseline: stratified guess": Pipeline([
             ("f", build_features(use_char=False, use_stats=False, word_max_features=1)),
             ("c", DummyClassifier(strategy="stratified", random_state=SEED)),
         ]),
-        # --- feature ablation, model held fixed at LinearSVC ----------------
+        # --- feature ablation, classifier held fixed ------------------------
         "word 1-2gram + LinearSVC": Pipeline([
             ("f", build_features(use_char=False, use_stats=False)),
-            ("c", LinearSVC(C=1.0, class_weight=balanced, random_state=SEED)),
+            ("c", svc()),
         ]),
         "char 3-5gram + LinearSVC": Pipeline([
-            ("f", build_features(use_word=False, use_stats=False)),
-            ("c", LinearSVC(C=1.0, class_weight=balanced, random_state=SEED)),
+            ("f", build_features(use_word=False, use_stats=False, char_ngram=(3, 5))),
+            ("c", svc()),
         ]),
-        "word + char + LinearSVC": Pipeline([
-            ("f", build_features(use_stats=False)),
-            ("c", LinearSVC(C=1.0, class_weight=balanced, random_state=SEED)),
+        f"{label} + LinearSVC": Pipeline([
+            ("f", build_features(use_word=False, use_stats=False, char_ngram=cng)),
+            ("c", svc()),
         ]),
-        "word + char + surface + LinearSVC": Pipeline([
-            ("f", build_features()),
-            ("c", LinearSVC(C=1.0, class_weight=balanced, random_state=SEED)),
+        f"word + {label} + LinearSVC": Pipeline([
+            ("f", build_features(use_stats=False, char_ngram=cng)),
+            ("c", svc()),
+        ]),
+        f"word + {label} + surface + LinearSVC": Pipeline([
+            ("f", build_features(char_ngram=cng)),
+            ("c", svc()),
         ]),
         # --- model families, features held fixed ----------------------------
-        "word + char + surface + LogisticRegression": Pipeline([
-            ("f", build_features()),
-            ("c", LogisticRegression(C=10.0, max_iter=3000,
-                                     class_weight=balanced, random_state=SEED)),
+        f"word + {label} + surface + LogisticRegression": Pipeline([
+            ("f", build_features(char_ngram=cng)),
+            ("c", LogisticRegression(C=C_lr, max_iter=3000,
+                                     class_weight=bal, random_state=SEED)),
         ]),
-        "word + char + surface + ComplementNB": Pipeline([
-            ("f", build_features(use_stats=False)),
+        f"word + {label} + ComplementNB": Pipeline([
+            ("f", build_features(use_stats=False, char_ngram=cng)),
             ("c", ComplementNB(alpha=0.3)),
         ]),
-        "word + char + surface + SGD (modified huber)": Pipeline([
-            ("f", build_features()),
+        f"word + {label} + surface + SGD (modified huber)": Pipeline([
+            ("f", build_features(char_ngram=cng)),
             ("c", SGDClassifier(loss="modified_huber", alpha=1e-5, max_iter=3000,
-                                class_weight=balanced, random_state=SEED)),
+                                class_weight=bal, random_state=SEED)),
         ]),
     }
 
@@ -136,12 +160,17 @@ def leakage_audit(pipe, X, y, groups) -> dict:
 def fit_final(pipe, X, y):
     """Refit the winner and wrap it so it can report calibrated confidence.
 
-    `LinearSVC` has no `predict_proba`; Platt scaling over 5 internal folds
-    supplies one without changing the decision rule materially. Error analysis
-    in `evaluate.py` needs that confidence to separate "wrong and sure" from
-    "wrong and hesitant".
+    `LinearSVC` has no `predict_proba`; Platt scaling supplies one without
+    changing the decision rule materially. Error analysis in `evaluate.py` needs
+    that confidence to separate "wrong and sure" from "wrong and hesitant".
+
+    ``ensemble=False`` fits the pipeline once on all of the training data and
+    calibrates it with cross-validated decision values, instead of keeping five
+    separately fitted copies. It is the same calibration with one vocabulary
+    instead of five, which takes the saved bundle from 9.0 MB to well inside the
+    10 MB the submission form allows.
     """
-    model = CalibratedClassifierCV(pipe, method="sigmoid", cv=5)
+    model = CalibratedClassifierCV(pipe, method="sigmoid", cv=5, ensemble=False)
     model.fit(X, y)
     return model
 

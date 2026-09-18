@@ -1,0 +1,20 @@
+{
+  "sentiment": {
+    "selected": "word + char 3-5gram + surface + LinearSVC",
+    "cv_f1_macro": 0.6227255714050116,
+    "leakage": {
+      "grouped_by_text_f1_macro": 0.6227255714050116,
+      "random_row_split_f1_macro": 0.6789746438386042,
+      "inflation": 0.05624907243359256
+    }
+  },
+  "topic": {
+    "selected": "char 2-3gram + LinearSVC",
+    "cv_f1_macro": 0.9170579382763032,
+    "leakage": {
+      "grouped_by_text_f1_macro": 0.9170579382763032,
+      "random_row_split_f1_macro": 0.9204229750123213,
+      "inflation": 0.0033650367360180677
+    }
+  }
+}
