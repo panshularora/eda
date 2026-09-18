@@ -1,0 +1,16 @@
+# Round 2 - NLP comprehension layer. Python 3.11 (tested).
+# Pinned to the versions the reported numbers were produced with.
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.1
+scipy==1.17.1
+matplotlib==3.10.9
+joblib==1.4.2
+
+# PDF reports
+reportlab>=4.0
+
+# Only needed to re-execute the walkthrough notebook
+nbformat>=5.10
+nbclient>=0.10
+ipykernel>=6.29

@@ -31,6 +31,49 @@ PRETTY = {"sentiment": "Sentiment", "topic": "Topic"}
 # ---------------------------------------------------------------------------
 # core metrics
 # ---------------------------------------------------------------------------
+def corpus_profile(df) -> dict:
+    """Counts the preprocessing and problem-definition sections quote.
+
+    Computed here rather than typed into the PDFs, so that pointing the
+    pipeline at a different file updates the prose as well as the tables.
+    """
+    text = df[TEXT_COL]
+    low = text.str.lower()
+    chars = text.str.len()
+    words = text.str.split().str.len()
+    backslash = chr(92)
+    return {
+        "n_rows": int(len(df)),
+        "n_columns": int(df.shape[1] - 1),        # text_group is ours, not theirs
+        "n_nulls": int(df.isna().sum().sum()),
+        "chars": {"min": int(chars.min()), "median": int(chars.median()),
+                  "max": int(chars.max())},
+        "words": {"min": int(words.min()), "median": int(words.median()),
+                  "max": int(words.max())},
+        "unicode_escapes": int(text.str.contains(re.escape(backslash + "u00"), regex=True).sum()),
+        "escaped_quotes": int(text.str.contains(re.escape(backslash + '"'), regex=True).sum()),
+        "quote_wrapped": int((text.str.startswith('"') & text.str.endswith('"')).sum()),
+        "mentions": int(text.str.contains("@", regex=False).sum()),
+        "hashtags": int(text.str.contains("#", regex=False).sum()),
+        "retweets": int(text.str.contains(r"\bRT\b", regex=True).sum()),
+        "truncated": int(text.str.rstrip().str.endswith("...").sum()),
+        "urls": int(low.str.contains("http", regex=False).sum()),
+        "class_counts": {
+            task: df[col].value_counts().sort_index().to_dict()
+            for task, col in TASKS.items()
+        },
+        "majority_share": {
+            task: float(df[col].value_counts(normalize=True).max())
+            for task, col in TASKS.items()
+        },
+        "cue_word_polarity": {
+            kw: df.loc[low.str.contains(kw, regex=False), TASKS["sentiment"]]
+                  .value_counts(normalize=True).round(3).to_dict()
+            for kw in ["love", "hate", "happy", "worst"]
+        },
+    }
+
+
 def metric_block(y_true, y_pred, proba=None, classes=None) -> dict:
     """Every headline number for one task on one slice of data."""
     classes = classes or sorted(set(y_true))
@@ -448,6 +491,7 @@ def main() -> dict:
     results: dict = {"dataset_sha256": bundle["dataset_sha256"],
                      "seed": SEED,
                      "duplicates": bundle["duplicates"],
+                     "corpus": corpus_profile(df),
                      "figures": {},
                      "tasks": {}}
 

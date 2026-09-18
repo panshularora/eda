@@ -33,6 +33,7 @@ import pandas as pd
 import sklearn
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_score, cross_validate
 from sklearn.naive_bayes import ComplementNB
@@ -63,9 +64,15 @@ HPARAMS = {
 def candidates(task: str) -> dict[str, Pipeline]:
     """Ordered candidate registry for one task.
 
-    Rows 2-5 hold the classifier fixed and add one feature block at a time;
-    rows 6-8 hold the features fixed and change the model family. Reading the
-    resulting table top to bottom therefore says what each decision bought.
+    The early rows hold the classifier fixed and add one feature block at a
+    time; the later ones hold the features fixed and change the model family,
+    ending with a soft-vote ensemble of the three. Reading the resulting table
+    top to bottom therefore says what each decision bought.
+
+    When a task's tuned character range *is* 3-5 (sentiment), the fixed 3-5 row
+    and the tuned-range row collide on the same key and the dict keeps one of
+    them. That is intended: there is nothing to ablate between a range and
+    itself, so the sentiment table is one row shorter than the topic table.
     """
     hp = HPARAMS[task]
     bal, C, C_lr, cng = hp["balanced"], hp["C"], hp["C_lr"], hp["char_ngram"]
@@ -113,6 +120,18 @@ def candidates(task: str) -> dict[str, Pipeline]:
             ("c", SGDClassifier(loss="modified_huber", alpha=1e-5, max_iter=3000,
                                 class_weight=bal, random_state=SEED)),
         ]),
+        # --- does combining them help? ---------------------------------------
+        f"word + {label} + surface + soft-vote ensemble": Pipeline([
+            ("f", build_features(char_ngram=cng)),
+            ("c", VotingClassifier(
+                [("svc", CalibratedClassifierCV(
+                    LinearSVC(C=C, class_weight=bal, max_iter=20000, random_state=SEED),
+                    method="sigmoid", cv=3)),
+                 ("lr", LogisticRegression(C=C_lr, max_iter=3000,
+                                           class_weight=bal, random_state=SEED)),
+                 ("cnb", ComplementNB(alpha=0.3))],
+                voting="soft")),
+        ]),
     }
 
 
@@ -140,20 +159,30 @@ def score_candidates(X, y, groups, task: str) -> pd.DataFrame:
 
 
 def leakage_audit(pipe, X, y, groups) -> dict:
-    """Same pipeline, same folds count, two splitting rules.
+    """Two sanity checks that keep the headline number honest.
 
-    The gap is the score a row-level split would have invented, and it is the
-    reason every number in this submission uses the grouped split.
+    *Split rule.* The same pipeline is scored with the grouped split we report
+    and with a duplicate-blind row split. The gap is the score the shortcut
+    would have invented, and it belongs on the record rather than merely being
+    avoided.
+
+    *Label permutation.* The same pipeline is scored on shuffled labels. If the
+    protocol were leaking, this would come back above chance; it does not, which
+    is what licenses reading the real score as signal from the text.
     """
     grouped = cross_val_score(pipe, X, y, cv=grouped_cv(CV_FOLDS), groups=groups,
                               scoring="f1_macro", n_jobs=1)
     naive = cross_val_score(pipe, X, y,
                             cv=StratifiedKFold(CV_FOLDS, shuffle=True, random_state=SEED),
                             scoring="f1_macro", n_jobs=1)
+    shuffled = np.random.RandomState(SEED).permutation(y)
+    permuted = cross_val_score(pipe, X, shuffled, cv=grouped_cv(CV_FOLDS), groups=groups,
+                               scoring="f1_macro", n_jobs=1)
     return {
         "grouped_by_text_f1_macro": float(grouped.mean()),
         "random_row_split_f1_macro": float(naive.mean()),
         "inflation": float(naive.mean() - grouped.mean()),
+        "permuted_labels_f1_macro": float(permuted.mean()),
     }
 
 
@@ -189,11 +218,12 @@ def train_task(df: pd.DataFrame, task: str) -> dict:
     best_pipe = candidates(task)[best_name]
     print(f"  winner: {best_name}")
 
-    print("  leakage audit (grouped vs random row split) ...", flush=True)
+    print("  leakage audit + permutation check ...", flush=True)
     leak = leakage_audit(candidates(task)[best_name], Xtr, ytr, split.groups_train)
     print(f"    grouped {leak['grouped_by_text_f1_macro']:.4f} | "
           f"random rows {leak['random_row_split_f1_macro']:.4f} | "
-          f"inflation +{leak['inflation']:.4f}")
+          f"inflation +{leak['inflation']:.4f} | "
+          f"permuted labels {leak['permuted_labels_f1_macro']:.4f}")
 
     print("  refitting on full training split and calibrating ...", flush=True)
     model = fit_final(best_pipe, Xtr, ytr)

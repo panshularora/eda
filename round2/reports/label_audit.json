@@ -10,18 +10,18 @@
       "Technical_Issues": [
         "app",
         "down",
-        "pda",
+        "pdate",
         "cras",
-        "creen",
+        "scree",
         "slow",
-        "cpe"
+        "mcp"
       ],
       "Account_Security": [
         "ban",
         "accoun",
-        "uspend",
+        "suspend",
         "hack",
-        "assw"
+        "asswo"
       ],
       "Feature_Feedback": [
         "ui",
@@ -29,7 +29,7 @@
         "eature",
         "ugly",
         "desig",
-        "button"
+        "utto"
       ]
     },
     "trace": [
@@ -38,11 +38,11 @@
         "keywords": [
           "app",
           "down",
-          "pda",
+          "pdate",
           "cras",
-          "creen",
+          "scree",
           "slow",
-          "cpe"
+          "mcp"
         ],
         "covered": 814,
         "of": 815
@@ -52,9 +52,9 @@
         "keywords": [
           "ban",
           "accoun",
-          "uspend",
+          "suspend",
           "hack",
-          "assw"
+          "asswo"
         ],
         "covered": 136,
         "of": 136
@@ -67,14 +67,14 @@
           "eature",
           "ugly",
           "desig",
-          "button"
+          "utto"
         ],
         "covered": 297,
         "of": 297
       }
     ],
-    "fidelity": 0.9996666666666667,
-    "n_mismatches": 3
+    "fidelity": 0.9998888888888889,
+    "n_mismatches": 1
   },
   "curated_rule": {
     "fidelity": 1.0,
@@ -114,6 +114,8 @@
     ],
     "default": "Community_Discussion"
   },
-  "artefact_rate": 0.13866666666666666,
-  "n_semantic_misfires_sampled": 127
+  "trigger_rate": 0.13866666666666666,
+  "artefact_rate": 0.10566666666666667,
+  "artefact_share_of_triggered": 0.7620192307692307,
+  "n_semantic_misfires_sampled": 36
 }

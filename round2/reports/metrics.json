@@ -1,0 +1,590 @@
+{
+  "dataset_sha256": "a866d9fd9d5b6e5559467fd8d1c1430a07d46ef9e88df8ca422f37efdf069099",
+  "seed": 42,
+  "duplicates": {
+    "n_rows": 9000,
+    "n_unique_texts": 7900,
+    "n_duplicate_rows": 1100,
+    "n_texts_repeated": 987,
+    "max_repeats": 5,
+    "label_conflicts_among_repeats": {
+      "sentiment": 0,
+      "topic": 0
+    }
+  },
+  "figures": {
+    "class_distribution": "fig01_class_distribution.png",
+    "length_profile": "fig02_length_profile.png",
+    "model_comparison": "fig03_model_comparison.png",
+    "split_leakage": "fig08_split_leakage.png",
+    "confusion_sentiment": "fig04_confusion_sentiment.png",
+    "error_profile_sentiment": "fig11_error_profile_sentiment.png",
+    "reliability_sentiment": "fig09_reliability_sentiment.png",
+    "learning_curve_sentiment": "fig07_learning_curve_sentiment.png",
+    "top_features_sentiment": "fig10_top_features_sentiment.png",
+    "confusion_topic": "fig05_confusion_topic.png",
+    "error_profile_topic": "fig11_error_profile_topic.png",
+    "reliability_topic": "fig09_reliability_topic.png",
+    "learning_curve_topic": "fig07_learning_curve_topic.png",
+    "topic_rule_gap": "fig12_topic_rule_gap.png",
+    "per_class": "fig06_per_class_metrics.png"
+  },
+  "tasks": {
+    "sentiment": {
+      "n": 1789,
+      "accuracy": 0.626607043040805,
+      "macro_precision": 0.6273286048585742,
+      "macro_recall": 0.6262523270103544,
+      "macro_f1": 0.6263201895381928,
+      "weighted_f1": 0.6267473598319975,
+      "cohen_kappa": 0.4399544859802572,
+      "matthews_corrcoef": 0.44026425537476904,
+      "per_class": {
+        "Negative": {
+          "precision": 0.6492890995260664,
+          "recall": 0.6884422110552764,
+          "f1": 0.6682926829268293,
+          "support": 597
+        },
+        "Neutral": {
+          "precision": 0.5428571428571428,
+          "recall": 0.5474576271186441,
+          "f1": 0.5451476793248945,
+          "support": 590
+        },
+        "Positive": {
+          "precision": 0.6898395721925134,
+          "recall": 0.6428571428571429,
+          "f1": 0.6655202063628547,
+          "support": 602
+        }
+      },
+      "confusion_matrix": [
+        [
+          411,
+          122,
+          64
+        ],
+        [
+          157,
+          323,
+          110
+        ],
+        [
+          65,
+          150,
+          387
+        ]
+      ],
+      "labels": [
+        "Negative",
+        "Neutral",
+        "Positive"
+      ],
+      "roc_auc_ovr_macro": 0.8045813923156823,
+      "selected_model": "word + char 3-5gram + surface + LinearSVC",
+      "cv": {
+        "f1_macro": 0.6227255714050116,
+        "f1_macro_std": 0.0124583889069027,
+        "folds": 5
+      },
+      "leakage": {
+        "grouped_by_text_f1_macro": 0.6227255714050116,
+        "random_row_split_f1_macro": 0.6789746438386042,
+        "inflation": 0.05624907243359256
+      },
+      "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.65      0.69      0.67       597\n     Neutral       0.54      0.55      0.55       590\n    Positive       0.69      0.64      0.67       602\n\n    accuracy                           0.63      1789\n   macro avg       0.63      0.63      0.63      1789\nweighted avg       0.63      0.63      0.63      1789\n",
+      "error_profile": {
+        "error_rate_by_length": {
+          "0-12": 0.3770491803278688,
+          "12-16": 0.31343283582089554,
+          "16-20": 0.40376569037656906,
+          "20-24": 0.36398467432950193,
+          "24-40": 0.38847117794486213
+        },
+        "error_rate_by_cue": {
+          "has emoticon": {
+            "present": 0.16417910447761194,
+            "absent": 0.38153310104529614
+          },
+          "has negation": {
+            "present": 0.41292134831460675,
+            "absent": 0.36357292393579904
+          },
+          "has hashtag": {
+            "present": 0.3103448275862069,
+            "absent": 0.3855903935957305
+          },
+          "has @mention": {
+            "present": 0.36706349206349204,
+            "absent": 0.37587548638132295
+          },
+          "ALL CAPS word": {
+            "present": 0.3526570048309179,
+            "absent": 0.37963636363636366
+          }
+        },
+        "mean_conf_correct": 0.6839872524052181,
+        "mean_conf_wrong": 0.5933418448258795,
+        "share_of_errors_above_0_8_conf": 0.05239520958083832
+      },
+      "calibration": {
+        "expected_calibration_error": 0.033718023728449106,
+        "bins": 8
+      },
+      "learning_curve": {
+        "train_sizes": [
+          864,
+          1845,
+          2825,
+          3805,
+          4785,
+          5766
+        ],
+        "train_f1_macro": [
+          0.9631121234515992,
+          0.9483299170642179,
+          0.9395765425226376,
+          0.9329230085537386,
+          0.9307038059312951,
+          0.9289149925642703
+        ],
+        "val_f1_macro": [
+          0.543523461118884,
+          0.5690244178943764,
+          0.5916717445832237,
+          0.6054943053047286,
+          0.6181556465558408,
+          0.6238905501011285
+        ],
+        "final_gap": 0.30502444246314186
+      },
+      "top_confusions": [
+        {
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "n": 157,
+          "share_of_actual": 0.26610169491525426
+        },
+        {
+          "actual": "Positive",
+          "predicted": "Neutral",
+          "n": 150,
+          "share_of_actual": 0.24916943521594684
+        },
+        {
+          "actual": "Negative",
+          "predicted": "Neutral",
+          "n": 122,
+          "share_of_actual": 0.20435510887772193
+        },
+        {
+          "actual": "Neutral",
+          "predicted": "Positive",
+          "n": 110,
+          "share_of_actual": 0.1864406779661017
+        }
+      ],
+      "worst_errors": [
+        {
+          "text_id": "TXT_06993",
+          "post_text": "\"If it weren't for Christians, the Aztecs would never have stopped killing babies (like Planned Parenthood does.)",
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "confidence": 0.912
+        },
+        {
+          "text_id": "TXT_03063",
+          "post_text": "Josh Hamilton hit a two run homer in 2011 WS in the 10th with a sports hernia. If anyone with any decent fielding skills catches the ball...",
+          "actual": "Positive",
+          "predicted": "Neutral",
+          "confidence": 0.91
+        },
+        {
+          "text_id": "TXT_06753",
+          "post_text": "Hot Mess Monday! I'm feeling it! #runninglate #crazyday #blah #happymonday #lovemylife",
+          "actual": "Negative",
+          "predicted": "Positive",
+          "confidence": 0.906
+        },
+        {
+          "text_id": "TXT_00557",
+          "post_text": "In rugby news\\u002c @user are winning 26-5 at Cobham\\u002c with the four-try bonus point in the bag. See The Monday Gazette for a full report.",
+          "actual": "Positive",
+          "predicted": "Neutral",
+          "confidence": 0.882
+        },
+        {
+          "text_id": "TXT_00322",
+          "post_text": "\"Should've went to watch Paper Towns first, I'll just go see it tomorrow\"",
+          "actual": "Neutral",
+          "predicted": "Positive",
+          "confidence": 0.879
+        },
+        {
+          "text_id": "TXT_08196",
+          "post_text": "When Kanye West told George Bush that Black Lives Matter...As much as I may not like him. It was the TRUTH!",
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "confidence": 0.869
+        },
+        {
+          "text_id": "TXT_01236",
+          "post_text": "Kerry hopeful Israeli-Palestinian talks can be relaunched: US Secretary of State John Kerry said Wednesday he ...",
+          "actual": "Positive",
+          "predicted": "Neutral",
+          "confidence": 0.863
+        },
+        {
+          "text_id": "TXT_05848",
+          "post_text": "Kerry hopeful Israeli-Palestinian talks can be relaunched: US Secretary of State John Kerry said Wednesday he ...",
+          "actual": "Positive",
+          "predicted": "Neutral",
+          "confidence": 0.863
+        },
+        {
+          "text_id": "TXT_04972",
+          "post_text": "@user @user CAITLYN Jenner may have saved/helped mils of trans people around the globe.why can't you just be happy for her?",
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "confidence": 0.862
+        },
+        {
+          "text_id": "TXT_01979",
+          "post_text": "June 7-8 Red Sox at Giants. Who's down to go and boo from the 3rd baseline?",
+          "actual": "Negative",
+          "predicted": "Neutral",
+          "confidence": 0.861
+        },
+        {
+          "text_id": "TXT_05413",
+          "post_text": "2103: 'We don't need governments to make peace': Israel gets unofficial Iranian ... - The Guardian (blog)",
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "confidence": 0.858
+        },
+        {
+          "text_id": "TXT_01591",
+          "post_text": "\"Was going to play DA but man I'm so fucking tired I may just go the fuck to bed. But Twilight is up to 22k, yay ^_^\"",
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "confidence": 0.856
+        },
+        {
+          "text_id": "TXT_08172",
+          "post_text": "\"in 8th grade, i was dead ready to fight niggas for saying Frank Ocean was gay bc like....he's bi. n apparently people can't get it through\"",
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "confidence": 0.85
+        },
+        {
+          "text_id": "TXT_00621",
+          "post_text": "David Wright grounds out in the 9th. Was 2-for-5 today.",
+          "actual": "Negative",
+          "predicted": "Neutral",
+          "confidence": 0.849
+        }
+      ]
+    },
+    "topic": {
+      "n": 1779,
+      "accuracy": 0.985947161326588,
+      "macro_precision": 0.9716855048558917,
+      "macro_recall": 0.9165367468307547,
+      "macro_f1": 0.9426155599657735,
+      "weighted_f1": 0.9856692049809237,
+      "cohen_kappa": 0.9429958241797679,
+      "matthews_corrcoef": 0.9434110942977357,
+      "per_class": {
+        "Account_Security": {
+          "precision": 1.0,
+          "recall": 0.8846153846153846,
+          "f1": 0.9387755102040817,
+          "support": 26
+        },
+        "Community_Discussion": {
+          "precision": 0.9896171317326411,
+          "recall": 0.9980366492146597,
+          "f1": 0.9938090583251874,
+          "support": 1528
+        },
+        "Feature_Feedback": {
+          "precision": 0.9285714285714286,
+          "recall": 0.8387096774193549,
+          "f1": 0.8813559322033898,
+          "support": 62
+        },
+        "Technical_Issues": {
+          "precision": 0.9685534591194969,
+          "recall": 0.9447852760736196,
+          "f1": 0.9565217391304348,
+          "support": 163
+        }
+      },
+      "confusion_matrix": [
+        [
+          23,
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          1525,
+          1,
+          2
+        ],
+        [
+          0,
+          7,
+          52,
+          3
+        ],
+        [
+          0,
+          7,
+          2,
+          154
+        ]
+      ],
+      "labels": [
+        "Account_Security",
+        "Community_Discussion",
+        "Feature_Feedback",
+        "Technical_Issues"
+      ],
+      "roc_auc_ovr_macro": 0.9962685515223452,
+      "selected_model": "char 2-3gram + LinearSVC",
+      "cv": {
+        "f1_macro": 0.9170579382763032,
+        "f1_macro_std": 0.0180414372442766,
+        "folds": 5
+      },
+      "leakage": {
+        "grouped_by_text_f1_macro": 0.9170579382763032,
+        "random_row_split_f1_macro": 0.9204229750123213,
+        "inflation": 0.0033650367360180677
+      },
+      "classification_report": "                      precision    recall  f1-score   support\n\n    Account_Security       1.00      0.88      0.94        26\nCommunity_Discussion       0.99      1.00      0.99      1528\n    Feature_Feedback       0.93      0.84      0.88        62\n    Technical_Issues       0.97      0.94      0.96       163\n\n            accuracy                           0.99      1779\n           macro avg       0.97      0.92      0.94      1779\n        weighted avg       0.99      0.99      0.99      1779\n",
+      "error_profile": {
+        "error_rate_by_length": {
+          "0-12": 0.0,
+          "12-16": 0.015873015873015872,
+          "16-20": 0.0066815144766146995,
+          "20-24": 0.017045454545454544,
+          "24-40": 0.020737327188940093
+        },
+        "error_rate_by_cue": {
+          "has emoticon": {
+            "present": 0.0,
+            "absent": 0.014577259475218658
+          },
+          "has negation": {
+            "present": 0.008571428571428572,
+            "absent": 0.015395381385584325
+          },
+          "has hashtag": {
+            "present": 0.015723270440251572,
+            "absent": 0.013689253935660506
+          },
+          "has @mention": {
+            "present": 0.01694915254237288,
+            "absent": 0.01282051282051282
+          },
+          "ALL CAPS word": {
+            "present": 0.011904761904761904,
+            "absent": 0.014716703458425313
+          }
+        },
+        "mean_conf_correct": 0.9868162220984051,
+        "mean_conf_wrong": 0.7595381318386971,
+        "share_of_errors_above_0_8_conf": 0.48
+      },
+      "calibration": {
+        "expected_calibration_error": 0.0022819024374922977,
+        "bins": 2
+      },
+      "learning_curve": {
+        "train_sizes": [
+          868,
+          1851,
+          2835,
+          3819,
+          4803,
+          5787
+        ],
+        "train_f1_macro": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "val_f1_macro": [
+          0.5274859203565142,
+          0.7452262316010186,
+          0.8360704678502902,
+          0.8812023726394648,
+          0.8937954214132429,
+          0.9170579382763032
+        ],
+        "final_gap": 0.08294206172369678
+      },
+      "top_confusions": [
+        {
+          "actual": "Feature_Feedback",
+          "predicted": "Community_Discussion",
+          "n": 7,
+          "share_of_actual": 0.11290322580645161
+        },
+        {
+          "actual": "Technical_Issues",
+          "predicted": "Community_Discussion",
+          "n": 7,
+          "share_of_actual": 0.04294478527607362
+        },
+        {
+          "actual": "Feature_Feedback",
+          "predicted": "Technical_Issues",
+          "n": 3,
+          "share_of_actual": 0.04838709677419355
+        },
+        {
+          "actual": "Account_Security",
+          "predicted": "Community_Discussion",
+          "n": 2,
+          "share_of_actual": 0.07692307692307693
+        }
+      ],
+      "worst_errors": [
+        {
+          "text_id": "TXT_05924",
+          "post_text": "Google+ may have thrown in the social media towel, but it still has great features. Here's 6!  via @user",
+          "actual": "Feature_Feedback",
+          "predicted": "Community_Discussion",
+          "confidence": 0.996
+        },
+        {
+          "text_id": "TXT_04027",
+          "post_text": "Planned Parenthood is WORLDWIDE. They have been Killing our babies by DESIGN as the plan was to send in #illegals / #refugees from 3rd world",
+          "actual": "Feature_Feedback",
+          "predicted": "Community_Discussion",
+          "confidence": 0.995
+        },
+        {
+          "text_id": "TXT_08669",
+          "post_text": "@user @user -__- shid i may not be able 2 take screenshots of it but everybody @user me. Peyton Siva kik'd me this morn #NoLie",
+          "actual": "Technical_Issues",
+          "predicted": "Community_Discussion",
+          "confidence": 0.977
+        },
+        {
+          "text_id": "TXT_00194",
+          "post_text": "Why oh why does Toronto's Nuit Blanche have to be the same night as a wedding I have to attend?!? #snbTO",
+          "actual": "Feature_Feedback",
+          "predicted": "Community_Discussion",
+          "confidence": 0.973
+        },
+        {
+          "text_id": "TXT_02752",
+          "post_text": "\"Alabama : Trent Richardson on cover of SI:  The junior running back is featured on the August 22 issue, alongsid...",
+          "actual": "Feature_Feedback",
+          "predicted": "Community_Discussion",
+          "confidence": 0.966
+        },
+        {
+          "text_id": "TXT_00079",
+          "post_text": "bloodymary - hackers nirvana - smell like teen spirit butterfingers - nicotine feeder - 7 days in the sun smashing pumpkins - bullets with..",
+          "actual": "Account_Security",
+          "predicted": "Community_Discussion",
+          "confidence": 0.958
+        },
+        {
+          "text_id": "TXT_08801",
+          "post_text": "The 4th, the Nokia 5530 XpressMusic. Fact: This have an Stylus. Used to hate Touchscreens on cellphones before this",
+          "actual": "Technical_Issues",
+          "predicted": "Community_Discussion",
+          "confidence": 0.954
+        },
+        {
+          "text_id": "TXT_04445",
+          "post_text": "Updating tomorrow but I won't be on twitter much. I love you all and stay Gucci if you need me text me. @user @user",
+          "actual": "Community_Discussion",
+          "predicted": "Technical_Issues",
+          "confidence": 0.952
+        },
+        {
+          "text_id": "TXT_04377",
+          "post_text": "if i sat beside niall i would be so annoyed bc he looks like he chews his gum annoyingly loud",
+          "actual": "Community_Discussion",
+          "predicted": "Feature_Feedback",
+          "confidence": 0.932
+        },
+        {
+          "text_id": "TXT_01508",
+          "post_text": "So Carly Fiorina is going to crash and burn. @user  #WakeUpAmerica ....NEXT...",
+          "actual": "Technical_Issues",
+          "predicted": "Community_Discussion",
+          "confidence": 0.909
+        },
+        {
+          "text_id": "TXT_04386",
+          "post_text": "All the Stone Brewing verticals will be featured on tap tomorrow at @user",
+          "actual": "Feature_Feedback",
+          "predicted": "Community_Discussion",
+          "confidence": 0.898
+        },
+        {
+          "text_id": "TXT_06225",
+          "post_text": "Seems my new iPod doesn\\u2019t like Kasabian very much- laptop has crashed every time it\\u2019s got to syncing Empire. 10th time lucky...",
+          "actual": "Technical_Issues",
+          "predicted": "Community_Discussion",
+          "confidence": 0.8
+        },
+        {
+          "text_id": "TXT_06679",
+          "post_text": "\"Contraband on Blue Ray = $15 1st Season of Martin = $10 Sidney Poitier \\\"\"in the heat of the night\\\"\" = $5 @ PS3",
+          "actual": "Account_Security",
+          "predicted": "Community_Discussion",
+          "confidence": 0.8
+        },
+        {
+          "text_id": "TXT_00067",
+          "post_text": "Niall faced serious bullying problems as a kid. He got suspended in the 3rd grade for swinging when somebody called him ugly",
+          "actual": "Account_Security",
+          "predicted": "Feature_Feedback",
+          "confidence": 0.728
+        }
+      ],
+      "rule_diagnosis": {
+        "error_rate_no_trigger": 0.001963350785340314,
+        "error_rate_common_trigger": 0.013824884792626729,
+        "error_rate_rare_trigger": 0.5588235294117647,
+        "trigger_corpus_frequency": {
+          "app": 489,
+          "down": 248,
+          "update": 43,
+          "crash": 23,
+          "screen": 19,
+          "slow": 12,
+          "bug": 2,
+          "glitch": 2,
+          "ban": 122,
+          "account": 13,
+          "suspend": 7,
+          "hack": 6,
+          "password": 3,
+          "ui": 273,
+          "mode": 25,
+          "feature": 18,
+          "ugly": 14,
+          "design": 7,
+          "button": 5
+        },
+        "model_accuracy": 0.985947161326588,
+        "rule_accuracy": 1.0
+      }
+    }
+  }
+}

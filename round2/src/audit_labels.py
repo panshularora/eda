@@ -2,10 +2,11 @@
 
 Why this file exists
 --------------------
-A character-ngram model reaches 0.78 macro-F1 on ``topic_category`` while the
-same model on word 1-2 grams reaches only 0.55. A *character* view beating a
-*word* view by 23 points is not how topical language works; it is what happens
-when the label depends on substrings rather than on words. The top-weighted
+On ``topic_category`` a character-ngram model beats the same classifier on word
+1-2 grams by more than 25 macro-F1 points (see
+``reports/model_comparison_topic.csv``). A *character* view beating a *word*
+view by that margin is not how topical language works; it is what happens when
+the label depends on substrings rather than on words. The top-weighted
 character features made the reason obvious - ``'ban'``, ``'app'``, ``'ui'``,
 ``'mode'`` - so this module tests the hypothesis directly.
 
@@ -24,10 +25,12 @@ exceptions and no tie-breaks left over. ``topic_category`` is not an
 annotation; it is a case-insensitive substring switch over the raw post.
 
 The consequence for modelling is in the technical report: the Bayes error of
-the topic task is exactly zero, a high topic F1 is evidence of substring
-recovery rather than of topical understanding, and 12.5% of the labels are
-semantically wrong (``husband`` -> Account_Security, ``happy`` ->
-Technical_Issues, ``moderate`` -> Feature_Feedback).
+the topic task is exactly zero, and a high topic F1 is evidence of substring
+recovery rather than of topical understanding. 13.9% of posts get a non-default
+topic from a trigger, and three quarters of those triggers are buried inside an
+unrelated word - ``happy`` -> Technical_Issues, ``band`` -> Account_Security,
+``model`` -> Feature_Feedback - so about one post in ten carries a topic a human
+reader would call wrong.
 """
 from __future__ import annotations
 
@@ -88,6 +91,11 @@ def mine_triggers(texts, labels, cls, min_precision=0.95, min_docs=3, max_keywor
         s for s, c in within.items()
         if overall[s] >= min_docs and c / overall[s] >= min_precision
     ]
+    # Python randomises string hashing per process, so Counter iteration order
+    # is not stable across runs. Sort explicitly - purest first, then most
+    # supported, then alphabetically - so the greedy search below breaks ties
+    # the same way every time and the mined rule is reproducible.
+    candidates.sort(key=lambda s: (-within[s] / overall[s], -overall[s], s))
     docs = {s: {i for i, t in enumerate(texts) if s in t} for s in candidates}
     target = {i for i, l in enumerate(labels) if l == cls}
     covered, chosen = set(), []
@@ -95,7 +103,7 @@ def mine_triggers(texts, labels, cls, min_precision=0.95, min_docs=3, max_keywor
         best, gain = None, 0
         for s in candidates:
             g = len(docs[s] & target - covered)
-            if g > gain:
+            if g > gain:                     # strict >, so the sort decides ties
                 best, gain = s, g
         if best is None:
             break
@@ -130,27 +138,49 @@ def rediscover(df: pd.DataFrame, target_col="topic_category") -> dict:
     }
 
 
-def semantic_misfires(df: pd.DataFrame, limit=12) -> pd.DataFrame:
-    """Posts whose topic label is an artefact of a substring, not of meaning.
+def _misfire_mask(df: pd.DataFrame) -> pd.Series:
+    """True where a post's topic is decided *only* by buried substrings.
 
-    A post counts as a misfire when its only trigger is a substring buried
-    inside an unrelated word - ``husband`` firing ``ban``, ``happy`` firing
-    ``app``, ``model`` firing ``mode``.
+    A trigger that appears as a standalone word (``the app crashed``) is a
+    defensible label. A trigger that appears only inside an unrelated word
+    (``happy`` firing ``app``, ``band`` firing ``ban``, ``model`` firing
+    ``mode``) is an artefact, and the post's topic is wrong to a human reader.
     """
     low = df[TEXT_COL].str.lower()
+    assigned = apply_rule(df[TEXT_COL])
+    mask = pd.Series(False, index=df.index)
+    for cls in PRIORITY:
+        in_class = assigned == cls
+        if not in_class.any():
+            continue
+        buried_only = pd.Series(True, index=df.index)
+        fired = pd.Series(False, index=df.index)
+        for kw in RECOVERED_RULE[cls]:
+            present = low.str.contains(kw, regex=False)
+            standalone = low.str.contains(rf"\b{kw}\b", regex=True)
+            fired |= present
+            # any standalone occurrence of any trigger makes the label defensible
+            buried_only &= ~(present & standalone)
+        mask |= in_class & fired & buried_only
+    return mask
+
+
+def semantic_misfires(df: pd.DataFrame, limit=12) -> pd.DataFrame:
+    """A sample of posts whose topic label is an artefact rather than a meaning."""
+    low = df[TEXT_COL].str.lower()
+    assigned = apply_rule(df[TEXT_COL])
+    misfire = _misfire_mask(df)
     rows = []
     for cls in PRIORITY:
-        for kw in RECOVERED_RULE[cls]:
-            hit = low.str.contains(kw, regex=False) & (df["topic_category"] == cls)
-            # standalone word occurrence = defensible; buried occurrence = artefact
-            standalone = low.str.contains(rf"\b{kw}\b", regex=True)
-            artefact = hit & ~standalone
-            for _, r in df[artefact].head(limit).iterrows():
-                rows.append({
-                    "trigger": kw,
-                    "assigned_topic": cls,
-                    "post_text": r[TEXT_COL][:140],
-                })
+        sub = df[misfire & (assigned == cls)]
+        for _, r in sub.head(limit).iterrows():
+            text = r[TEXT_COL].lower()
+            trigger = next((k for k in RECOVERED_RULE[cls] if k in text), "")
+            rows.append({
+                "trigger": trigger,
+                "assigned_topic": cls,
+                "post_text": r[TEXT_COL][:140],
+            })
     return pd.DataFrame(rows)
 
 
@@ -177,10 +207,18 @@ def main() -> dict:
     # (b) verification: replay the curated rule the mining converged on
     curated = verify(df)
 
+    assigned = apply_rule(df[TEXT_COL])
+    misfire = _misfire_mask(df)
     result = {
         "blind_rediscovery": mined,
         "curated_rule": curated,
-        "artefact_rate": float((apply_rule(df[TEXT_COL]) != DEFAULT_CLASS).mean()),
+        # share of the corpus whose topic is decided by a trigger at all
+        "trigger_rate": float((assigned != DEFAULT_CLASS).mean()),
+        # share of the corpus whose topic is decided only by a buried substring
+        "artefact_rate": float(misfire.mean()),
+        # ... and the same as a share of the posts that got a non-default topic
+        "artefact_share_of_triggered": float(
+            misfire.sum() / max((assigned != DEFAULT_CLASS).sum(), 1)),
     }
     misfires = semantic_misfires(df)
     result["n_semantic_misfires_sampled"] = int(len(misfires))
@@ -196,7 +234,10 @@ def main() -> dict:
     for cls in PRIORITY:
         print(f"  {cls:22s} <- {RECOVERED_RULE[cls]}")
     print(f"  {DEFAULT_CLASS:22s} <- (fall-through)")
-    print(f"posts whose topic is set by a trigger: {result['artefact_rate']:.1%}")
+    print(f"posts whose topic is set by a trigger      : {result['trigger_rate']:.1%}")
+    print(f"posts whose topic is a buried-substring artefact: "
+          f"{result['artefact_rate']:.1%} of the corpus, "
+          f"{result['artefact_share_of_triggered']:.1%} of the triggered posts")
     print(f"written: {out.name}, label_audit_misfires.csv")
     return result
 

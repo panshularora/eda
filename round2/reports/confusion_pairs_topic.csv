@@ -1,0 +1,9 @@
+actual,predicted,n,share_of_actual
+Feature_Feedback,Community_Discussion,7,0.11290322580645161
+Technical_Issues,Community_Discussion,7,0.04294478527607362
+Feature_Feedback,Technical_Issues,3,0.04838709677419355
+Account_Security,Community_Discussion,2,0.07692307692307693
+Community_Discussion,Technical_Issues,2,0.0013089005235602095
+Technical_Issues,Feature_Feedback,2,0.012269938650306749
+Account_Security,Feature_Feedback,1,0.038461538461538464
+Community_Discussion,Feature_Feedback,1,0.0006544502617801048

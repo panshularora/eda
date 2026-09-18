@@ -113,8 +113,22 @@ def bullets(items, marker="•"):
     return [Paragraph(f"{marker}&nbsp;&nbsp;{i}", S["bullet"]) for i in items]
 
 
+_FIGURE_COUNT = {"n": 0}
+
+
+def reset_figures():
+    """Restart figure numbering; each PDF calls this before it starts building."""
+    _FIGURE_COUNT["n"] = 0
+
+
 def figure(name, caption, width=CONTENT_W, max_height=None):
-    """Place a figure from reports/figures, scaled to the text column."""
+    """Place a figure from reports/figures, scaled to the text column.
+
+    Captions are numbered here rather than written by hand, so inserting or
+    moving a figure cannot leave the numbering wrong.
+    """
+    _FIGURE_COUNT["n"] += 1
+    caption = f"Figure {_FIGURE_COUNT['n']}. {caption}"
     path = FIGURES / name
     img = Image(str(path))
     ratio = img.imageHeight / img.imageWidth

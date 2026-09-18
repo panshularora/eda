@@ -17,7 +17,7 @@ from reportlab.platypus import PageBreak, Paragraph, Spacer
 from config import CV_FOLDS, REPORTS, SEED, SUBMISSION, TASKS
 from report_style import (
     CONTENT_W, S, bullets, build, callout, cover, figure, h1, h2, h3,
-    metric_cards, p, table,
+    metric_cards, p, reset_figures, table,
 )
 
 OUT = REPORTS / "Round2_Technical_Report_Team_SE7EN.pdf"
@@ -56,7 +56,8 @@ def summary(m) -> list:
         "<b>Sentiment is the real task.</b> Three balanced classes, a genuine human "
         f"annotation, and a linear model over word + character + surface features "
         f"reaches <b>{f4(s['macro_f1'])}</b> macro-F1 held out "
-        f"(Cohen's kappa {f4(s['cohen_kappa'])}) against a 0.3333 chance floor.",
+        f"(Cohen's kappa {f4(s['cohen_kappa'])}) against a "
+        f"{m['corpus']['majority_share']['sentiment']:.4f} majority-class floor.",
         "<b>Topic is not an annotation.</b> A case-insensitive substring switch "
         "recovered from the data reproduces every one of the 9,000 topic labels "
         "exactly. <i>Happy Friday friends!</i> is labelled Technical_Issues because "
@@ -92,37 +93,47 @@ def problem_definition(m) -> list:
         "supervised classification problems over the same text, because that is what "
         "the two label columns support, and because a deployed comprehension layer "
         "needs both an affect signal and a routing signal."))
+    c = m["corpus"]
+    sc, tc = c["class_counts"]["sentiment"], c["class_counts"]["topic"]
+    skew = max(tc.values()) / min(tc.values())
     flow.append(table([
         ["", "Task A — sentiment", "Task B — topic"],
         ["Target", "sentiment_label", "topic_category"],
-        ["Classes", "Negative, Neutral, Positive", "Account_Security, Community_Discussion, "
-                                                   "Feature_Feedback, Technical_Issues"],
-        ["Balance", "3,000 / 3,000 / 3,000 (exactly balanced)",
-         "136 / 7,752 / 297 / 815 (57:1 skew)"],
+        ["Classes", ", ".join(sc), ", ".join(tc)],
+        ["Balance", " / ".join(f"{v:,}" for v in sc.values()) + " (exactly balanced)",
+         " / ".join(f"{v:,}" for v in tc.values()) + f" ({skew:.0f}:1 skew)"],
         ["Business use", "affect signal for the engagement model",
          "routing signal for support and moderation queues"],
         ["Primary metric", "macro-F1", "macro-F1"],
         ["Why macro-F1", "all three classes matter equally",
-         "accuracy would sit at 0.861 by always predicting Community_Discussion"],
+         f"accuracy would sit at {c['majority_share']['topic']:.3f} by always "
+         "predicting Community_Discussion"],
     ], widths=[26 * mm, 52 * mm, CONTENT_W - 78 * mm]))
     flow.append(Spacer(1, 6))
     flow.append(h2("Inputs"))
     flow.append(p(
-        f"9,000 rows, four columns ({code('text_id')}, {code('post_text')}, "
-        f"{code('sentiment_label')}, {code('topic_category')}), no nulls anywhere. "
-        "Posts run 25–180 characters (median 113) and 4–35 words (median 20) — "
-        "short, informal, heavy on mentions (2,617 posts), hashtags (1,586) and "
-        "crawler truncation (856). Verified against SHA-256 "
+        f"{c['n_rows']:,} rows, {c['n_columns']} columns ({code('text_id')}, "
+        f"{code('post_text')}, {code('sentiment_label')}, {code('topic_category')}), "
+        f"{c['n_nulls']} nulls anywhere. Posts run {c['chars']['min']}–"
+        f"{c['chars']['max']} characters (median {c['chars']['median']}) and "
+        f"{c['words']['min']}–{c['words']['max']} words (median "
+        f"{c['words']['median']}) — short, informal, heavy on mentions "
+        f"({c['mentions']:,} posts), hashtags ({c['hashtags']:,}) and crawler "
+        f"truncation ({c['truncated']:,}). Verified against SHA-256 "
         f"{code(m['dataset_sha256'][:40] + '…')}."))
     flow.append(figure(m["figures"]["class_distribution"],
-                       "Figure 1. The two targets could hardly be more different in shape."))
+                       "The two targets could hardly be more different in shape."))
     flow.append(figure(m["figures"]["length_profile"],
-                       "Figure 2. Length distribution, and length against sentiment. Length is "
+                       "Length distribution, and length against sentiment. Length is "
                        "not a usable polarity cue, which rules out the cheapest shortcut."))
     return flow
 
 
 def data_audit(m) -> list:
+    audit = json.loads((REPORTS / "label_audit.json").read_text(encoding="utf-8"))
+    artefact_rate = audit["artefact_rate"]
+    trigger_rate = audit["trigger_rate"]
+    artefact_love = m["corpus"]["cue_word_polarity"]["love"]["Positive"]
     dup = m["duplicates"]
     rd = m["tasks"]["topic"]["rule_diagnosis"]
     flow = [PageBreak()]
@@ -156,7 +167,7 @@ def data_audit(m) -> list:
         f"and +{f4(m['tasks']['topic']['leakage']['inflation'])} on topic, for free, "
         "from the same pipeline."))
     flow.append(figure(m["figures"]["split_leakage"],
-                       "Figure 3. Identical pipeline, two splitting rules. The orange bars are "
+                       "Identical pipeline, two splitting rules. The orange bars are "
                        "the score we would have reported if we had not checked.",
                        width=CONTENT_W * 0.66))
 
@@ -186,14 +197,18 @@ def data_audit(m) -> list:
         "elif any of [ui, mode, feature, ugly, design, button] &rarr; Feature_Feedback<br/>"
         "else &rarr; Community_Discussion</font><br/><br/>"
         "Run it yourself: " + code("python round2/src/audit_labels.py") + ". The blind "
-        "re-mining, given no prior knowledge, converges on the same rule "
-        "(fidelity 0.9997) before the curated list closes the last three rows.",
+        "re-mining, given no prior knowledge of the rule, converges on it at fidelity "
+        f"{f4(audit['blind_rediscovery']['fidelity'])} "
+        f"({audit['blind_rediscovery']['n_mismatches']} rows short); the curated list "
+        "above closes the remainder and reaches 1.0000.",
         tone="warn"))
     flow.append(p(
-        f"Because matching is on substrings rather than words, {pct(m['artefact_rate'])} "
-        "of the corpus gets a topic from a trigger buried inside an unrelated word. A "
-        "sample of the damage, all real rows from the training file:"))
-    mis = pd.read_csv(REPORTS / "label_audit_misfires.csv")
+        f"{pct(trigger_rate)} of posts get a non-default topic from a trigger — and "
+        f"because matching is on substrings rather than words, "
+        f"<b>{pct(audit['artefact_share_of_triggered'])} of those triggers are buried "
+        f"inside an unrelated word</b>. That is {pct(artefact_rate)} of the whole "
+        "corpus, about one post in ten, carrying a topic a human reader would call "
+        "wrong. A sample of the damage, all real rows from the training file:"))
     picks = [
         ("app", "Technical_Issues", "That Janet Jackson. Sometimes she just gets me. Happy Friday friends!"),
         ("ban", "Account_Security", "… Kenneth “KK” Downing Jr., Guitarist in the British heavy metal <b>band</b> JUDAS PRIEST"),
@@ -210,16 +225,17 @@ def data_audit(m) -> list:
         "Bayes error of the topic task is exactly zero — the label is a deterministic "
         "function of the input, so a perfect score is attainable and meaningless. "
         "Second, a topic model is rewarded for recovering substrings, not topics, so "
-        "its macro-F1 must be read with that attached. Third, roughly one in eight "
-        "posts carries a topic that a human would call wrong, which caps how useful "
-        "this column can be for routing until it is re-annotated. Sentiment shows no "
-        "such structure: no lexical rule comes close, and the class-conditional "
-        "distributions of cue words are graded (“love” is 81% Positive, not 100%), "
-        "which is what human annotation looks like."))
+        "its macro-F1 must be read with that attached. Third, about one post in ten "
+        "carries a topic that a human would call wrong, which caps how useful this "
+        "column can be for routing until it is re-annotated. Sentiment shows no such "
+        "structure: no lexical rule comes close, and the class-conditional "
+        f"distributions of cue words are graded (“love” is {artefact_love:.0%} "
+        "Positive, not 100%), which is what human annotation looks like."))
     return flow
 
 
 def preprocessing(m) -> list:
+    c = m["corpus"]
     flow = [PageBreak()]
     flow += h1("Preprocessing pipeline", 3)
     flow.append(p(
@@ -233,21 +249,22 @@ def preprocessing(m) -> list:
         ["#", "Step", "What it does", "Why it earns its place"],
         ["1", "Unicode-escape repair",
          code("\\u002c") + " &rarr; “,”, " + code("\\u2019") + " &rarr; ”'”",
-         "619 posts carry literal escapes; left alone they become junk tokens"],
+         f"{c['unicode_escapes']} posts carry literal escapes; left alone they become junk tokens"],
         ["2", "Quote unwrapping", "strip leaked CSV quoting and " + code('\\"'),
-         "1,219 posts are wrapped in quotes that are not part of the text"],
+         f"{c['quote_wrapped']:,} posts are wrapped in quotes that are not part of the text"],
         ["3", "Retweet marker", "drop a leading " + code("RT"),
-         "99 posts; the marker is metadata, not content"],
+         f"{c['retweets']} posts; the marker is metadata, not content"],
         ["4", "Truncation marker", "trailing " + code("...") + " &rarr; " + code("trunctoken"),
-         "856 posts were cut by the crawler; the model should know the text is "
-         "incomplete rather than read “…” as punctuation"],
+         f"{c['truncated']} posts were cut by the crawler; the model should know the "
+         "text is incomplete rather than read “…” as punctuation"],
         ["5", "URL / mention", "&rarr; " + code("urltoken") + " / " + code("usertoken"),
-         "2,617 mentions; the identity is noise, the fact of addressing someone is not"],
+         f"{c['mentions']:,} mentions; the identity is noise, the fact of addressing "
+         "someone is not"],
         ["6", "Emoticons", ":-) &rarr; " + code("emotesmile") + ", :( &rarr; " + code("emotefrown"),
          "highest-precision cue in the corpus (“:(” is 85% Negative) and a word "
          "tokeniser throws it away"],
         ["7", "Hashtag splitting", "#GoodFriday &rarr; " + code("# good friday"),
-         "1,586 posts; the polarity is inside the compound"],
+         f"{c['hashtags']:,} posts; the polarity is inside the compound"],
         ["8", "Digits", "&rarr; " + code("numtoken"),
          "scores and dates fragment the vocabulary without carrying sentiment"],
         ["9", "Elongation / punctuation runs", "sooooo &rarr; soo, !!!! &rarr; !!",
@@ -269,16 +286,17 @@ def preprocessing(m) -> list:
         "“shouting” are different evidence.",
         "<b>No external sentiment lexicon.</b> Adding one would import an unstated "
         "prior and make the pipeline depend on a download; the corpus is large enough "
-        "to learn its own lexicon, and the learned weights (Figure 7) are inspectable.",
+        "to learn its own lexicon, and the learned weights are inspectable - they "
+        "are plotted in Section 8.",
     ])
     flow.append(callout(
         "The pipeline is not neutral between the two tasks",
-        "Normalisation is tuned for meaning, and the topic label lives in surface "
-        "substrings. On the topic task, the normalised character block scores "
-        f"{f4(0.8464)} against {f4(0.8413)} for the same block on raw lower-cased text "
-        "— close enough that normalisation is kept for consistency, but the fact "
-        "that the gap is this small is itself evidence that the topic signal is "
-        "orthographic rather than semantic."))
+        "Normalisation is tuned for meaning, and step 10 in particular is a "
+        "sentiment device: negation marking adds a feature that only helps when the "
+        "label is a judgement about the author. The topic label is a property of the "
+        "raw surface string, so the same pipeline is doing less work there — which "
+        "is exactly what Section 4.3 shows when the word block, the most "
+        "meaning-oriented of the three, turns out to <i>cost</i> topic accuracy."))
     return flow
 
 
@@ -327,7 +345,7 @@ def model_selection(m) -> list:
     ], widths=[62 * mm, CONTENT_W - 62 * mm]))
     flow.append(Spacer(1, 6))
     flow.append(figure(m["figures"]["model_comparison"],
-                       "Figure 4. Grouped 5-fold CV macro-F1 for every candidate on both tasks."))
+                       "Grouped 5-fold CV macro-F1 for every candidate on both tasks."))
 
     flow.append(h2("4.3  What the comparison decided"))
     for task in TASKS:
@@ -349,13 +367,18 @@ def model_selection(m) -> list:
                 "the audit of Section 2.2 showing up as a model-selection result, and "
                 "it is why the two tasks do not share a feature set."
             )))
-        flow.append(callout(
-            "Ensembles were tried and rejected",
-            "Soft-voting LinearSVC + LogisticRegression + ComplementNB scored "
-            "0.6167 on sentiment against 0.6227 for the single best member. With "
-            "correlated linear models over identical features there is no diversity to "
-            "exploit, so the ensemble buys nothing and costs interpretability. We kept "
-            "the single model.") if task == "sentiment" else Spacer(1, 1))
+        if task == "sentiment":
+            ens = t[t.model.str.contains("ensemble")]
+            ens_score = float(ens.iloc[0]["cv_f1_macro"]) if len(ens) else None
+            flow.append(callout(
+                "Ensembles were tried and rejected",
+                "The last row of each table is a soft-vote ensemble of LinearSVC, "
+                "LogisticRegression and ComplementNB over the same features. On "
+                f"sentiment it scores {f4(ens_score)} against "
+                f"{f4(best['cv_f1_macro'])} for the single best member. Correlated "
+                "linear models over an identical feature space leave no diversity to "
+                "exploit, so the ensemble buys nothing and costs both interpretability "
+                "and inference time. We kept the single model."))
     return flow
 
 
@@ -392,9 +415,12 @@ def methodology(m) -> list:
     flow += bullets([
         "<b>Leakage audit.</b> The same pipeline is deliberately scored with a leaky "
         "row split so the size of the shortcut is on the record, not just avoided.",
-        "<b>Permutation check.</b> With labels shuffled, the sentiment pipeline drops "
-        "to 0.3329 macro-F1 — chance for three balanced classes — confirming the "
-        "score comes from the text and not from the protocol.",
+        "<b>Permutation check.</b> With the labels shuffled, the same pipelines fall "
+        f"to {f4(m['tasks']['sentiment']['leakage']['permuted_labels_f1_macro'])} "
+        f"(sentiment) and "
+        f"{f4(m['tasks']['topic']['leakage']['permuted_labels_f1_macro'])} (topic) "
+        "macro-F1 — chance in both cases — confirming the score comes from "
+        "the text and not from the protocol.",
         "<b>Single seed, fixed in " + code("config.py") + ".</b> Splits, folds and "
         "fits are deterministic; re-running reproduces the reported numbers.",
         "<b>Held-out slice touched once.</b> All tuning decisions were made on CV; the "
@@ -411,9 +437,9 @@ def methodology(m) -> list:
         f"gap is {f4(lc_t['final_gap'])}: it is closing in on a rule it can only "
         "approximate from examples."))
     flow.append(figure(m["figures"]["learning_curve_sentiment"],
-                       "Figure 5. Sentiment learning curve.", width=CONTENT_W * 0.56))
+                       "Sentiment learning curve.", width=CONTENT_W * 0.56))
     flow.append(figure(m["figures"]["learning_curve_topic"],
-                       "Figure 6. Topic learning curve.", width=CONTENT_W * 0.56))
+                       "Topic learning curve.", width=CONTENT_W * 0.56))
     return flow
 
 
@@ -431,7 +457,9 @@ def evaluation(m) -> list:
     s, t = m["tasks"]["sentiment"], m["tasks"]["topic"]
     for key, label, note in [
         ("macro_f1", "macro-F1", "primary metric; unweighted mean of per-class F1"),
-        ("accuracy", "accuracy", "majority-class floor: 0.333 / 0.861"),
+        ("accuracy", "accuracy", f"majority-class floor: "
+         f"{m['corpus']['majority_share']['sentiment']:.3f} / "
+         f"{m['corpus']['majority_share']['topic']:.3f}"),
         ("weighted_f1", "weighted-F1", "support-weighted; flattered by class skew"),
         ("cohen_kappa", "Cohen's kappa", "agreement corrected for chance"),
         ("matthews_corrcoef", "MCC", "correlation between prediction and truth"),
@@ -447,7 +475,7 @@ def evaluation(m) -> list:
     flow.append(table(rows, widths=[32 * mm, 26 * mm, 26 * mm, CONTENT_W - 84 * mm]))
     flow.append(Spacer(1, 6))
     flow.append(figure(m["figures"]["per_class"],
-                       "Figure 7. Per-class precision, recall and F1 on the held-out slice."))
+                       "Per-class precision, recall and F1 on the held-out slice."))
     flow.append(p(
         "Calibration is measured rather than assumed. Expected calibration error is "
         f"{f4(s['calibration']['expected_calibration_error'])} for sentiment and "
@@ -504,7 +532,7 @@ def error_analysis(m) -> list:
         + code("reports/errors_topic.csv") + ") and grouped them into named failure "
         "modes, each with the fix it implies."))
     flow.append(figure(m["figures"]["error_profile_sentiment"],
-                       "Figure 8. Sentiment errors by post length, by surface cue, and by the "
+                       "Sentiment errors by post length, by surface cue, and by the "
                        "confidence the model attached to them."))
 
     flow.append(h2("8.1  Sentiment failure modes"))
@@ -562,7 +590,7 @@ def error_analysis(m) -> list:
     ], widths=[72 * mm, 26 * mm, CONTENT_W - 98 * mm]))
     flow.append(Spacer(1, 5))
     flow.append(figure(m["figures"]["topic_rule_gap"],
-                       "Figure 9. Left: topic error rate by trigger frequency. Right: the learned "
+                       "Left: topic error rate by trigger frequency. Right: the learned "
                        "model against the recovered rule on the same held-out posts."))
     flow.append(p(
         f"The learned model reaches {f4(rd['model_accuracy'])} held-out accuracy; the "
@@ -572,14 +600,14 @@ def error_analysis(m) -> list:
         "all converge on the same rule and would all be learning an artefact."))
     flow.append(callout(
         "Recommendation to the Social Engine team",
-        "Do not deploy topic_category as it stands. Roughly one post in eight is "
+        "Do not deploy topic_category as it stands. About one post in ten is "
         "routed by a substring buried in an unrelated word, so a support queue built "
         "on this column would receive “Happy Friday friends!” as a technical "
         "issue. Re-annotate a stratified sample by hand, measure inter-annotator "
         "agreement, and retrain — the pipeline here transfers unchanged, because "
         "nothing in it was tuned to the rule.", tone="warn"))
     flow.append(figure(m["figures"]["top_features_sentiment"],
-                       "Figure 10. Highest-weight word features per sentiment class. The model's "
+                       "Highest-weight word features per sentiment class. The model's "
                        "learned lexicon is inspectable, and it is the lexicon a human would "
                        "expect — which is the argument for a linear model on a corpus this "
                        "size."))
@@ -644,6 +672,7 @@ def limitations(m) -> list:
 
 
 def main():
+    reset_figures()
     m = json.loads((REPORTS / "metrics.json").read_text(encoding="utf-8"))
     s, t = m["tasks"]["sentiment"], m["tasks"]["topic"]
     flow = cover(

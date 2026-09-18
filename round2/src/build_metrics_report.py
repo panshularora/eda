@@ -15,7 +15,7 @@ from reportlab.platypus import PageBreak, Spacer
 from config import CV_FOLDS, REPORTS, SEED, SUBMISSION, TASKS
 from report_style import (
     CONTENT_W, S, bullets, build, callout, cover, figure, h1, h2, h3,
-    metric_cards, p, table,
+    metric_cards, p, reset_figures, table,
 )
 
 PRETTY = {"sentiment": "Task A — Sentiment", "topic": "Task B — Topic"}
@@ -68,10 +68,10 @@ def section_protocol(m) -> list:
         f"(+{f4(m['tasks']['topic']['leakage']['inflation'])}). That gap is duplicate "
         "memorisation, not skill. Every figure in this report uses the grouped split."))
     flow.append(figure(m["figures"]["split_leakage"],
-                       "Figure 1. The same pipeline scored two ways. The orange bars are what a "
+                       "The same pipeline scored two ways. The orange bars are what a "
                        "duplicate-blind evaluation would have reported."))
     flow.append(figure(m["figures"]["class_distribution"],
-                       "Figure 2. Class balance for both targets. Sentiment is balanced by "
+                       "Class balance for both targets. Sentiment is balanced by "
                        "construction; topic is not, which is why macro-F1 leads the reporting."))
     return flow
 
@@ -86,7 +86,7 @@ def section_selection(m) -> list:
         "a column therefore answers “what did this choice buy?” rather than just "
         "“which number is biggest?”"))
     flow.append(figure(m["figures"]["model_comparison"],
-                       "Figure 3. Grouped 5-fold CV macro-F1 for every candidate, with "
+                       "Grouped 5-fold CV macro-F1 for every candidate, with "
                        "fold-to-fold standard deviation as error bars."))
     for task in TASKS:
         t = pd.read_csv(REPORTS / f"model_comparison_{task}.csv")
@@ -103,7 +103,7 @@ def section_selection(m) -> list:
     return flow
 
 
-def section_task(m, task: str, fig_no: int) -> list:
+def section_task(m, task: str) -> list:
     b = m["tasks"][task]
     flow = [PageBreak()]
     flow += h1(f"{PRETTY[task]} — held-out results", 3 if task == "sentiment" else 4)
@@ -118,21 +118,27 @@ def section_task(m, task: str, fig_no: int) -> list:
         cards.append((f4(b["roc_auc_ovr_macro"]), "ROC-AUC (OvR)"))
     flow.append(metric_cards(cards))
 
-    n_classes = len(b["labels"])
-    chance = 1.0 / n_classes
+    comparison = pd.read_csv(REPORTS / f"model_comparison_{task}.csv")
+    floor = float(comparison[comparison.model.str.startswith("baseline")].iloc[0]["cv_f1_macro"])
+    permuted = b["leakage"]["permuted_labels_f1_macro"]
     flow.append(table([
-        ["Metric", "Held-out", f"{CV_FOLDS}-fold CV", "Chance floor", "Reading"],
+        ["Metric", "Held-out", f"{CV_FOLDS}-fold CV", "Floor", "Reading"],
         ["macro-F1", f4(b["macro_f1"]),
          f"{f4(b['cv']['f1_macro'])} ± {b['cv']['f1_macro_std']:.3f}",
-         f4(chance if task == "sentiment" else 0.2331),
+         f4(floor),
          "held-out sits inside the CV band, so selection did not overfit"],
-        ["accuracy", f4(b["accuracy"]), f4(b["cv"]["f1_macro"]), f4(chance), ""],
-        ["weighted-F1", f4(b["weighted_f1"]), "—", "—", ""],
+        ["accuracy", f4(b["accuracy"]), "—",
+         f4(max(pc["support"] for pc in b["per_class"].values()) / b["n"]),
+         "floor here is the majority class, not chance"],
+        ["weighted-F1", f4(b["weighted_f1"]), "—", "—",
+         "support-weighted; flattered by class skew"],
         ["Cohen's kappa", f4(b["cohen_kappa"]), "—", "0.0000",
-         "agreement above chance"],
+         "agreement corrected for chance"],
         ["MCC", f4(b["matthews_corrcoef"]), "—", "0.0000",
          "correlation between prediction and truth"],
-    ], widths=[24 * mm, 20 * mm, 27 * mm, 21 * mm, CONTENT_W - 92 * mm]))
+        ["macro-F1, shuffled labels", "—", f4(permuted), f4(floor),
+         "permutation check: the protocol itself leaks nothing"],
+    ], widths=[30 * mm, 20 * mm, 27 * mm, 16 * mm, CONTENT_W - 93 * mm]))
     flow.append(Spacer(1, 7))
 
     flow.append(h2("Per-class breakdown"))
@@ -150,7 +156,7 @@ def section_task(m, task: str, fig_no: int) -> list:
 
     flow.append(h2("Confusion matrix"))
     flow.append(figure(m["figures"][f"confusion_{task}"],
-                       f"Figure {fig_no}. Counts on the left, row-normalised on the right; "
+                       f"Counts on the left, row-normalised on the right; "
                        "the diagonal of the right-hand panel is per-class recall."))
     pairs = pd.read_csv(REPORTS / f"confusion_pairs_{task}.csv")
     rows = [["Actual", "Predicted as", "Posts", "Share of that class"]]
@@ -184,10 +190,10 @@ def section_calibration(m) -> list:
                                     CONTENT_W - 120 * mm]))
     flow.append(Spacer(1, 6))
     flow.append(figure(m["figures"]["reliability_sentiment"],
-                       "Figure 8. Sentiment reliability. Points below the diagonal mean the "
+                       "Sentiment reliability. Points below the diagonal mean the "
                        "model claims more certainty than it earns.", width=CONTENT_W * 0.62))
     flow.append(figure(m["figures"]["reliability_topic"],
-                       "Figure 9. Topic reliability.", width=CONTENT_W * 0.62))
+                       "Topic reliability.", width=CONTENT_W * 0.62))
     flow.append(PageBreak())
     flow.append(h2("Learning curves"))
     flow.append(p(
@@ -206,9 +212,9 @@ def section_calibration(m) -> list:
                                     CONTENT_W - 110 * mm]))
     flow.append(Spacer(1, 5))
     flow.append(figure(m["figures"]["learning_curve_sentiment"],
-                       "Figure 10. Sentiment learning curve.", width=CONTENT_W * 0.60))
+                       "Sentiment learning curve.", width=CONTENT_W * 0.60))
     flow.append(figure(m["figures"]["learning_curve_topic"],
-                       "Figure 11. Topic learning curve.", width=CONTENT_W * 0.60))
+                       "Topic learning curve.", width=CONTENT_W * 0.60))
     return flow
 
 
@@ -221,9 +227,9 @@ def section_errors(m) -> list:
         "third is the one that matters operationally — a wrong-but-hesitant prediction "
         "can be routed to a human, a wrong-and-certain one cannot."))
     flow.append(figure(m["figures"]["error_profile_sentiment"],
-                       "Figure 12. Sentiment errors by length, surface cue and confidence."))
+                       "Sentiment errors by length, surface cue and confidence."))
     flow.append(figure(m["figures"]["error_profile_topic"],
-                       "Figure 13. Topic errors by length, surface cue and confidence."))
+                       "Topic errors by length, surface cue and confidence."))
     for task in TASKS:
         b = m["tasks"][task]
         flow.append(h2(f"{PRETTY[task]} — highest-confidence mistakes"))
@@ -274,7 +280,7 @@ def section_topic_rule(m) -> list:
         "whose trigger appears in fewer than 60 posts carry "
         f"{pct(rd['error_rate_rare_trigger'])} of the error."))
     flow.append(figure(m["figures"]["topic_rule_gap"],
-                       "Figure 14. Left: topic error rate by how common the deciding trigger is. "
+                       "Left: topic error rate by how common the deciding trigger is. "
                        "Right: the learned model against the recovered rule."))
     flow.append(p(
         "This is reported rather than exploited. Submitting the rule would score 1.000 "
@@ -312,6 +318,7 @@ def section_repro(m) -> list:
 
 
 def main():
+    reset_figures()
     m = json.loads((REPORTS / "metrics.json").read_text(encoding="utf-8"))
     s, t = m["tasks"]["sentiment"], m["tasks"]["topic"]
     flow = cover(
@@ -342,12 +349,12 @@ def main():
         "reported with that context attached rather than as evidence of topical "
         "understanding."))
     flow.append(figure(m["figures"]["per_class"],
-                       "Figure 0. Per-class precision, recall and F1 on the held-out slice "
+                       "Per-class precision, recall and F1 on the held-out slice "
                        "for both tasks."))
     flow += section_protocol(m)
     flow += section_selection(m)
-    flow += section_task(m, "sentiment", 4)
-    flow += section_task(m, "topic", 6)
+    flow += section_task(m, "sentiment")
+    flow += section_task(m, "topic")
     flow += section_calibration(m)
     flow += section_errors(m)
     flow += section_topic_rule(m)
