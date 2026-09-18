@@ -24,9 +24,15 @@ how the author feels and what the post is about.
 
 | | Sentiment (3 classes) | Topic (4 classes) |
 |---|---|---|
-| Selected model | word + char 3-5gram + surface → LinearSVC | char 2-3gram → LinearSVC |
-| Grouped 5-fold CV macro-F1 | see `reports/model_comparison_sentiment.csv` | see `reports/model_comparison_topic.csv` |
-| Held-out macro-F1 | see `reports/metrics.json` | see `reports/metrics.json` |
+| Selected model | word + char 2-4gram + surface + LinearSVC | char 2-3gram + LinearSVC |
+| Grouped 5-fold CV macro-F1 | 0.6274 ± 0.012 | 0.9171 ± 0.018 |
+| **Held-out macro-F1** | **0.6268** | **0.9426** |
+| Held-out accuracy | 0.6272 | 0.9859 |
+| Cohen's kappa · MCC | 0.4408 · 0.4409 | 0.9430 · 0.9434 |
+| ROC-AUC (one-vs-rest) | 0.8038 | 0.9963 |
+| Stratified-guess floor | 0.3369 | 0.2646 |
+| Shuffled-label control | 0.3342 | 0.2482 |
+| Score a row-level split would fake | +0.0497 | +0.0034 |
 
 Every number in both PDFs is read from `reports/metrics.json`, which is written by
 `src/evaluate.py`. Nothing in the reports is typed by hand.
@@ -52,8 +58,9 @@ else:
 
 Reproduce it with `python round2/src/audit_labels.py`.
 
-Because it matches **substrings** rather than words, roughly one post in eight gets a
-topic from a trigger buried in an unrelated word:
+13.9% of posts get a non-default topic from a trigger, and because it
+matches **substrings** rather than words, **76% of those triggers are buried inside an
+unrelated word** — about one post in ten, carrying a topic a human would call wrong:
 
 | Post | Trigger | Assigned topic |
 |---|---|---|

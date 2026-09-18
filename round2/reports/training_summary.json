@@ -1,12 +1,12 @@
 {
   "sentiment": {
-    "selected": "word + char 3-5gram + surface + LinearSVC",
-    "cv_f1_macro": 0.6227255714050116,
+    "selected": "word + char 2-4gram + surface + LinearSVC",
+    "cv_f1_macro": 0.6274325473120517,
     "leakage": {
-      "grouped_by_text_f1_macro": 0.6227255714050116,
-      "random_row_split_f1_macro": 0.6789746438386042,
-      "inflation": 0.05624907243359256,
-      "permuted_labels_f1_macro": 0.33659782757821316
+      "grouped_by_text_f1_macro": 0.6274325473120517,
+      "random_row_split_f1_macro": 0.6771678401361785,
+      "inflation": 0.04973529282412681,
+      "permuted_labels_f1_macro": 0.3342235014458091
     }
   },
   "topic": {

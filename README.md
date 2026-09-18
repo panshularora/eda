@@ -14,7 +14,8 @@ it is in [`round2/`](round2/README.md).
 Two supervised tasks over 9,000 labelled social posts: sentiment (3 classes) and topic
 (4 classes). TF-IDF word + character + surface features into regularised linear
 classifiers, selected under grouped cross-validation that never splits a duplicated
-post across folds.
+post across folds. Held-out macro-F1 **0.6268** on sentiment (κ 0.441, against a
+0.3369 stratified-guess floor) and **0.9426** on topic.
 
 | Deliverable (form) | File |
 |---|---|

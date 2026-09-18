@@ -1,7 +1,7 @@
 actual,predicted,n,share_of_actual
-Neutral,Negative,157,0.26610169491525426
-Positive,Neutral,150,0.24916943521594684
-Negative,Neutral,122,0.20435510887772193
-Neutral,Positive,110,0.1864406779661017
-Positive,Negative,65,0.1079734219269103
-Negative,Positive,64,0.10720268006700168
+Neutral,Negative,151,0.2559322033898305
+Positive,Neutral,146,0.2425249169435216
+Negative,Neutral,124,0.20770519262981574
+Neutral,Positive,116,0.19661016949152543
+Negative,Positive,67,0.11222780569514237
+Positive,Negative,63,0.10465116279069768

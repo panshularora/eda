@@ -94,48 +94,48 @@
   "tasks": {
     "sentiment": {
       "n": 1789,
-      "accuracy": 0.626607043040805,
-      "macro_precision": 0.6273286048585742,
-      "macro_recall": 0.6262523270103544,
-      "macro_f1": 0.6263201895381928,
-      "weighted_f1": 0.6267473598319975,
-      "cohen_kappa": 0.4399544859802572,
-      "matthews_corrcoef": 0.44026425537476904,
+      "accuracy": 0.6271660145332588,
+      "macro_precision": 0.627272801108512,
+      "macro_recall": 0.6267828496864888,
+      "macro_f1": 0.6268387915714881,
+      "weighted_f1": 0.6272677213446339,
+      "cohen_kappa": 0.4407695527001878,
+      "matthews_corrcoef": 0.440894986146718,
       "per_class": {
         "Negative": {
-          "precision": 0.6492890995260664,
-          "recall": 0.6884422110552764,
-          "f1": 0.6682926829268293,
+          "precision": 0.6548387096774193,
+          "recall": 0.6800670016750419,
+          "f1": 0.6672144617912901,
           "support": 597
         },
         "Neutral": {
-          "precision": 0.5428571428571428,
+          "precision": 0.5446880269814502,
           "recall": 0.5474576271186441,
-          "f1": 0.5451476793248945,
+          "f1": 0.5460693153000845,
           "support": 590
         },
         "Positive": {
-          "precision": 0.6898395721925134,
-          "recall": 0.6428571428571429,
-          "f1": 0.6655202063628547,
+          "precision": 0.6822916666666666,
+          "recall": 0.6528239202657807,
+          "f1": 0.66723259762309,
           "support": 602
         }
       },
       "confusion_matrix": [
         [
-          411,
-          122,
-          64
+          406,
+          124,
+          67
         ],
         [
-          157,
+          151,
           323,
-          110
+          116
         ],
         [
-          65,
-          150,
-          387
+          63,
+          146,
+          393
         ]
       ],
       "labels": [
@@ -143,56 +143,56 @@
         "Neutral",
         "Positive"
       ],
-      "roc_auc_ovr_macro": 0.8045813923156823,
-      "selected_model": "word + char 3-5gram + surface + LinearSVC",
+      "roc_auc_ovr_macro": 0.803811261339949,
+      "selected_model": "word + char 2-4gram + surface + LinearSVC",
       "cv": {
-        "f1_macro": 0.6227255714050116,
-        "f1_macro_std": 0.0124583889069027,
+        "f1_macro": 0.6274325473120517,
+        "f1_macro_std": 0.0124689128986799,
         "folds": 5
       },
       "leakage": {
-        "grouped_by_text_f1_macro": 0.6227255714050116,
-        "random_row_split_f1_macro": 0.6789746438386042,
-        "inflation": 0.05624907243359256,
-        "permuted_labels_f1_macro": 0.33659782757821316
+        "grouped_by_text_f1_macro": 0.6274325473120517,
+        "random_row_split_f1_macro": 0.6771678401361785,
+        "inflation": 0.04973529282412681,
+        "permuted_labels_f1_macro": 0.3342235014458091
       },
-      "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.65      0.69      0.67       597\n     Neutral       0.54      0.55      0.55       590\n    Positive       0.69      0.64      0.67       602\n\n    accuracy                           0.63      1789\n   macro avg       0.63      0.63      0.63      1789\nweighted avg       0.63      0.63      0.63      1789\n",
+      "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.65      0.68      0.67       597\n     Neutral       0.54      0.55      0.55       590\n    Positive       0.68      0.65      0.67       602\n\n    accuracy                           0.63      1789\n   macro avg       0.63      0.63      0.63      1789\nweighted avg       0.63      0.63      0.63      1789\n",
       "error_profile": {
         "error_rate_by_length": {
-          "0-12": 0.3770491803278688,
-          "12-16": 0.31343283582089554,
-          "16-20": 0.40376569037656906,
-          "20-24": 0.36398467432950193,
-          "24-40": 0.38847117794486213
+          "0-12": 0.3524590163934426,
+          "12-16": 0.332089552238806,
+          "16-20": 0.3912133891213389,
+          "20-24": 0.3544061302681992,
+          "24-40": 0.40852130325814534
         },
         "error_rate_by_cue": {
           "emoticon": {
             "present": 0.16417910447761194,
-            "absent": 0.38153310104529614
+            "absent": 0.38095238095238093
           },
           "negation": {
-            "present": 0.41292134831460675,
-            "absent": 0.36357292393579904
+            "present": 0.4297752808988764,
+            "absent": 0.3586880669923238
           },
           "hashtag": {
-            "present": 0.3103448275862069,
-            "absent": 0.3855903935957305
+            "present": 0.3137931034482759,
+            "absent": 0.3842561707805203
           },
           "@mention": {
-            "present": 0.36706349206349204,
+            "present": 0.36507936507936506,
             "absent": 0.37587548638132295
           },
           "ALL CAPS": {
-            "present": 0.3526570048309179,
-            "absent": 0.37963636363636366
+            "present": 0.3695652173913043,
+            "absent": 0.3738181818181818
           }
         },
-        "mean_conf_correct": 0.6839872524052181,
-        "mean_conf_wrong": 0.5933418448258795,
-        "share_of_errors_above_0_8_conf": 0.05239520958083832
+        "mean_conf_correct": 0.6837765777319309,
+        "mean_conf_wrong": 0.5938980424796635,
+        "share_of_errors_above_0_8_conf": 0.05847076461769116
       },
       "calibration": {
-        "expected_calibration_error": 0.033718023728449106,
+        "expected_calibration_error": 0.03725353521155234,
         "bins": 8
       },
       "learning_curve": {
@@ -205,147 +205,147 @@
           5766
         ],
         "train_f1_macro": [
-          0.9631121234515992,
-          0.9483299170642179,
-          0.9395765425226376,
-          0.9329230085537386,
-          0.9307038059312951,
-          0.9289149925642703
+          0.9560860412148637,
+          0.939303358082792,
+          0.9303719152960946,
+          0.9261580150721681,
+          0.9217064703412582,
+          0.9215456579381337
         ],
         "val_f1_macro": [
-          0.543523461118884,
-          0.5690244178943764,
-          0.5916717445832237,
-          0.6054943053047286,
-          0.6181556465558408,
-          0.6238905501011285
+          0.5410991356637205,
+          0.5710156392513759,
+          0.5925017715237504,
+          0.6042033339577497,
+          0.6172604022058717,
+          0.6275611491172087
         ],
-        "final_gap": 0.30502444246314186
+        "final_gap": 0.293984508820925
       },
       "top_confusions": [
         {
           "actual": "Neutral",
           "predicted": "Negative",
-          "n": 157,
-          "share_of_actual": 0.26610169491525426
+          "n": 151,
+          "share_of_actual": 0.2559322033898305
         },
         {
           "actual": "Positive",
           "predicted": "Neutral",
-          "n": 150,
-          "share_of_actual": 0.24916943521594684
+          "n": 146,
+          "share_of_actual": 0.2425249169435216
         },
         {
           "actual": "Negative",
           "predicted": "Neutral",
-          "n": 122,
-          "share_of_actual": 0.20435510887772193
+          "n": 124,
+          "share_of_actual": 0.20770519262981574
         },
         {
           "actual": "Neutral",
           "predicted": "Positive",
-          "n": 110,
-          "share_of_actual": 0.1864406779661017
+          "n": 116,
+          "share_of_actual": 0.19661016949152543
         }
       ],
       "worst_errors": [
+        {
+          "text_id": "TXT_06753",
+          "post_text": "Hot Mess Monday! I'm feeling it! #runninglate #crazyday #blah #happymonday #lovemylife",
+          "actual": "Negative",
+          "predicted": "Positive",
+          "confidence": 0.924
+        },
         {
           "text_id": "TXT_06993",
           "post_text": "\"If it weren't for Christians, the Aztecs would never have stopped killing babies (like Planned Parenthood does.)",
           "actual": "Neutral",
           "predicted": "Negative",
-          "confidence": 0.912
+          "confidence": 0.905
         },
         {
           "text_id": "TXT_03063",
           "post_text": "Josh Hamilton hit a two run homer in 2011 WS in the 10th with a sports hernia. If anyone with any decent fielding skills catches the ball...",
           "actual": "Positive",
           "predicted": "Neutral",
-          "confidence": 0.91
-        },
-        {
-          "text_id": "TXT_06753",
-          "post_text": "Hot Mess Monday! I'm feeling it! #runninglate #crazyday #blah #happymonday #lovemylife",
-          "actual": "Negative",
-          "predicted": "Positive",
-          "confidence": 0.906
+          "confidence": 0.898
         },
         {
           "text_id": "TXT_00557",
           "post_text": "In rugby news\\u002c @user are winning 26-5 at Cobham\\u002c with the four-try bonus point in the bag. See The Monday Gazette for a full report.",
           "actual": "Positive",
           "predicted": "Neutral",
-          "confidence": 0.882
+          "confidence": 0.88
         },
         {
           "text_id": "TXT_00322",
           "post_text": "\"Should've went to watch Paper Towns first, I'll just go see it tomorrow\"",
           "actual": "Neutral",
           "predicted": "Positive",
-          "confidence": 0.879
-        },
-        {
-          "text_id": "TXT_08196",
-          "post_text": "When Kanye West told George Bush that Black Lives Matter...As much as I may not like him. It was the TRUTH!",
-          "actual": "Neutral",
-          "predicted": "Negative",
-          "confidence": 0.869
-        },
-        {
-          "text_id": "TXT_01236",
-          "post_text": "Kerry hopeful Israeli-Palestinian talks can be relaunched: US Secretary of State John Kerry said Wednesday he ...",
-          "actual": "Positive",
-          "predicted": "Neutral",
-          "confidence": 0.863
-        },
-        {
-          "text_id": "TXT_05848",
-          "post_text": "Kerry hopeful Israeli-Palestinian talks can be relaunched: US Secretary of State John Kerry said Wednesday he ...",
-          "actual": "Positive",
-          "predicted": "Neutral",
-          "confidence": 0.863
-        },
-        {
-          "text_id": "TXT_04972",
-          "post_text": "@user @user CAITLYN Jenner may have saved/helped mils of trans people around the globe.why can't you just be happy for her?",
-          "actual": "Neutral",
-          "predicted": "Negative",
-          "confidence": 0.862
+          "confidence": 0.878
         },
         {
           "text_id": "TXT_01979",
           "post_text": "June 7-8 Red Sox at Giants. Who's down to go and boo from the 3rd baseline?",
           "actual": "Negative",
           "predicted": "Neutral",
+          "confidence": 0.87
+        },
+        {
+          "text_id": "TXT_08196",
+          "post_text": "When Kanye West told George Bush that Black Lives Matter...As much as I may not like him. It was the TRUTH!",
+          "actual": "Neutral",
+          "predicted": "Negative",
+          "confidence": 0.866
+        },
+        {
+          "text_id": "TXT_05848",
+          "post_text": "Kerry hopeful Israeli-Palestinian talks can be relaunched: US Secretary of State John Kerry said Wednesday he ...",
+          "actual": "Positive",
+          "predicted": "Neutral",
+          "confidence": 0.864
+        },
+        {
+          "text_id": "TXT_01236",
+          "post_text": "Kerry hopeful Israeli-Palestinian talks can be relaunched: US Secretary of State John Kerry said Wednesday he ...",
+          "actual": "Positive",
+          "predicted": "Neutral",
+          "confidence": 0.864
+        },
+        {
+          "text_id": "TXT_04972",
+          "post_text": "@user @user CAITLYN Jenner may have saved/helped mils of trans people around the globe.why can't you just be happy for her?",
+          "actual": "Neutral",
+          "predicted": "Negative",
           "confidence": 0.861
         },
         {
-          "text_id": "TXT_05413",
-          "post_text": "2103: 'We don't need governments to make peace': Israel gets unofficial Iranian ... - The Guardian (blog)",
-          "actual": "Neutral",
+          "text_id": "TXT_08048",
+          "post_text": "Transgender is a difficult subject but it has been timed well with the Caitlyn Jenner thing so that may give it some appeal.",
+          "actual": "Positive",
           "predicted": "Negative",
-          "confidence": 0.858
+          "confidence": 0.85
         },
         {
-          "text_id": "TXT_01591",
-          "post_text": "\"Was going to play DA but man I'm so fucking tired I may just go the fuck to bed. But Twilight is up to 22k, yay ^_^\"",
-          "actual": "Neutral",
-          "predicted": "Negative",
-          "confidence": 0.856
+          "text_id": "TXT_05708",
+          "post_text": "@user is this one of your little jokes like Elvis playing at the Marquee  next Tuesday?",
+          "actual": "Negative",
+          "predicted": "Neutral",
+          "confidence": 0.848
+        },
+        {
+          "text_id": "TXT_07953",
+          "post_text": "LIVE: Sunderland v Newcastle: It may not have the glamour of El Clasico or the title implications of the Manches...",
+          "actual": "Negative",
+          "predicted": "Neutral",
+          "confidence": 0.848
         },
         {
           "text_id": "TXT_08172",
           "post_text": "\"in 8th grade, i was dead ready to fight niggas for saying Frank Ocean was gay bc like....he's bi. n apparently people can't get it through\"",
           "actual": "Neutral",
           "predicted": "Negative",
-          "confidence": 0.85
-        },
-        {
-          "text_id": "TXT_00621",
-          "post_text": "David Wright grounds out in the 9th. Was 2-for-5 today.",
-          "actual": "Negative",
-          "predicted": "Neutral",
-          "confidence": 0.849
+          "confidence": 0.841
         }
       ]
     },
