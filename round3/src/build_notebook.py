@@ -207,20 +207,51 @@ display(Image(str(REPORTS / "figures" / "fig01_timeline.png")))"""),
 
         MD("""## 6. Sentiment over time — shifts
 
-Shifts are **not eyeballed off the chart**. At every candidate day we compare
-the individual sentiment scores in the 3 days before against the 3 days after
-with Welch's t-test, require at least 60 records on each side, and correct every
-p-value across the whole 45-day scan with Benjamini–Hochberg.
+Shifts are **not eyeballed off the chart**, and getting this right took two
+attempts — the first one is worth reporting because the failure was
+instructive.
 
-That correction matters: scanning 45 days at α=0.05 expects false positives by
-construction. What survives is a shift we can defend."""),
+**What we tried first.** Test every candidate day with Welch's t-test and
+correct with Benjamini–Hochberg. That scan generated ~1,800 tests across every
+scope, metric and window width, and **nothing survived the correction.** We
+report that below rather than hiding it.
 
-        CODE("""shifts = analysis["sentiment_shifts"]
-print(f"{len(shifts)} shifts significant after FDR correction\\n")
-sh = pd.DataFrame(shifts)[["scope","date","direction","mean_before","mean_after",
-                           "delta","cohens_d","n_before","n_after","p_value"]]
-sh["p_value"] = sh["p_value"].map(lambda p: f"{p:.2e}")
-sh.head(12)"""),
+**Why it failed.** "When did the level change?" is one question, and turning it
+into 1,800 significance questions is the wrong framing. An honest multiplicity
+correction over that many tests then rejects everything — which is a property of
+asking the question badly, not of the series being flat.
+
+**What we use instead.** PELT change-point detection (L2 cost, BIC-scaled
+penalty) asks the segmentation question directly: find the partition of the
+series that best trades fit against the number of breaks. The penalty is what
+stops it finding a break everywhere.
+
+Two instruments are run independently: the **Round 2 model's sentiment** (what
+the rulebook requires us to apply) and the **reviewer's own star rating** (finer
+grained, and not produced by any model of ours). A break that appears in both is
+corroborated rather than resting on the one model whose domain transfer we
+already measured as imperfect."""),
+
+        CODE("""meta = analysis["shift_method"]
+scan = analysis["shift_scan"]
+print("primary   :", meta["primary"])
+print("instruments:", ", ".join(meta["instruments"]))
+print()
+print(f"conservative day-by-day scan: {scan['candidates_tested']:,} tests, "
+      f"{scan['significant_after_fdr']} survive pooled FDR<{scan['fdr_q']}")
+print()
+shifts = analysis["sentiment_shifts"]
+print(f"PELT change points with |Cohen's d| >= {meta['effect_size_floor']}: {len(shifts)}")
+sh = pd.DataFrame(shifts)[["date","scope","metric","direction","mean_before",
+                           "mean_after","cohens_d","welch_p_uncorrected"]]
+sh["welch_p_uncorrected"] = sh["welch_p_uncorrected"].map(
+    lambda v: f"{v:.2e}" if pd.notna(v) else "-")
+sh"""),
+
+        MD("""The `welch_p_uncorrected` column is exactly what its name says: it
+describes the size of a step PELT located, it does **not** certify that the step
+was discovered by a corrected test. Read it as an effect-size sanity check, not
+as a licence."""),
 
         MD("""## 7. Trigger explanations
 

@@ -187,9 +187,17 @@ def main() -> dict:
     full_gz = PROCESSED / "round3_delay_reactions_full.csv.gz"
     with open(full_csv, "rb") as fin, gzip.open(full_gz, "wb", compresslevel=9) as fout:
         fout.writelines(fin)
+    # Written in chunks: pandas' lines=True builds the entire JSON document as
+    # one Python string before splitting it, which exhausts memory at this row
+    # count. Streaming 5,000 rows at a time produces the identical file.
     full_json = PROCESSED / "round3_delay_reactions_full.json.gz"
     with gzip.open(full_json, "wt", encoding="utf-8", compresslevel=9) as fh:
-        df.to_json(fh, orient="records", date_format="iso", lines=True)
+        for start in range(0, len(df), 5000):
+            chunk = df.iloc[start:start + 5000]
+            if chunk.empty:
+                continue
+            block = chunk.to_json(orient="records", date_format="iso", lines=True)
+            fh.write(block if block.endswith("\n") else block + "\n")
     print(f"  full CSV   {full_csv.stat().st_size/1e6:6.1f} MB")
     print(f"  full CSV.gz{full_gz.stat().st_size/1e6:6.1f} MB")
 

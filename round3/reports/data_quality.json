@@ -1,41 +1,41 @@
 {
-  "rows": 76123,
-  "columns": 36,
-  "window_start_utc": "2026-08-06 08:39:18+00:00",
+  "rows": 76121,
+  "columns": 37,
+  "window_start_utc": "2026-08-06 08:44:11+00:00",
   "window_end_utc": "2026-09-20 08:20:59+00:00",
-  "span_days": 44.99,
+  "span_days": 44.98,
   "by_source": {
-    "google_play": 74015,
+    "google_play": 74013,
     "hackernews": 691,
     "news": 619,
     "mastodon": 523,
     "reddit": 275
   },
   "by_delay_domain": {
-    "ecommerce": 25608,
-    "food_delivery": 18857,
-    "quick_commerce": 10753,
+    "ecommerce": 25623,
+    "food_delivery": 18878,
+    "quick_commerce": 10759,
     "ride_hailing": 7963,
-    "telecom_isp": 7106,
-    "airline": 2039,
-    "parcel_courier": 2026,
-    "": 1771
+    "telecom_isp": 7107,
+    "airline": 2042,
+    "parcel_courier": 2031,
+    "": 1718
   },
   "by_delay_type": {
-    "": 58691,
-    "unspecified_delay": 8680,
-    "late_delivery": 2552,
-    "cancelled": 1479,
-    "outage": 1289,
-    "never_arrived": 1269,
-    "long_wait": 829,
-    "support_delay": 604,
-    "missing_items": 440,
-    "refund_delay": 215,
-    "stuck_in_transit": 75
+    "": 59877,
+    "unspecified_delay": 5920,
+    "cancelled": 2936,
+    "late_delivery": 2429,
+    "never_arrived": 1749,
+    "outage": 1276,
+    "long_wait": 677,
+    "support_delay": 578,
+    "missing_items": 428,
+    "refund_delay": 180,
+    "stuck_in_transit": 71
   },
   "by_reaction_type": {
-    "neutral_report": 58821,
+    "neutral_report": 58819,
     "anger": 9189,
     "escalation": 4268,
     "churn_threat": 1721,
@@ -46,15 +46,15 @@
     "praise_recovery": 28
   },
   "by_sentiment": {
-    "Negative": 36233,
+    "Negative": 36232,
     "Positive": 24325,
-    "Neutral": 15565
+    "Neutral": 15564
   },
-  "delay_related_share": 0.2147576947834426,
-  "thin_text_share": 0.091050011166139,
+  "delay_related_share": 0.1997740439563327,
+  "thin_text_share": 0.09105240341035982,
   "duplicate_record_ids": 0,
-  "distinct_authors": 70184,
-  "distinct_brands": 462,
+  "distinct_authors": 70182,
+  "distinct_brands": 45,
   "completeness": {
     "record_id": 1.0,
     "source": 1.0,
@@ -73,6 +73,7 @@
     "text_length": 1.0,
     "word_count": 1.0,
     "author_pseudonym": 1.0,
+    "publisher": 0.0081,
     "rating": 0.9723,
     "engagement": 1.0,
     "engagement_kind": 1.0,
@@ -95,18 +96,20 @@
   },
   "files": {
     "full_csv": {
-      "rows": 76123,
-      "bytes": 49747876,
-      "sha256": "e983067d55f1b5fde393853ca375666c693fb6cd211b6e6ec3b29bffe84c9e46"
+      "rows": 76121,
+      "bytes": 49801457,
+      "sha256": "6408a9e66aa011c7f0269d1fc43e7837a439915cbd62b106a99c05385ecb428c"
     },
     "submission_csv": {
-      "rows": 8172,
-      "bytes": 7987694,
-      "sha256": "e62778bf2a9a22440184959182540a79bfef8f23caa82859c236125d428692ff",
-      "trimmed_to_fit": true
+      "rows": 14984,
+      "row_coverage_vs_full": 0.1968,
+      "bytes": 8526343,
+      "sha256": "b0a62e91db9fd6ba75c09ed24182aacff5ab4dc000ca8dcfe167a65df967a575",
+      "size_reduction": "rows dropped after byte reduction was exhausted",
+      "rows_dropped": true
     }
   },
   "topic": "Reaction to a Major Delivery or Service Delay",
   "window_days_requested": 45,
-  "built_utc": "2026-09-20T08:31:56+00:00"
+  "built_utc": "2026-09-20T08:44:39+00:00"
 }

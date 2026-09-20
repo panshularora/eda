@@ -1,8 +1,8 @@
 {
-  "n": 74015,
-  "accuracy": 0.6944673377018172,
-  "macro_f1": 0.5520336083016684,
-  "cohen_kappa": 0.4958231607492499,
+  "n": 74013,
+  "accuracy": 0.694472592652642,
+  "macro_f1": 0.5520380467205249,
+  "cohen_kappa": 0.49582934161369796,
   "labels": [
     "Negative",
     "Neutral",
@@ -10,7 +10,7 @@
   ],
   "confusion_matrix": [
     [
-      29059,
+      29058,
       6750,
       2034
     ],
@@ -21,27 +21,27 @@
     ],
     [
       3931,
-      7380,
+      7379,
       21383
     ]
   ],
-  "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.83      0.77      0.80     37843\n     Neutral       0.06      0.28      0.10      3478\n    Positive       0.89      0.65      0.75     32694\n\n    accuracy                           0.69     74015\n   macro avg       0.60      0.57      0.55     74015\nweighted avg       0.82      0.69      0.75     74015\n",
+  "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.83      0.77      0.80     37842\n     Neutral       0.06      0.28      0.10      3478\n    Positive       0.89      0.65      0.75     32693\n\n    accuracy                           0.69     74013\n   macro avg       0.60      0.57      0.55     74013\nweighted avg       0.82      0.69      0.75     74013\n",
   "star_distribution": {
-    "1": 34158,
+    "1": 34157,
     "2": 3685,
     "3": 3478,
     "4": 4401,
-    "5": 28293
+    "5": 28292
   },
   "predicted_distribution": {
-    "Negative": 34841,
+    "Negative": 34840,
     "Positive": 24085,
-    "Neutral": 15089
+    "Neutral": 15088
   },
   "polarity_only": {
-    "n": 56407,
-    "accuracy": 0.8942507135639194,
-    "cohen_kappa": 0.7847589438992107
+    "n": 56406,
+    "accuracy": 0.8942488387760167,
+    "cohen_kappa": 0.784756049827142
   },
   "per_domain": {
     "quick_commerce": {
@@ -51,10 +51,10 @@
       "negative_recall": 0.759018456375839
     },
     "food_delivery": {
-      "n": 18750,
-      "accuracy": 0.69712,
-      "macro_f1": 0.5551519526054102,
-      "negative_recall": 0.7709729168632632
+      "n": 18748,
+      "accuracy": 0.6971410283763602,
+      "macro_f1": 0.5551735302343985,
+      "negative_recall": 0.7709513023782559
     },
     "ecommerce": {
       "n": 25506,
@@ -90,13 +90,13 @@
   "confidence_bands": [
     {
       "band": "0.0-0.5",
-      "n": 9608,
-      "accuracy": 0.40268526228143214
+      "n": 9607,
+      "accuracy": 0.40262308733215363
     },
     {
       "band": "0.5-0.6",
-      "n": 13295,
-      "accuracy": 0.48537044001504326
+      "n": 13294,
+      "accuracy": 0.48540695050398674
     },
     {
       "band": "0.6-0.7",
@@ -121,17 +121,17 @@
   ],
   "accuracy_at_conf_ge_0.6": {
     "n": 51112,
-    "coverage": 0.6905627237722083,
+    "coverage": 0.6905813843513977,
     "accuracy": 0.8037055877289091
   },
   "accuracy_at_conf_ge_0.7": {
     "n": 37108,
-    "coverage": 0.5013578328717152,
+    "coverage": 0.5013713807033899,
     "accuracy": 0.8780855880133663
   },
   "accuracy_at_conf_ge_0.8": {
     "n": 21324,
-    "coverage": 0.28810376275079375,
+    "coverage": 0.28811154797130234,
     "accuracy": 0.9367379478521853
   }
 }
