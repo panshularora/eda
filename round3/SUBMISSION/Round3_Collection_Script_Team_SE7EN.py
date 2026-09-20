@@ -32,6 +32,7 @@
 =============================================================================
 """
 
+from __future__ import annotations
 
 
 ##############################################################################
@@ -64,7 +65,6 @@ different results run to run and currently raises on apps with a null field, so
 a pinned, verified list is both reproducible and honest about what was sampled.
 Every ID in ``PLAY_APPS`` was verified to resolve before being added.
 """
-from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -340,7 +340,6 @@ honoured, so no collector can accidentally hammer a host:
 
 Nothing here is specific to the topic - it is infrastructure.
 """
-from __future__ import annotations
 
 import gzip
 import hashlib
@@ -525,7 +524,6 @@ at once:
 Reviews are pulled newest-first and paginated backwards until the per-app
 budget or the window edge is reached, whichever comes first.
 """
-from __future__ import annotations
 
 import time
 from datetime import datetime, timezone
@@ -653,7 +651,6 @@ So the dataset triangulates across four more genres:
 Each returns the same flat record shape as ``play_reviews`` so they can be
 concatenated without special-casing downstream.
 """
-from __future__ import annotations
 
 import html
 import re
@@ -883,7 +880,6 @@ The output is an incident table with a start time, which ``analyse.py`` joins
 against the reaction time series. When a sentiment shift sits next to an
 incident, we can say so with a citation instead of an adjective.
 """
-from __future__ import annotations
 
 import html
 import re
@@ -1065,7 +1061,6 @@ cheapest available defence against fooling ourselves, so it is worth one API.
 
 Daily granularity, 45-day window, one series per brand.
 """
-from __future__ import annotations
 
 import urllib.parse
 from datetime import datetime, timedelta, timezone
@@ -1135,7 +1130,6 @@ endpoints is only trustworthy if the reader can see which ones answered, which
 ones refused, how many requests we made and what we did about the refusals -
 so that is recorded per source and reproduced in the report.
 """
-from __future__ import annotations
 
 import json
 import sys

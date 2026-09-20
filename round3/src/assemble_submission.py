@@ -11,6 +11,7 @@ preserved as banners - so the judge reads everything that actually ran.
 """
 from __future__ import annotations
 
+import re
 import shutil
 from pathlib import Path
 
@@ -66,16 +67,30 @@ HEADER = f'''"""
 
 
 def build_collection_script() -> Path:
-    parts = [HEADER]
+    """Concatenate the collection package into one runnable script.
+
+    ``from __future__`` imports must be the first statement in a file, so every
+    module's copy is stripped out of the bodies and a single one is hoisted to
+    the top. Without this the concatenated file raises SyntaxError on the second
+    module - which is exactly what a judge would hit on first run, and is why
+    this function verifies the result compiles before returning it.
+    """
+    future = re.compile(r"^from __future__ import .*$\n?", re.M)
+
+    parts = [HEADER, "from __future__ import annotations\n"]
     for rel, desc in COLLECTION_MODULES:
         path = ROUND3 / rel
         if not path.exists():
             continue
+        body = future.sub("", path.read_text(encoding="utf-8"))
         bar = "#" * 78
         parts.append(f"\n\n{bar}\n# {rel}\n# {desc}\n{bar}\n\n")
-        parts.append(path.read_text(encoding="utf-8"))
+        parts.append(body)
+
     out = ROUND3 / "Round3_Collection_Script_Team_SE7EN.py"
-    out.write_text("".join(parts), encoding="utf-8")
+    source = "".join(parts)
+    compile(source, str(out), "exec")          # fail here, not on the judge's machine
+    out.write_text(source, encoding="utf-8")
     return out
 
 
