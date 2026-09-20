@@ -128,46 +128,85 @@ def data_dictionary(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _write_sized_csv(df: pd.DataFrame, path, budget_mb: float) -> tuple[int, bool, str]:
-    """Fit the upload budget by shedding *bytes*, never rows.
+# Columns that are exactly reconstructible from others. Dropping them from the
+# submission copy costs a reader one line of pandas and buys back a third of the
+# file, so they go first whenever the upload budget binds.
+DERIVABLE = ["full_text", "date", "hour_utc", "text_length", "word_count",
+             "sentiment_score_weighted", "collected_utc"]
 
-    The first version of this dropped rows until the file fit, and threw away
-    89% of the dataset to do it. That is the wrong trade: a structured dataset's
-    value is its coverage, and a reader can always re-read a truncated review
-    but cannot recover a row that was never shipped.
 
-    So the ladder below removes redundancy first - ``full_text`` is exactly
-    ``title`` + ``text`` and is reconstructible in one line - then caps the long
-    tail of review prose, and only drops rows if a 200-character cap somehow
-    still overflows. Whatever step was needed is returned and recorded, so the
-    published file is never quietly different from what the reader assumes.
+def _write_submission(df: pd.DataFrame, path, budget_mb: float) -> dict:
+    """Build the submitted dataset under the upload cap, deliberately.
+
+    76,000 rows carrying real review prose is ~50 MB of CSV. No amount of
+    column pruning fits that into 9.5 MB while leaving the text readable, so
+    something has to give and the choice should be made on what the dataset is
+    *for* rather than by a loop that truncates until the number goes green.
+
+    The assignment is "Reaction to a Major Delivery or Service Delay". The
+    delay-related rows are that dataset; the remaining rows are a comparison
+    baseline, valuable for measuring how delay reactions differ from ordinary
+    ones but not themselves the subject. So the submitted file is **every
+    delay-related row, with its text intact**, and the full corpus - baseline
+    included - ships in the repository as .csv.gz and .json.gz.
+
+    The ladder below still applies inside that choice, and whatever step was
+    needed is recorded so the published file is never quietly different from
+    what a reader assumes.
     """
-    def size_of(frame) -> float:
+    def write(frame) -> float:
         frame.to_csv(path, index=False, encoding="utf-8")
         return path.stat().st_size / 1e6
 
-    if size_of(df) <= budget_mb:
-        return len(df), False, "complete"
+    steps: list[str] = []
 
-    # 1. drop the redundant concatenation
-    slim = df.drop(columns=["full_text"], errors="ignore")
-    if size_of(slim) <= budget_mb:
-        return len(slim), False, "dropped full_text (= title + text)"
+    # 1. the on-topic dataset, complete
+    topic = df[df["is_delay_related"]].copy()
+    steps.append(f"delay-related rows only ({len(topic):,} of {len(df):,})")
+    size = write(topic)
+    if size <= budget_mb:
+        return {"rows": len(topic), "size_mb": round(size, 2),
+                "row_coverage_of_topic_subset": 1.0, "steps": steps,
+                "text_intact": True}
 
-    # 2. cap the prose, keeping every row
-    for cap in (800, 500, 350, 200):
+    # 2. shed reconstructible columns
+    slim = topic.drop(columns=[c for c in DERIVABLE if c in topic.columns])
+    steps.append("dropped reconstructible columns: " + ", ".join(DERIVABLE))
+    size = write(slim)
+    if size <= budget_mb:
+        return {"rows": len(slim), "size_mb": round(size, 2),
+                "row_coverage_of_topic_subset": 1.0, "steps": steps,
+                "text_intact": True}
+
+    # 3. shed the permalink (provenance survives via source + source_id)
+    if "url" in slim.columns:
+        slim = slim.drop(columns=["url"])
+        steps.append("dropped url (provenance preserved by source + source_id)")
+        size = write(slim)
+        if size <= budget_mb:
+            return {"rows": len(slim), "size_mb": round(size, 2),
+                    "row_coverage_of_topic_subset": 1.0, "steps": steps,
+                    "text_intact": True}
+
+    # 4. only now touch the text
+    for cap in (600, 400, 280):
         capped = slim.copy()
         capped["text"] = capped["text"].astype(str).str.slice(0, cap)
-        capped["text_truncated_at"] = cap
-        if size_of(capped) <= budget_mb:
-            return len(capped), False, f"dropped full_text; text capped at {cap} chars"
+        size = write(capped)
+        if size <= budget_mb:
+            steps.append(f"text capped at {cap} characters")
+            return {"rows": len(capped), "size_mb": round(size, 2),
+                    "row_coverage_of_topic_subset": 1.0, "steps": steps,
+                    "text_intact": False, "text_cap": cap}
 
-    # 3. last resort
-    capped = capped.sort_values(["is_delay_related", "engagement", "created_utc"],
-                                ascending=[False, False, False])
-    while size_of(capped) > budget_mb and len(capped) > 5000:
+    # 5. last resort, and it should never be reached
+    capped = capped.sort_values(["engagement", "created_utc"], ascending=False)
+    while write(capped) > budget_mb and len(capped) > 5000:
         capped = capped.head(int(len(capped) * 0.85))
-    return len(capped), True, "rows dropped after byte reduction was exhausted"
+    steps.append("rows dropped after byte reduction was exhausted")
+    return {"rows": len(capped), "size_mb": round(path.stat().st_size / 1e6, 2),
+            "row_coverage_of_topic_subset": round(len(capped) / max(len(topic), 1), 4),
+            "steps": steps, "text_intact": False}
 
 
 def main() -> dict:
@@ -212,9 +251,12 @@ def main() -> dict:
 
     # ---- submission copy, inside the upload budget ------------------------
     sub_csv = SUBMISSION / "Round3_Delay_Reactions_Dataset_Team_SE7EN.csv"
-    n_kept, rows_dropped, how = _write_sized_csv(df.copy(), sub_csv, SUBMISSION_BUDGET_MB)
-    print(f"  submission CSV {sub_csv.stat().st_size/1e6:.1f} MB, {n_kept:,} rows "
-          f"({n_kept/len(df):.0%} of full)  [{how}]")
+    sub = _write_submission(df.copy(), sub_csv, SUBMISSION_BUDGET_MB)
+    print(f"  submission CSV {sub['size_mb']:.1f} MB, {sub['rows']:,} rows "
+          f"= {sub['row_coverage_of_topic_subset']:.0%} of all delay-related rows, "
+          f"text {'intact' if sub['text_intact'] else 'capped'}")
+    for st in sub["steps"]:
+        print(f"      - {st}")
 
     # ---- dictionary + quality --------------------------------------------
     dd = data_dictionary(df)
@@ -224,12 +266,11 @@ def main() -> dict:
         "full_csv": {"rows": int(len(df)),
                      "bytes": full_csv.stat().st_size,
                      "sha256": sha256_file(full_csv)},
-        "submission_csv": {"rows": int(n_kept),
-                           "row_coverage_vs_full": round(n_kept / len(df), 4),
-                           "bytes": sub_csv.stat().st_size,
-                           "sha256": sha256_file(sub_csv),
-                           "size_reduction": how,
-                           "rows_dropped": rows_dropped},
+        "submission_csv": dict(sub, bytes=sub_csv.stat().st_size,
+                               sha256=sha256_file(sub_csv),
+                               scope="all delay-related reactions; the full corpus "
+                                     "including the non-delay comparison baseline is "
+                                     "published as round3_delay_reactions_full.csv.gz"),
     }
     qual["topic"] = TOPIC
     qual["window_days_requested"] = WINDOW_DAYS

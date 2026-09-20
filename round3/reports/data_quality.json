@@ -101,15 +101,20 @@
       "sha256": "6408a9e66aa011c7f0269d1fc43e7837a439915cbd62b106a99c05385ecb428c"
     },
     "submission_csv": {
-      "rows": 14984,
-      "row_coverage_vs_full": 0.1968,
-      "bytes": 8526343,
-      "sha256": "b0a62e91db9fd6ba75c09ed24182aacff5ab4dc000ca8dcfe167a65df967a575",
-      "size_reduction": "rows dropped after byte reduction was exhausted",
-      "rows_dropped": true
+      "rows": 15207,
+      "size_mb": 9.0,
+      "row_coverage_of_topic_subset": 1.0,
+      "steps": [
+        "delay-related rows only (15,207 of 76,121)",
+        "dropped reconstructible columns: full_text, date, hour_utc, text_length, word_count, sentiment_score_weighted, collected_utc"
+      ],
+      "text_intact": true,
+      "bytes": 9000635,
+      "sha256": "520ee02a27b55b4338d46fafe0eef3b5e3320219b53d1d2266346aae4aaabf5e",
+      "scope": "all delay-related reactions; the full corpus including the non-delay comparison baseline is published as round3_delay_reactions_full.csv.gz"
     }
   },
   "topic": "Reaction to a Major Delivery or Service Delay",
   "window_days_requested": 45,
-  "built_utc": "2026-09-20T08:44:39+00:00"
+  "built_utc": "2026-09-20T08:48:16+00:00"
 }

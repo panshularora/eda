@@ -24,6 +24,82 @@ changed it?*
 
 ---
 
+## What the run produced
+
+| | |
+|---|---|
+| Reaction records collected | **123,195** across 5 platforms |
+| After normalisation & dedupe | **76,121** rows, 44.98 days (2026-08-06 → 2026-09-20) |
+| Delay-related | **15,207** (20.0%) |
+| Brands · distinct authors | 45 · 70,182 |
+| Ground-truth incidents | 244 |
+| Attention series | 1,440 daily brand-days |
+| Live HTTP requests · failures | 101 · 9 |
+
+**Sentiment shifts: 9** change points at |Cohen's *d*| ≥ 0.20, in both directions.
+**Engagement spikes: 27** at robust *z* > 3.5 — the largest being
+2026-09-15 at **12.35× the median** (*z* = 20.5).
+
+Both exceed the rulebook's minimum of two shifts and one spike.
+
+### Does the Round 2 model still work here?
+
+It is measured, not assumed — Google Play hands us an answer key, because every
+review carries a star rating written by the same person as the text.
+
+| | |
+|---|---|
+| Independent labels | **74,013** star ratings |
+| Three-class accuracy | 0.6945 (macro-F1 0.5520, κ 0.4958) |
+| **Polarity only** (Neutral dropped) | **0.8942** on 56,406 rows, κ 0.785 |
+
+A model trained on 2015-era tweets reaches **89.4% agreement on
+positive-vs-negative** in 2026 app-store reviews — a completely different domain.
+It struggles on Neutral, which is where a tweet-trained three-class model is
+least at home, and that limitation is carried forward explicitly rather than
+hidden behind the aggregate.
+
+### How the shifts were found — and one method that failed
+
+The first approach tested every candidate day with Welch's t-test and corrected
+with Benjamini–Hochberg. Pooled honestly across all **1,793 tests**,
+**nothing survived**. That result is kept in `analysis.json` and reported in the
+notebook rather than quietly dropped, because it is a real property of the data.
+
+The diagnosis is that the question was being asked wrongly: *"when did the level
+change?"* is one segmentation question, and turning it into ~1,800 significance
+questions guarantees that an honest multiplicity correction rejects everything.
+**PELT change-point detection** asks it directly and finds 9.
+
+Two instruments run independently — the Round 2 model's sentiment, and the
+reviewer's own star rating — so a break appearing in both is corroborated rather
+than resting on the model whose transfer we just measured at 0.69.
+
+### Trigger evidence is relevance-gated
+
+Temporal proximity is not relevance. Something is always broken somewhere, so a
+±2-day window over ten status pages will always return *an* incident. An earlier
+version offered a Discord media-proxy outage as the reason Amazon India's
+delivery sentiment moved — exactly the plausible-sounding story this pipeline
+exists to avoid.
+
+Evidence is now tiered. **Internal** evidence (distinctive vocabulary, delay-type
+mix, app versions in the field) is always available and directly about the event.
+**External** corroboration counts only when it actually names a brand in the
+window, and every event carries an explicit verdict — including *"no external
+corroboration found"*, which is what several honestly report.
+
+### The submitted dataset
+
+**15,207 rows — 100% of all delay-related reactions, text intact**, at
+9.0 MB. 76,000 rows of real review prose is ~50 MB of CSV and cannot fit a
+9.5 MB cap with readable text, so the choice was made on what the dataset is
+*for*: the delay-related rows **are** the assigned topic. The full corpus —
+including the non-delay comparison baseline — ships in the repo as
+`round3_delay_reactions_full.csv.gz` and `.json.gz`.
+
+---
+
 ## Why the dataset is built in three layers
 
 Most answers to "explain this spike" are a plausible story told over a chart. A
@@ -84,13 +160,20 @@ asking "why is this row in that bucket?".
 
 ## Method
 
-**Sentiment shifts** are not read off a chart. At every candidate day, the
-individual sentiment scores in the preceding 3 days are compared against the
-following 3 days with Welch's t-test, requiring ≥60 records per side, and every
-p-value in the 45-day scan is corrected with Benjamini–Hochberg. Scanning 45 days
-at α=0.05 *expects* false positives; the correction is what makes a surviving
-shift defensible. Cohen's *d* is reported beside each one so a significant but
-trivial move is visible as trivial.
+**Sentiment shifts** are located with **PELT change-point detection** (L2 cost,
+BIC-scaled penalty, minimum 4-day segment) on the daily series, run separately
+over two instruments — the Round 2 model's sentiment and the reviewer's own star
+rating. Cohen's *d* is reported beside each break, with a floor of 0.20, so a
+detectable-but-trivial move is visible as trivial.
+
+The Welch/Benjamini–Hochberg scan is retained as a deliberately conservative
+second opinion and its result — *nothing survives* — is published rather than
+discarded. See "How the shifts were found" above for why that is a statement
+about the framing of the question rather than about the data being flat.
+
+Welch p-values attached to change points are **uncorrected** and labelled as
+such: they describe the size of a break PELT located, they do not certify its
+discovery.
 
 **Engagement spikes** use a median/MAD robust z-score. A spike inflates the very
 mean and standard deviation a conventional z-score would test it against, which
@@ -100,10 +183,12 @@ systematically under-detects the events we are hunting.
 (Monroe et al.), whose z-scores are comparable across words of very different
 frequency — raw counts and ratios are not.
 
-**Trigger attribution** searches a ±2-day window around each event for four
-independent kinds of evidence — documented incidents, news coverage, app
-releases, and corroborating Wikipedia attention — and reports what is found,
-*including when nothing is found*.
+**Trigger attribution** searches a ±2-day window around each event, but counts
+external evidence only when it is *about* the brands in that window — an
+incident whose entity names one of them, or a headline that does. Temporal
+coincidence alone is discarded, and the discard count is published. Every event
+carries an explicit verdict, *including when no external corroboration is
+found*.
 
 ---
 

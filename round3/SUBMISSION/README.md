@@ -8,9 +8,9 @@ Upload one file per Google Form slot, in this order.
 
 | # | Form slot | File | Size |
 |---|---|---|---|
-| 1 | Self-Collected Structured Dataset (CSV/JSON) | `Round3_Delay_Reactions_Dataset_Team_SE7EN.csv` | 8.53 MB |
+| 1 | Self-Collected Structured Dataset (CSV/JSON) | `Round3_Delay_Reactions_Dataset_Team_SE7EN.csv` | 9.00 MB |
 | 2 | Data Collection / Scraping Code (Python) | `Round3_Collection_Script_Team_SE7EN.py` | 0.05 MB |
-| 3 | Analysis Notebook | `Round3_Analysis_Notebook_Team_SE7EN.ipynb` | 0.83 MB |
+| 3 | Analysis Notebook | `Round3_Analysis_Notebook_Team_SE7EN.ipynb` | 0.82 MB |
 
 Companion material (not a form slot): `DATA_DICTIONARY.md`, `companion_incidents.csv`, `companion_attention.csv`.
 

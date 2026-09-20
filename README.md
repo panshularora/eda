@@ -3,9 +3,9 @@
 **Team SE7EN**: Tanmay Singh · Panshul Arora
 Data Vortex @ Aaruush '26, SRM Institute of Science & Technology
 
-Round 1 phase 1 restored the intake pipeline; phase 2 rebuilt the analytical core in
-MySQL. **Round 2 rebuilds the semantic comprehension layer with NLP** — everything for
-it is in [`round2/`](round2/README.md).
+Round 1 restored the intake pipeline and the analytical core in MySQL. **Round 2
+rebuilds the semantic comprehension layer with NLP** ([`round2/`](round2/README.md)).
+**Round 3 puts it to work on live data** ([`round3/`](round3/README.md)).
 
 ---
 
@@ -32,6 +32,30 @@ report it rather than submitting the rule for a free 1.000. Full write-up and
 reproduction: [`round2/README.md`](round2/README.md).
 
 Rebuild everything from the raw CSV with `python round2/run_round2.py`.
+
+---
+
+## Round 3 — live monitoring of delivery and service delays
+
+**Assigned topic:** *Reaction to a Major Delivery or Service Delay*
+
+123,195 reaction records collected live from 5 platforms over 45 days, plus 244
+documented incidents and an independent Wikipedia attention signal. The Round 2
+model is applied and then **measured** against 74,013 star ratings the reviewers
+wrote themselves: 89.4% agreement on polarity in a completely different domain.
+
+| Deliverable (form) | File |
+|---|---|
+| Self-collected dataset | [`round3/SUBMISSION/Round3_Delay_Reactions_Dataset_Team_SE7EN.csv`](round3/SUBMISSION/Round3_Delay_Reactions_Dataset_Team_SE7EN.csv) |
+| Collection / scraping code | [`round3/SUBMISSION/Round3_Collection_Script_Team_SE7EN.py`](round3/SUBMISSION/Round3_Collection_Script_Team_SE7EN.py) |
+| Analysis notebook | [`round3/SUBMISSION/Round3_Analysis_Notebook_Team_SE7EN.ipynb`](round3/SUBMISSION/Round3_Analysis_Notebook_Team_SE7EN.ipynb) |
+
+9 sentiment change points and 27 engagement spikes, the largest at 12.35x the
+median. Full write-up and reproduction: [`round3/README.md`](round3/README.md).
+
+```bash
+python round3/run_round3.py
+```
 
 ---
 
