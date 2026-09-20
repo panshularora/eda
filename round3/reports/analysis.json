@@ -1,0 +1,2453 @@
+{
+  "generated_utc": "2026-09-20T08:31:37.281996+00:00",
+  "n_records": 76123,
+  "n_delay_related": 16348,
+  "daily_overall": [
+    {
+      "date": "2026-08-06",
+      "n": 74,
+      "sentiment_mean": -0.6216216216216216,
+      "sentiment_weighted": -0.4580513513513514,
+      "negative_share": 0.7837837837837838,
+      "engagement_sum": 236,
+      "engagement_mean": 3.189189189189189,
+      "rating_mean": 1.8055555555555556,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-07",
+      "n": 168,
+      "sentiment_mean": -0.7857142857142857,
+      "sentiment_weighted": -0.6030785714285715,
+      "negative_share": 0.8690476190476191,
+      "engagement_sum": 356,
+      "engagement_mean": 2.119047619047619,
+      "rating_mean": 1.694267515923567,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-08",
+      "n": 184,
+      "sentiment_mean": -0.6739130434782609,
+      "sentiment_weighted": -0.5037521739130435,
+      "negative_share": 0.8043478260869565,
+      "engagement_sum": 355,
+      "engagement_mean": 1.9293478260869565,
+      "rating_mean": 1.6833333333333333,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-09",
+      "n": 159,
+      "sentiment_mean": -0.7547169811320755,
+      "sentiment_weighted": -0.5591704402515724,
+      "negative_share": 0.8553459119496856,
+      "engagement_sum": 235,
+      "engagement_mean": 1.4779874213836477,
+      "rating_mean": 1.4675324675324675,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-10",
+      "n": 170,
+      "sentiment_mean": -0.7411764705882353,
+      "sentiment_weighted": -0.5638217647058823,
+      "negative_share": 0.8117647058823529,
+      "engagement_sum": 689,
+      "engagement_mean": 4.052941176470588,
+      "rating_mean": 1.4620253164556962,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-11",
+      "n": 178,
+      "sentiment_mean": -0.6853932584269663,
+      "sentiment_weighted": -0.5160988764044944,
+      "negative_share": 0.8033707865168539,
+      "engagement_sum": 353,
+      "engagement_mean": 1.9831460674157304,
+      "rating_mean": 1.4782608695652173,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-12",
+      "n": 148,
+      "sentiment_mean": -0.6621621621621622,
+      "sentiment_weighted": -0.48972770270270266,
+      "negative_share": 0.7972972972972973,
+      "engagement_sum": 228,
+      "engagement_mean": 1.5405405405405406,
+      "rating_mean": 1.6691176470588236,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-13",
+      "n": 173,
+      "sentiment_mean": -0.7052023121387283,
+      "sentiment_weighted": -0.5324670520231214,
+      "negative_share": 0.8323699421965318,
+      "engagement_sum": 225,
+      "engagement_mean": 1.300578034682081,
+      "rating_mean": 1.5129870129870129,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-14",
+      "n": 199,
+      "sentiment_mean": -0.7286432160804021,
+      "sentiment_weighted": -0.561572864321608,
+      "negative_share": 0.8341708542713567,
+      "engagement_sum": 295,
+      "engagement_mean": 1.4824120603015076,
+      "rating_mean": 1.5183246073298429,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-15",
+      "n": 189,
+      "sentiment_mean": -0.746031746031746,
+      "sentiment_weighted": -0.5758232804232805,
+      "negative_share": 0.8359788359788359,
+      "engagement_sum": 296,
+      "engagement_mean": 1.566137566137566,
+      "rating_mean": 1.5913978494623655,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-16",
+      "n": 191,
+      "sentiment_mean": -0.680628272251309,
+      "sentiment_weighted": -0.5010994764397906,
+      "negative_share": 0.7853403141361257,
+      "engagement_sum": 908,
+      "engagement_mean": 4.7539267015706805,
+      "rating_mean": 1.6868131868131868,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-17",
+      "n": 169,
+      "sentiment_mean": -0.7455621301775148,
+      "sentiment_weighted": -0.5546520710059172,
+      "negative_share": 0.8224852071005917,
+      "engagement_sum": 333,
+      "engagement_mean": 1.970414201183432,
+      "rating_mean": 1.5477707006369428,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-18",
+      "n": 185,
+      "sentiment_mean": -0.772972972972973,
+      "sentiment_weighted": -0.5721870270270271,
+      "negative_share": 0.8486486486486486,
+      "engagement_sum": 302,
+      "engagement_mean": 1.6324324324324324,
+      "rating_mean": 1.4850299401197604,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-19",
+      "n": 186,
+      "sentiment_mean": -0.8010752688172043,
+      "sentiment_weighted": -0.5974096774193548,
+      "negative_share": 0.8709677419354839,
+      "engagement_sum": 520,
+      "engagement_mean": 2.795698924731183,
+      "rating_mean": 1.5371428571428571,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-20",
+      "n": 184,
+      "sentiment_mean": -0.7119565217391305,
+      "sentiment_weighted": -0.5287141304347827,
+      "negative_share": 0.8152173913043478,
+      "engagement_sum": 480,
+      "engagement_mean": 2.608695652173913,
+      "rating_mean": 1.4719101123595506,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-21",
+      "n": 161,
+      "sentiment_mean": -0.7018633540372671,
+      "sentiment_weighted": -0.5283552795031056,
+      "negative_share": 0.8136645962732919,
+      "engagement_sum": 425,
+      "engagement_mean": 2.639751552795031,
+      "rating_mean": 1.4451612903225806,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-22",
+      "n": 189,
+      "sentiment_mean": -0.7671957671957672,
+      "sentiment_weighted": -0.582379365079365,
+      "negative_share": 0.8465608465608465,
+      "engagement_sum": 232,
+      "engagement_mean": 1.2275132275132274,
+      "rating_mean": 1.5297297297297296,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-23",
+      "n": 174,
+      "sentiment_mean": -0.8045977011494253,
+      "sentiment_weighted": -0.6214454022988506,
+      "negative_share": 0.867816091954023,
+      "engagement_sum": 237,
+      "engagement_mean": 1.3620689655172413,
+      "rating_mean": 1.308139534883721,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-24",
+      "n": 232,
+      "sentiment_mean": -0.7844827586206896,
+      "sentiment_weighted": -0.593923275862069,
+      "negative_share": 0.8491379310344828,
+      "engagement_sum": 399,
+      "engagement_mean": 1.7198275862068966,
+      "rating_mean": 1.3616071428571428,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-25",
+      "n": 252,
+      "sentiment_mean": -0.7817460317460317,
+      "sentiment_weighted": -0.5876039682539682,
+      "negative_share": 0.8452380952380952,
+      "engagement_sum": 265,
+      "engagement_mean": 1.0515873015873016,
+      "rating_mean": 1.4556962025316456,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-26",
+      "n": 247,
+      "sentiment_mean": -0.7206477732793523,
+      "sentiment_weighted": -0.54291012145749,
+      "negative_share": 0.8097165991902834,
+      "engagement_sum": 892,
+      "engagement_mean": 3.611336032388664,
+      "rating_mean": 1.5932203389830508,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-27",
+      "n": 240,
+      "sentiment_mean": -0.7958333333333333,
+      "sentiment_weighted": -0.59655625,
+      "negative_share": 0.8666666666666667,
+      "engagement_sum": 657,
+      "engagement_mean": 2.7375,
+      "rating_mean": 1.4469026548672566,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-28",
+      "n": 296,
+      "sentiment_mean": -0.7398648648648649,
+      "sentiment_weighted": -0.556864527027027,
+      "negative_share": 0.8344594594594594,
+      "engagement_sum": 342,
+      "engagement_mean": 1.1554054054054055,
+      "rating_mean": 1.50354609929078,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-29",
+      "n": 300,
+      "sentiment_mean": -0.7866666666666666,
+      "sentiment_weighted": -0.590557,
+      "negative_share": 0.87,
+      "engagement_sum": 481,
+      "engagement_mean": 1.6033333333333333,
+      "rating_mean": 1.4189189189189189,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-30",
+      "n": 292,
+      "sentiment_mean": -0.8047945205479452,
+      "sentiment_weighted": -0.6117164383561643,
+      "negative_share": 0.863013698630137,
+      "engagement_sum": 536,
+      "engagement_mean": 1.8356164383561644,
+      "rating_mean": 1.4685314685314685,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-08-31",
+      "n": 303,
+      "sentiment_mean": -0.7425742574257426,
+      "sentiment_weighted": -0.5709257425742574,
+      "negative_share": 0.8316831683168316,
+      "engagement_sum": 471,
+      "engagement_mean": 1.5544554455445545,
+      "rating_mean": 1.4965277777777777,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-01",
+      "n": 290,
+      "sentiment_mean": -0.6827586206896552,
+      "sentiment_weighted": -0.5132234482758621,
+      "negative_share": 0.803448275862069,
+      "engagement_sum": 676,
+      "engagement_mean": 2.331034482758621,
+      "rating_mean": 1.6888888888888889,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-02",
+      "n": 306,
+      "sentiment_mean": -0.6699346405228758,
+      "sentiment_weighted": -0.49816666666666665,
+      "negative_share": 0.7875816993464052,
+      "engagement_sum": 286,
+      "engagement_mean": 0.934640522875817,
+      "rating_mean": 1.5944055944055944,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-03",
+      "n": 389,
+      "sentiment_mean": -0.6709511568123393,
+      "sentiment_weighted": -0.5077210796915167,
+      "negative_share": 0.7866323907455013,
+      "engagement_sum": 321,
+      "engagement_mean": 0.8251928020565553,
+      "rating_mean": 1.6184971098265897,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-04",
+      "n": 415,
+      "sentiment_mean": -0.6867469879518072,
+      "sentiment_weighted": -0.528661686746988,
+      "negative_share": 0.7903614457831325,
+      "engagement_sum": 592,
+      "engagement_mean": 1.4265060240963856,
+      "rating_mean": 1.5926892950391645,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-05",
+      "n": 412,
+      "sentiment_mean": -0.7305825242718447,
+      "sentiment_weighted": -0.5490946601941747,
+      "negative_share": 0.8252427184466019,
+      "engagement_sum": 335,
+      "engagement_mean": 0.8131067961165048,
+      "rating_mean": 1.6317135549872124,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-06",
+      "n": 415,
+      "sentiment_mean": -0.6867469879518072,
+      "sentiment_weighted": -0.5230238554216867,
+      "negative_share": 0.7975903614457831,
+      "engagement_sum": 582,
+      "engagement_mean": 1.4024096385542169,
+      "rating_mean": 1.5050251256281406,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-07",
+      "n": 410,
+      "sentiment_mean": -0.7365853658536585,
+      "sentiment_weighted": -0.556570243902439,
+      "negative_share": 0.8195121951219512,
+      "engagement_sum": 447,
+      "engagement_mean": 1.0902439024390245,
+      "rating_mean": 1.5994764397905759,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-08",
+      "n": 529,
+      "sentiment_mean": -0.6635160680529301,
+      "sentiment_weighted": -0.5017720226843101,
+      "negative_share": 0.7731568998109641,
+      "engagement_sum": 298,
+      "engagement_mean": 0.5633270321361059,
+      "rating_mean": 1.6653061224489796,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-09",
+      "n": 540,
+      "sentiment_mean": -0.6648148148148149,
+      "sentiment_weighted": -0.49275259259259263,
+      "negative_share": 0.7685185185185185,
+      "engagement_sum": 303,
+      "engagement_mean": 0.5611111111111111,
+      "rating_mean": 1.6495901639344261,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-10",
+      "n": 551,
+      "sentiment_mean": -0.6406533575317604,
+      "sentiment_weighted": -0.48045898366606166,
+      "negative_share": 0.7586206896551724,
+      "engagement_sum": 360,
+      "engagement_mean": 0.6533575317604355,
+      "rating_mean": 1.6764705882352942,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-11",
+      "n": 668,
+      "sentiment_mean": -0.6452095808383234,
+      "sentiment_weighted": -0.4830559880239521,
+      "negative_share": 0.7634730538922155,
+      "engagement_sum": 524,
+      "engagement_mean": 0.7844311377245509,
+      "rating_mean": 1.6741214057507987,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-12",
+      "n": 749,
+      "sentiment_mean": -0.6955941255006676,
+      "sentiment_weighted": -0.5228615487316421,
+      "negative_share": 0.7957276368491322,
+      "engagement_sum": 389,
+      "engagement_mean": 0.5193591455273698,
+      "rating_mean": 1.7615062761506277,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-13",
+      "n": 799,
+      "sentiment_mean": -0.623279098873592,
+      "sentiment_weighted": -0.47277534418022527,
+      "negative_share": 0.7496871088861077,
+      "engagement_sum": 542,
+      "engagement_mean": 0.6783479349186483,
+      "rating_mean": 1.7567567567567568,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-14",
+      "n": 726,
+      "sentiment_mean": -0.6666666666666666,
+      "sentiment_weighted": -0.5057356749311295,
+      "negative_share": 0.778236914600551,
+      "engagement_sum": 1812,
+      "engagement_mean": 2.4958677685950414,
+      "rating_mean": 1.7668621700879765,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-15",
+      "n": 755,
+      "sentiment_mean": -0.5894039735099338,
+      "sentiment_weighted": -0.4467796026490066,
+      "negative_share": 0.7417218543046358,
+      "engagement_sum": 5336,
+      "engagement_mean": 7.067549668874173,
+      "rating_mean": 1.926241134751773,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-16",
+      "n": 953,
+      "sentiment_mean": -0.614900314795383,
+      "sentiment_weighted": -0.45941017838405035,
+      "negative_share": 0.751311647429171,
+      "engagement_sum": 1009,
+      "engagement_mean": 1.0587618048268626,
+      "rating_mean": 1.816326530612245,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-17",
+      "n": 918,
+      "sentiment_mean": -0.6230936819172114,
+      "sentiment_weighted": -0.46558518518518516,
+      "negative_share": 0.7472766884531591,
+      "engagement_sum": 1809,
+      "engagement_mean": 1.9705882352941178,
+      "rating_mean": 1.71900826446281,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-18",
+      "n": 910,
+      "sentiment_mean": -0.6076923076923076,
+      "sentiment_weighted": -0.45771087912087915,
+      "negative_share": 0.7472527472527473,
+      "engagement_sum": 1375,
+      "engagement_mean": 1.510989010989011,
+      "rating_mean": 1.7570422535211268,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-19",
+      "n": 323,
+      "sentiment_mean": -0.6408668730650154,
+      "sentiment_weighted": -0.48296687306501546,
+      "negative_share": 0.7461300309597523,
+      "engagement_sum": 81,
+      "engagement_mean": 0.25077399380804954,
+      "rating_mean": 1.8458149779735682,
+      "delay_share": 1.0
+    },
+    {
+      "date": "2026-09-20",
+      "n": 47,
+      "sentiment_mean": -0.7446808510638298,
+      "sentiment_weighted": -0.5812404255319149,
+      "negative_share": 0.851063829787234,
+      "engagement_sum": 0,
+      "engagement_mean": 0.0,
+      "rating_mean": NaN,
+      "delay_share": 1.0
+    }
+  ],
+  "sentiment_shifts": [
+    {
+      "scope": "overall",
+      "date": "2026-09-01",
+      "mean_before": -0.7777,
+      "mean_after": -0.6741,
+      "delta": 0.1035,
+      "cohens_d": 0.1655,
+      "n_before": 895,
+      "n_after": 985,
+      "t_stat": 3.597,
+      "p_value": 0.00032996979459162047,
+      "direction": "improvement",
+      "significant_fdr": true
+    }
+  ],
+  "engagement_spikes": [
+    {
+      "scope": "overall",
+      "metric": "engagement_sum",
+      "date": "2026-09-15",
+      "value": 5336.0,
+      "baseline_median": 374.5,
+      "ratio_to_median": 14.25,
+      "robust_z": 24.25,
+      "sentiment_mean": -0.5894,
+      "negative_share": 0.7417
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-18",
+      "value": 120.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 7.06,
+      "robust_z": 13.89,
+      "sentiment_mean": -0.7417,
+      "negative_share": 0.8167
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-11",
+      "value": 113.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 6.65,
+      "robust_z": 12.95,
+      "sentiment_mean": -0.5752,
+      "negative_share": 0.7168
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-17",
+      "value": 112.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 6.59,
+      "robust_z": 12.82,
+      "sentiment_mean": -0.6071,
+      "negative_share": 0.7411
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-09",
+      "value": 105.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 6.18,
+      "robust_z": 11.87,
+      "sentiment_mean": -0.5619,
+      "negative_share": 0.7048
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-14",
+      "value": 105.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 6.18,
+      "robust_z": 11.87,
+      "sentiment_mean": -0.6286,
+      "negative_share": 0.7619
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-13",
+      "value": 104.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 6.12,
+      "robust_z": 11.74,
+      "sentiment_mean": -0.5769,
+      "negative_share": 0.7308
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-16",
+      "value": 102.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 6.0,
+      "robust_z": 11.47,
+      "sentiment_mean": -0.6765,
+      "negative_share": 0.7745
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-08",
+      "value": 95.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 5.59,
+      "robust_z": 10.52,
+      "sentiment_mean": -0.6211,
+      "negative_share": 0.7368
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-10",
+      "value": 95.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 5.59,
+      "robust_z": 10.52,
+      "sentiment_mean": -0.6211,
+      "negative_share": 0.7474
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-12",
+      "value": 91.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 5.35,
+      "robust_z": 9.98,
+      "sentiment_mean": -0.6923,
+      "negative_share": 0.7912
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-13",
+      "value": 253.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 3.05,
+      "robust_z": 9.97,
+      "sentiment_mean": -0.6443,
+      "negative_share": 0.751
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-15",
+      "value": 89.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 5.24,
+      "robust_z": 9.71,
+      "sentiment_mean": -0.5955,
+      "negative_share": 0.7303
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-12",
+      "value": 226.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 2.72,
+      "robust_z": 8.39,
+      "sentiment_mean": -0.8363,
+      "negative_share": 0.8805
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-14",
+      "value": 216.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 2.6,
+      "robust_z": 7.8,
+      "sentiment_mean": -0.8009,
+      "negative_share": 0.8611
+    },
+    {
+      "scope": "overall",
+      "metric": "engagement_sum",
+      "date": "2026-09-14",
+      "value": 1812.0,
+      "baseline_median": 374.5,
+      "ratio_to_median": 4.84,
+      "robust_z": 7.03,
+      "sentiment_mean": -0.6667,
+      "negative_share": 0.7782
+    },
+    {
+      "scope": "overall",
+      "metric": "engagement_sum",
+      "date": "2026-09-17",
+      "value": 1809.0,
+      "baseline_median": 374.5,
+      "ratio_to_median": 4.83,
+      "robust_z": 7.01,
+      "sentiment_mean": -0.6231,
+      "negative_share": 0.7473
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-16",
+      "value": 202.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 2.43,
+      "robust_z": 6.98,
+      "sentiment_mean": -0.7327,
+      "negative_share": 0.8218
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-18",
+      "value": 193.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 2.33,
+      "robust_z": 6.45,
+      "sentiment_mean": -0.7202,
+      "negative_share": 0.8187
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-17",
+      "value": 183.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 2.2,
+      "robust_z": 5.87,
+      "sentiment_mean": -0.7104,
+      "negative_share": 0.8197
+    },
+    {
+      "scope": "overall",
+      "metric": "engagement_sum",
+      "date": "2026-09-18",
+      "value": 1375.0,
+      "baseline_median": 374.5,
+      "ratio_to_median": 3.67,
+      "robust_z": 4.89,
+      "sentiment_mean": -0.6077,
+      "negative_share": 0.7473
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-15",
+      "value": 166.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 2.0,
+      "robust_z": 4.87,
+      "sentiment_mean": -0.7048,
+      "negative_share": 0.8072
+    },
+    {
+      "scope": "overall",
+      "metric": "n",
+      "date": "2026-09-16",
+      "value": 953.0,
+      "baseline_median": 271.0,
+      "ratio_to_median": 3.52,
+      "robust_z": 4.53,
+      "sentiment_mean": -0.6149,
+      "negative_share": 0.7513
+    },
+    {
+      "scope": "overall",
+      "metric": "n",
+      "date": "2026-09-17",
+      "value": 918.0,
+      "baseline_median": 271.0,
+      "ratio_to_median": 3.39,
+      "robust_z": 4.3,
+      "sentiment_mean": -0.6231,
+      "negative_share": 0.7473
+    },
+    {
+      "scope": "food_delivery",
+      "metric": "n",
+      "date": "2026-09-11",
+      "value": 156.0,
+      "baseline_median": 83.0,
+      "ratio_to_median": 1.88,
+      "robust_z": 4.28,
+      "sentiment_mean": -0.6923,
+      "negative_share": 0.7756
+    },
+    {
+      "scope": "overall",
+      "metric": "n",
+      "date": "2026-09-18",
+      "value": 910.0,
+      "baseline_median": 271.0,
+      "ratio_to_median": 3.36,
+      "robust_z": 4.25,
+      "sentiment_mean": -0.6077,
+      "negative_share": 0.7473
+    },
+    {
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-07",
+      "value": 46.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 2.71,
+      "robust_z": 3.91,
+      "sentiment_mean": -0.7609,
+      "negative_share": 0.8261
+    },
+    {
+      "scope": "ecommerce",
+      "metric": "n",
+      "date": "2026-09-18",
+      "value": 343.0,
+      "baseline_median": 91.5,
+      "ratio_to_median": 3.75,
+      "robust_z": 3.53,
+      "sentiment_mean": -0.5277,
+      "negative_share": 0.7172
+    },
+    {
+      "scope": "overall",
+      "metric": "n",
+      "date": "2026-09-13",
+      "value": 799.0,
+      "baseline_median": 271.0,
+      "ratio_to_median": 2.95,
+      "robust_z": 3.51,
+      "sentiment_mean": -0.6233,
+      "negative_share": 0.7497
+    }
+  ],
+  "entities": {
+    "by_brand": {
+      "Amazon IN": 1242,
+      "DoorDash": 1149,
+      "Amazon": 1092,
+      "Uber Eats": 1078,
+      "Zepto": 794,
+      "Airtel": 731,
+      "Swiggy": 652,
+      "Uber": 590,
+      "bigbasket": 502,
+      "Temu": 463,
+      "Rapido": 438,
+      "foodpanda": 411,
+      "eBay": 381,
+      "Meesho": 373,
+      "Zomato": 347,
+      "Lyft": 339,
+      "Myntra": 336,
+      "Ola": 333,
+      "Blinkit": 321,
+      "Instamart": 320,
+      "AliExpress": 314,
+      "Domino's": 311,
+      "Flipkart": 297,
+      "Jio": 284,
+      "SHEIN": 282
+    },
+    "by_domain": {
+      "ecommerce": 4787,
+      "food_delivery": 4718,
+      "quick_commerce": 2117,
+      "ride_hailing": 1700,
+      "telecom_isp": 1228,
+      "": 1038,
+      "parcel_courier": 474,
+      "airline": 286
+    },
+    "delay_types": {
+      "unspecified_delay": 8680,
+      "late_delivery": 2552,
+      "cancelled": 1479,
+      "never_arrived": 1062,
+      "outage": 934,
+      "long_wait": 780,
+      "missing_items": 363,
+      "refund_delay": 215,
+      "support_delay": 212,
+      "stuck_in_transit": 71
+    },
+    "reaction_types": {
+      "neutral_report": 9474,
+      "anger": 3231,
+      "escalation": 1889,
+      "churn_threat": 691,
+      "refund_demand": 577,
+      "resigned": 403,
+      "sarcasm_humour": 51,
+      "praise_recovery": 17,
+      "informational": 15
+    },
+    "by_source": {
+      "google_play": 15205,
+      "hackernews": 445,
+      "news": 407,
+      "mastodon": 187,
+      "reddit": 104
+    }
+  },
+  "distinctive_terms_delay_vs_rest": [
+    {
+      "term": "refund",
+      "z": 28.37,
+      "focus_count": 3878,
+      "background_count": 0
+    },
+    {
+      "term": "cancel",
+      "z": 19.75,
+      "focus_count": 1884,
+      "background_count": 0
+    },
+    {
+      "term": "delivered",
+      "z": 16.43,
+      "focus_count": 1674,
+      "background_count": 779
+    },
+    {
+      "term": "late",
+      "z": 15.93,
+      "focus_count": 1227,
+      "background_count": 0
+    },
+    {
+      "term": "wait",
+      "z": 15.5,
+      "focus_count": 1162,
+      "background_count": 0
+    },
+    {
+      "term": "working",
+      "z": 15.5,
+      "focus_count": 819,
+      "background_count": 255
+    },
+    {
+      "term": "minutes",
+      "z": 15.1,
+      "focus_count": 866,
+      "background_count": 297
+    },
+    {
+      "term": "hours",
+      "z": 14.82,
+      "focus_count": 1062,
+      "background_count": 0
+    },
+    {
+      "term": "hour",
+      "z": 14.74,
+      "focus_count": 631,
+      "background_count": 164
+    },
+    {
+      "term": "cancelled",
+      "z": 14.61,
+      "focus_count": 1032,
+      "background_count": 0
+    },
+    {
+      "term": "missing",
+      "z": 14.44,
+      "focus_count": 1008,
+      "background_count": 0
+    },
+    {
+      "term": "slow",
+      "z": 14.28,
+      "focus_count": 986,
+      "background_count": 0
+    },
+    {
+      "term": "waiting",
+      "z": 13.1,
+      "focus_count": 830,
+      "background_count": 0
+    },
+    {
+      "term": "down",
+      "z": 12.95,
+      "focus_count": 811,
+      "background_count": 0
+    },
+    {
+      "term": "said",
+      "z": 12.22,
+      "focus_count": 773,
+      "background_count": 327
+    },
+    {
+      "term": "ordered",
+      "z": 12.05,
+      "focus_count": 1431,
+      "background_count": 798
+    },
+    {
+      "term": "told",
+      "z": 11.95,
+      "focus_count": 557,
+      "background_count": 195
+    },
+    {
+      "term": "refused",
+      "z": 11.92,
+      "focus_count": 389,
+      "background_count": 93
+    },
+    {
+      "term": "later",
+      "z": 11.88,
+      "focus_count": 683,
+      "background_count": 0
+    },
+    {
+      "term": "delayed",
+      "z": 11.65,
+      "focus_count": 657,
+      "background_count": 0
+    },
+    {
+      "term": "placed",
+      "z": 11.41,
+      "focus_count": 442,
+      "background_count": 137
+    },
+    {
+      "term": "disappointing",
+      "z": 10.53,
+      "focus_count": 567,
+      "background_count": 238
+    },
+    {
+      "term": "download",
+      "z": 10.52,
+      "focus_count": 535,
+      "background_count": 0
+    },
+    {
+      "term": "never",
+      "z": 10.35,
+      "focus_count": 1876,
+      "background_count": 1219
+    },
+    {
+      "term": "delays",
+      "z": 10.29,
+      "focus_count": 512,
+      "background_count": 0
+    }
+  ],
+  "terms_by_delay_type": {
+    "cancelled": [
+      {
+        "term": "cancelled",
+        "z": 41.58,
+        "focus_count": 950,
+        "background_count": 82
+      },
+      {
+        "term": "canceled",
+        "z": 25.86,
+        "focus_count": 433,
+        "background_count": 26
+      },
+      {
+        "term": "cancellation",
+        "z": 20.36,
+        "focus_count": 321,
+        "background_count": 13
+      },
+      {
+        "term": "ride",
+        "z": 15.25,
+        "focus_count": 258,
+        "background_count": 791
+      },
+      {
+        "term": "driver",
+        "z": 12.7,
+        "focus_count": 268,
+        "background_count": 1034
+      },
+      {
+        "term": "charged",
+        "z": 12.06,
+        "focus_count": 116,
+        "background_count": 277
+      },
+      {
+        "term": "automatically",
+        "z": 11.81,
+        "focus_count": 68,
+        "background_count": 92
+      },
+      {
+        "term": "placed",
+        "z": 11.68,
+        "focus_count": 122,
+        "background_count": 320
+      },
+      {
+        "term": "without",
+        "z": 10.72,
+        "focus_count": 185,
+        "background_count": 702
+      },
+      {
+        "term": "fee",
+        "z": 10.61,
+        "focus_count": 99,
+        "background_count": 256
+      }
+    ],
+    "late_delivery": [
+      {
+        "term": "late",
+        "z": 44.58,
+        "focus_count": 915,
+        "background_count": 312
+      },
+      {
+        "term": "slow",
+        "z": 39.39,
+        "focus_count": 874,
+        "background_count": 112
+      },
+      {
+        "term": "delays",
+        "z": 29.15,
+        "focus_count": 432,
+        "background_count": 80
+      },
+      {
+        "term": "delayed",
+        "z": 29.09,
+        "focus_count": 411,
+        "background_count": 246
+      },
+      {
+        "term": "delay",
+        "z": 27.03,
+        "focus_count": 339,
+        "background_count": 114
+      },
+      {
+        "term": "delivery",
+        "z": 22.9,
+        "focus_count": 1155,
+        "background_count": 3397
+      },
+      {
+        "term": "network",
+        "z": 18.09,
+        "focus_count": 224,
+        "background_count": 275
+      },
+      {
+        "term": "internet",
+        "z": 13.89,
+        "focus_count": 157,
+        "background_count": 235
+      },
+      {
+        "term": "flight",
+        "z": 12.97,
+        "focus_count": 129,
+        "background_count": 181
+      },
+      {
+        "term": "speed",
+        "z": 12.6,
+        "focus_count": 99,
+        "background_count": 106
+      }
+    ],
+    "long_wait": [
+      {
+        "term": "minutes",
+        "z": 28.21,
+        "focus_count": 302,
+        "background_count": 564
+      },
+      {
+        "term": "wait",
+        "z": 27.66,
+        "focus_count": 344,
+        "background_count": 818
+      },
+      {
+        "term": "mins",
+        "z": 18.51,
+        "focus_count": 119,
+        "background_count": 188
+      },
+      {
+        "term": "hours",
+        "z": 18.27,
+        "focus_count": 229,
+        "background_count": 833
+      },
+      {
+        "term": "waiting",
+        "z": 16.25,
+        "focus_count": 180,
+        "background_count": 650
+      },
+      {
+        "term": "min",
+        "z": 14.55,
+        "focus_count": 86,
+        "background_count": 176
+      },
+      {
+        "term": "hour",
+        "z": 12.86,
+        "focus_count": 127,
+        "background_count": 504
+      },
+      {
+        "term": "waited",
+        "z": 11.97,
+        "focus_count": 72,
+        "background_count": 193
+      },
+      {
+        "term": "later",
+        "z": 10.83,
+        "focus_count": 118,
+        "background_count": 565
+      },
+      {
+        "term": "minute",
+        "z": 10.5,
+        "focus_count": 51,
+        "background_count": 124
+      }
+    ],
+    "missing_items": [
+      {
+        "term": "missing",
+        "z": 45.26,
+        "focus_count": 384,
+        "background_count": 624
+      },
+      {
+        "term": "items",
+        "z": 36.95,
+        "focus_count": 348,
+        "background_count": 1130
+      },
+      {
+        "term": "item",
+        "z": 23.03,
+        "focus_count": 183,
+        "background_count": 892
+      },
+      {
+        "term": "wrong",
+        "z": 14.96,
+        "focus_count": 106,
+        "background_count": 719
+      },
+      {
+        "term": "refund",
+        "z": 9.53,
+        "focus_count": 204,
+        "background_count": 3674
+      },
+      {
+        "term": "doordash",
+        "z": 8.13,
+        "focus_count": 47,
+        "background_count": 446
+      },
+      {
+        "term": "zepto",
+        "z": 6.88,
+        "focus_count": 40,
+        "background_count": 428
+      },
+      {
+        "term": "proof",
+        "z": 6.72,
+        "focus_count": 19,
+        "background_count": 114
+      },
+      {
+        "term": "refused",
+        "z": 6.71,
+        "focus_count": 35,
+        "background_count": 354
+      },
+      {
+        "term": "send",
+        "z": 5.98,
+        "focus_count": 29,
+        "background_count": 302
+      }
+    ],
+    "never_arrived": [
+      {
+        "term": "delivered",
+        "z": 45.84,
+        "focus_count": 701,
+        "background_count": 973
+      },
+      {
+        "term": "never",
+        "z": 26.51,
+        "focus_count": 444,
+        "background_count": 1432
+      },
+      {
+        "term": "deliver",
+        "z": 24.18,
+        "focus_count": 266,
+        "background_count": 600
+      },
+      {
+        "term": "received",
+        "z": 18.13,
+        "focus_count": 227,
+        "background_count": 785
+      },
+      {
+        "term": "delivery",
+        "z": 15.94,
+        "focus_count": 575,
+        "background_count": 3977
+      },
+      {
+        "term": "delivering",
+        "z": 14.92,
+        "focus_count": 75,
+        "background_count": 102
+      },
+      {
+        "term": "did",
+        "z": 12.98,
+        "focus_count": 151,
+        "background_count": 636
+      },
+      {
+        "term": "receive",
+        "z": 12.74,
+        "focus_count": 100,
+        "background_count": 311
+      },
+      {
+        "term": "marked",
+        "z": 11.04,
+        "focus_count": 46,
+        "background_count": 78
+      },
+      {
+        "term": "parcel",
+        "z": 10.93,
+        "focus_count": 62,
+        "background_count": 162
+      }
+    ],
+    "outage": [
+      {
+        "term": "working",
+        "z": 47.2,
+        "focus_count": 581,
+        "background_count": 238
+      },
+      {
+        "term": "outage",
+        "z": 15.65,
+        "focus_count": 330,
+        "background_count": 2
+      },
+      {
+        "term": "properly",
+        "z": 15.56,
+        "focus_count": 94,
+        "background_count": 209
+      },
+      {
+        "term": "unlimited",
+        "z": 15.09,
+        "focus_count": 65,
+        "background_count": 78
+      },
+      {
+        "term": "network",
+        "z": 14.05,
+        "focus_count": 112,
+        "background_count": 387
+      },
+      {
+        "term": "internet",
+        "z": 13.6,
+        "focus_count": 95,
+        "background_count": 297
+      },
+      {
+        "term": "data",
+        "z": 12.86,
+        "focus_count": 87,
+        "background_count": 279
+      },
+      {
+        "term": "airtel",
+        "z": 11.31,
+        "focus_count": 97,
+        "background_count": 429
+      },
+      {
+        "term": "crashes",
+        "z": 11.19,
+        "focus_count": 66,
+        "background_count": 4
+      },
+      {
+        "term": "claude",
+        "z": 11.06,
+        "focus_count": 36,
+        "background_count": 9
+      }
+    ],
+    "unspecified_delay": [
+      {
+        "term": "hai",
+        "z": 15.37,
+        "focus_count": 919,
+        "background_count": 291
+      },
+      {
+        "term": "download",
+        "z": 13.9,
+        "focus_count": 465,
+        "background_count": 70
+      },
+      {
+        "term": "cancel",
+        "z": 11.38,
+        "focus_count": 1245,
+        "background_count": 639
+      },
+      {
+        "term": "details",
+        "z": 11.37,
+        "focus_count": 337,
+        "background_count": 63
+      },
+      {
+        "term": "down",
+        "z": 10.02,
+        "focus_count": 575,
+        "background_count": 236
+      },
+      {
+        "term": "bhi",
+        "z": 9.87,
+        "focus_count": 326,
+        "background_count": 89
+      },
+      {
+        "term": "refund",
+        "z": 9.86,
+        "focus_count": 2354,
+        "background_count": 1524
+      },
+      {
+        "term": "nhi",
+        "z": 9.16,
+        "focus_count": 243,
+        "background_count": 55
+      },
+      {
+        "term": "good",
+        "z": 9.02,
+        "focus_count": 840,
+        "background_count": 441
+      },
+      {
+        "term": "aur",
+        "z": 7.92,
+        "focus_count": 225,
+        "background_count": 66
+      }
+    ]
+  },
+  "sentiment_by_delay_type": [
+    {
+      "delay_type": "cancelled",
+      "n": 1479,
+      "sentiment_mean": -0.9182,
+      "negative_share": 0.9479,
+      "rating_mean": 1.2441,
+      "engagement_mean": 2.0379
+    },
+    {
+      "delay_type": "late_delivery",
+      "n": 2552,
+      "sentiment_mean": -0.5564,
+      "negative_share": 0.6818,
+      "rating_mean": 1.6319,
+      "engagement_mean": 1.1505
+    },
+    {
+      "delay_type": "long_wait",
+      "n": 780,
+      "sentiment_mean": -0.7974,
+      "negative_share": 0.8615,
+      "rating_mean": 1.3139,
+      "engagement_mean": 1.1218
+    },
+    {
+      "delay_type": "missing_items",
+      "n": 363,
+      "sentiment_mean": -0.9587,
+      "negative_share": 0.9752,
+      "rating_mean": 1.2632,
+      "engagement_mean": 1.562
+    },
+    {
+      "delay_type": "never_arrived",
+      "n": 1062,
+      "sentiment_mean": -0.9501,
+      "negative_share": 0.9708,
+      "rating_mean": 1.2214,
+      "engagement_mean": 0.7458
+    },
+    {
+      "delay_type": "outage",
+      "n": 934,
+      "sentiment_mean": -0.7837,
+      "negative_share": 0.8287,
+      "rating_mean": 1.3619,
+      "engagement_mean": 1.5546
+    },
+    {
+      "delay_type": "refund_delay",
+      "n": 215,
+      "sentiment_mean": -0.9628,
+      "negative_share": 0.9767,
+      "rating_mean": 1.1215,
+      "engagement_mean": 0.7721
+    },
+    {
+      "delay_type": "stuck_in_transit",
+      "n": 71,
+      "sentiment_mean": -0.9577,
+      "negative_share": 0.9718,
+      "rating_mean": 1.1159,
+      "engagement_mean": 1.3239
+    },
+    {
+      "delay_type": "support_delay",
+      "n": 212,
+      "sentiment_mean": -0.9623,
+      "negative_share": 0.9764,
+      "rating_mean": 1.1902,
+      "engagement_mean": 1.0142
+    },
+    {
+      "delay_type": "unspecified_delay",
+      "n": 8680,
+      "sentiment_mean": -0.5968,
+      "negative_share": 0.7461,
+      "rating_mean": 1.8804,
+      "engagement_mean": 2.0408
+    }
+  ],
+  "sentiment_by_reaction_type": [
+    {
+      "reaction_type": "anger",
+      "n": 3231,
+      "sentiment_mean": -0.931,
+      "rating_mean": 1.093,
+      "engagement_mean": 1.9712
+    },
+    {
+      "reaction_type": "churn_threat",
+      "n": 691,
+      "sentiment_mean": -0.8842,
+      "rating_mean": 1.1352,
+      "engagement_mean": 1.9638
+    },
+    {
+      "reaction_type": "escalation",
+      "n": 1889,
+      "sentiment_mean": -0.8846,
+      "rating_mean": 1.3343,
+      "engagement_mean": 2.9158
+    },
+    {
+      "reaction_type": "informational",
+      "n": 15,
+      "sentiment_mean": -0.8667,
+      "rating_mean": 1.4286,
+      "engagement_mean": 5.7333
+    },
+    {
+      "reaction_type": "neutral_report",
+      "n": 9474,
+      "sentiment_mean": -0.5267,
+      "rating_mean": 1.9797,
+      "engagement_mean": 1.2297
+    },
+    {
+      "reaction_type": "praise_recovery",
+      "n": 17,
+      "sentiment_mean": -0.8824,
+      "rating_mean": 1.4118,
+      "engagement_mean": 0.9412
+    },
+    {
+      "reaction_type": "refund_demand",
+      "n": 577,
+      "sentiment_mean": -0.9324,
+      "rating_mean": 1.1989,
+      "engagement_mean": 1.104
+    },
+    {
+      "reaction_type": "resigned",
+      "n": 403,
+      "sentiment_mean": -0.6873,
+      "rating_mean": 1.8472,
+      "engagement_mean": 5.3598
+    },
+    {
+      "reaction_type": "sarcasm_humour",
+      "n": 51,
+      "sentiment_mean": -0.4902,
+      "rating_mean": 2.6341,
+      "engagement_mean": 0.8235
+    }
+  ],
+  "explained_events": [
+    {
+      "event_type": "sentiment_shift",
+      "scope": "overall",
+      "date": "2026-09-01",
+      "mean_before": -0.7777,
+      "mean_after": -0.6741,
+      "delta": 0.1035,
+      "cohens_d": 0.1655,
+      "n_before": 895,
+      "n_after": 985,
+      "t_stat": 3.597,
+      "p_value": 0.00032996979459162047,
+      "direction": "improvement",
+      "significant_fdr": true,
+      "evidence": {
+        "window": [
+          "2026-08-30",
+          "2026-09-03"
+        ],
+        "n_in_window": 1191,
+        "distinctive_terms": [
+          {
+            "term": "nuclear",
+            "z": 8.82,
+            "focus_count": 29,
+            "background_count": 35
+          },
+          {
+            "term": "microsoft",
+            "z": 8.4,
+            "focus_count": 23,
+            "background_count": 18
+          },
+          {
+            "term": "amazon",
+            "z": 7.57,
+            "focus_count": 211,
+            "background_count": 1411
+          },
+          {
+            "term": "plants",
+            "z": 5.92,
+            "focus_count": 11,
+            "background_count": 6
+          },
+          {
+            "term": "outlook",
+            "z": 5.64,
+            "focus_count": 10,
+            "background_count": 5
+          },
+          {
+            "term": "zepto",
+            "z": 5.18,
+            "focus_count": 68,
+            "background_count": 400
+          },
+          {
+            "term": "gift",
+            "z": 5.17,
+            "focus_count": 26,
+            "background_count": 94
+          },
+          {
+            "term": "germany",
+            "z": 4.9,
+            "focus_count": 9,
+            "background_count": 11
+          },
+          {
+            "term": "built",
+            "z": 4.54,
+            "focus_count": 12,
+            "background_count": 28
+          },
+          {
+            "term": "pages",
+            "z": 4.18,
+            "focus_count": 12,
+            "background_count": 33
+          },
+          {
+            "term": "travelers",
+            "z": 4.16,
+            "focus_count": 6,
+            "background_count": 6
+          },
+          {
+            "term": "yung",
+            "z": 4.15,
+            "focus_count": 7,
+            "background_count": 10
+          },
+          {
+            "term": "handled",
+            "z": 4.09,
+            "focus_count": 10,
+            "background_count": 24
+          },
+          {
+            "term": "doordash",
+            "z": 3.98,
+            "focus_count": 63,
+            "background_count": 430
+          },
+          {
+            "term": "reactors",
+            "z": 3.98,
+            "focus_count": 5,
+            "background_count": 3
+          }
+        ],
+        "delay_type_mix": {
+          "unspecified_delay": 649,
+          "late_delivery": 181,
+          "cancelled": 90,
+          "never_arrived": 74,
+          "outage": 68,
+          "long_wait": 52
+        },
+        "reaction_type_mix": {
+          "neutral_report": 656,
+          "anger": 237,
+          "escalation": 154,
+          "churn_threat": 56,
+          "refund_demand": 55,
+          "resigned": 27
+        },
+        "top_brands": {
+          "Amazon IN": 174,
+          "Zepto": 144,
+          "DoorDash": 115,
+          "Amazon": 96,
+          "Uber Eats": 87,
+          "Airtel": 74
+        },
+        "incidents": [
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-02 23:42",
+            "title": "Voice endpoint selection issues",
+            "reason": "other"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-02 18:26",
+            "title": "Server Unavailability",
+            "reason": "degraded_performance"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-01 00:49",
+            "title": "Some servers and other services (voice calls, activities) not available for some users",
+            "reason": "outage"
+          },
+          {
+            "entity": "Datadog",
+            "kind": "Datadog",
+            "started": "2026-09-02 01:24",
+            "title": "Delayed DBM Monitor Evaluation",
+            "reason": "other"
+          },
+          {
+            "entity": "GitHub",
+            "kind": "GitHub",
+            "started": "2026-09-01 16:01",
+            "title": "Delays in commit processing",
+            "reason": "degraded_performance"
+          },
+          {
+            "entity": "GitHub",
+            "kind": "GitHub",
+            "started": "2026-08-31 09:58",
+            "title": "Elevated rate of errors for OpenAI models provided by Copilot",
+            "reason": "degraded_performance"
+          }
+        ],
+        "n_incidents_in_window": 6,
+        "news_headlines": [
+          "The 10 P.M. Dinner Is a Spanish Tradition. Are People Giving It Up? - The New York Times",
+          "KAP CARGO Offers Air Freight for Time-Sensitive Business Shipments - Aktualita.co",
+          "The Best New Restaurants In Columbus (September 2026) - Columbus Navigator",
+          "Royal Mail issues urgent disruption update as there are 'no deliveries' across Scotland - Daily Record",
+          "More Mail Ballots Are Arriving Late This Cycle, and They\u2019re Getting Tossed - The New York Times",
+          "$7M in orders from luxury online retailer The Outnet held up over legal dispute - Cleveland.com"
+        ],
+        "n_news_in_window": 36,
+        "app_versions_in_window": {
+          "32.16.2.300": 87,
+          "15.290.14": 80,
+          "26.8.6": 78,
+          "6.337.10002": 47,
+          "4.150.2": 43
+        }
+      }
+    },
+    {
+      "event_type": "engagement_spike",
+      "scope": "overall",
+      "metric": "engagement_sum",
+      "date": "2026-09-15",
+      "value": 5336.0,
+      "baseline_median": 374.5,
+      "ratio_to_median": 14.25,
+      "robust_z": 24.25,
+      "sentiment_mean": -0.5894,
+      "negative_share": 0.7417,
+      "evidence": {
+        "window": [
+          "2026-09-13",
+          "2026-09-17"
+        ],
+        "n_in_window": 3233,
+        "distinctive_terms": [
+          {
+            "term": "temu",
+            "z": 12.02,
+            "focus_count": 133,
+            "background_count": 123
+          },
+          {
+            "term": "zomato",
+            "z": 10.61,
+            "focus_count": 108,
+            "background_count": 105
+          },
+          {
+            "term": "hai",
+            "z": 10.19,
+            "focus_count": 374,
+            "background_count": 836
+          },
+          {
+            "term": "swiggy",
+            "z": 9.76,
+            "focus_count": 141,
+            "background_count": 202
+          },
+          {
+            "term": "meesho",
+            "z": 7.73,
+            "focus_count": 89,
+            "background_count": 128
+          },
+          {
+            "term": "myntra",
+            "z": 7.6,
+            "focus_count": 80,
+            "background_count": 109
+          },
+          {
+            "term": "salesforce",
+            "z": 6.77,
+            "focus_count": 33,
+            "background_count": 4
+          },
+          {
+            "term": "product",
+            "z": 5.94,
+            "focus_count": 373,
+            "background_count": 1107
+          },
+          {
+            "term": "kar",
+            "z": 5.6,
+            "focus_count": 82,
+            "background_count": 161
+          },
+          {
+            "term": "flipkart",
+            "z": 5.54,
+            "focus_count": 86,
+            "background_count": 174
+          },
+          {
+            "term": "achcha",
+            "z": 5.49,
+            "focus_count": 25,
+            "background_count": 20
+          },
+          {
+            "term": "fraud",
+            "z": 5.18,
+            "focus_count": 101,
+            "background_count": 229
+          },
+          {
+            "term": "bahut",
+            "z": 5.12,
+            "focus_count": 52,
+            "background_count": 89
+          },
+          {
+            "term": "bhi",
+            "z": 5.1,
+            "focus_count": 121,
+            "background_count": 294
+          },
+          {
+            "term": "uptime",
+            "z": 4.99,
+            "focus_count": 17,
+            "background_count": 9
+          }
+        ],
+        "delay_type_mix": {
+          "unspecified_delay": 1678,
+          "late_delivery": 500,
+          "cancelled": 331,
+          "never_arrived": 243,
+          "outage": 187,
+          "long_wait": 135
+        },
+        "reaction_type_mix": {
+          "neutral_report": 1945,
+          "anger": 612,
+          "escalation": 370,
+          "churn_threat": 107,
+          "refund_demand": 96,
+          "resigned": 85
+        },
+        "top_brands": {
+          "Temu": 261,
+          "Swiggy": 253,
+          "Uber": 207,
+          "Meesho": 193,
+          "Zomato": 189,
+          "Amazon IN": 174
+        },
+        "incidents": [
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-16 22:35",
+            "title": "Issue establishing voice call",
+            "reason": "other"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-16 19:28",
+            "title": "API Errors",
+            "reason": "other"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-16 16:43",
+            "title": "Google Pay Outage",
+            "reason": "outage"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-15 15:16",
+            "title": "Session Unavailability",
+            "reason": "outage"
+          },
+          {
+            "entity": "AWS",
+            "kind": "AWS",
+            "started": "2026-09-15 10:27",
+            "title": "Service disruption: Increased Error Rates",
+            "reason": "outage"
+          },
+          {
+            "entity": "AWS",
+            "kind": "AWS",
+            "started": "2026-09-15 10:22",
+            "title": "Service disruption: Increased Error Rates",
+            "reason": "outage"
+          },
+          {
+            "entity": "GitHub",
+            "kind": "GitHub",
+            "started": "2026-09-16 17:48",
+            "title": "Degradation with Gemini 3.8 Flash",
+            "reason": "degraded_performance"
+          },
+          {
+            "entity": "GitHub",
+            "kind": "GitHub",
+            "started": "2026-09-15 20:00",
+            "title": "Disruption with some GitHub services",
+            "reason": "degraded_performance"
+          }
+        ],
+        "n_incidents_in_window": 11,
+        "news_headlines": [
+          "Woolworths restores online orders, warns backlog will take time to clear - NZ Herald",
+          "Brothers attacked Uber Eats driver after McDonald\u2019s burger delivery took \u2018too long\u2019 - Kent Online",
+          "Indian Startup IPO Tracker 2026 - Inc42",
+          "The government is letting airlines off the hook for some flight delays. Here's what it means for you. - Elliott Report",
+          "Apple Launches iPhone 18 Pro and Pro Max for Pre-Order Amid Shipping Delays - SSBCrack",
+          "Apple Opens iPhone 18 Pro and Pro Max Pre-Orders - Bloom Pakistan"
+        ],
+        "n_news_in_window": 122,
+        "app_versions_in_window": {
+          "4.647.10002": 111,
+          "4.115.0": 99,
+          "32.17.0.300": 91,
+          "29.3": 89,
+          "4.2608.40": 84
+        }
+      }
+    },
+    {
+      "event_type": "engagement_spike",
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-18",
+      "value": 120.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 7.06,
+      "robust_z": 13.89,
+      "sentiment_mean": -0.7417,
+      "negative_share": 0.8167,
+      "evidence": {
+        "window": [
+          "2026-09-16",
+          "2026-09-20"
+        ],
+        "n_in_window": 360,
+        "distinctive_terms": [
+          {
+            "term": "suspended",
+            "z": 4.17,
+            "focus_count": 13,
+            "background_count": 2
+          },
+          {
+            "term": "whenever",
+            "z": 3.11,
+            "focus_count": 11,
+            "background_count": 10
+          },
+          {
+            "term": "nahi",
+            "z": 3.1,
+            "focus_count": 14,
+            "background_count": 16
+          },
+          {
+            "term": "karte",
+            "z": 3.06,
+            "focus_count": 7,
+            "background_count": 3
+          },
+          {
+            "term": "liye",
+            "z": 3.06,
+            "focus_count": 7,
+            "background_count": 3
+          },
+          {
+            "term": "rating",
+            "z": 3.03,
+            "focus_count": 17,
+            "background_count": 23
+          },
+          {
+            "term": "sometimes",
+            "z": 2.72,
+            "focus_count": 17,
+            "background_count": 26
+          },
+          {
+            "term": "vehicle",
+            "z": 2.65,
+            "focus_count": 15,
+            "background_count": 22
+          },
+          {
+            "term": "appreciate",
+            "z": 2.64,
+            "focus_count": 5,
+            "background_count": 1
+          },
+          {
+            "term": "baar",
+            "z": 2.64,
+            "focus_count": 5,
+            "background_count": 1
+          },
+          {
+            "term": "thinking",
+            "z": 2.64,
+            "focus_count": 5,
+            "background_count": 1
+          },
+          {
+            "term": "space",
+            "z": 2.61,
+            "focus_count": 5,
+            "background_count": 2
+          },
+          {
+            "term": "temporarily",
+            "z": 2.61,
+            "focus_count": 5,
+            "background_count": 2
+          },
+          {
+            "term": "basic",
+            "z": 2.61,
+            "focus_count": 5,
+            "background_count": 2
+          },
+          {
+            "term": "match",
+            "z": 2.59,
+            "focus_count": 6,
+            "background_count": 4
+          }
+        ],
+        "delay_type_mix": {
+          "unspecified_delay": 197,
+          "cancelled": 59,
+          "late_delivery": 39,
+          "long_wait": 35,
+          "never_arrived": 12,
+          "outage": 8
+        },
+        "reaction_type_mix": {
+          "neutral_report": 219,
+          "anger": 81,
+          "escalation": 40,
+          "churn_threat": 8,
+          "resigned": 8,
+          "refund_demand": 4
+        },
+        "top_brands": {
+          "Uber": 195,
+          "Rapido": 110,
+          "Lyft": 29,
+          "Ola": 26
+        },
+        "incidents": [
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-17 20:39",
+            "title": "Issue / Delay in establishing call connection",
+            "reason": "other"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-16 22:35",
+            "title": "Issue establishing voice call",
+            "reason": "other"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-16 19:28",
+            "title": "API Errors",
+            "reason": "other"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-16 16:43",
+            "title": "Google Pay Outage",
+            "reason": "outage"
+          },
+          {
+            "entity": "Squarespace",
+            "kind": "Squarespace",
+            "started": "2026-09-18 20:46",
+            "title": "Acuity Scheduling Admin Mobile app crashing unexpectedly after iOS 27 update",
+            "reason": "other"
+          },
+          {
+            "entity": "Zoom",
+            "kind": "Zoom",
+            "started": "2026-09-19 12:00",
+            "title": "Zoom Push Notification Service Release: September, 2026 (No Operational Impact)",
+            "reason": "maintenance"
+          },
+          {
+            "entity": "Zoom",
+            "kind": "Zoom",
+            "started": "2026-09-19 09:01",
+            "title": "Zoom Contact Center Update: September 19, 2026 (No Operational Impact)",
+            "reason": "maintenance"
+          },
+          {
+            "entity": "Zoom",
+            "kind": "Zoom",
+            "started": "2026-09-19 09:00",
+            "title": "Zoom Virtual Agent Update: September 19, 2026 (No Operational Impact)",
+            "reason": "maintenance"
+          }
+        ],
+        "n_incidents_in_window": 14,
+        "news_headlines": [
+          "DoorDash customer who shot at delivery driver in Richlandtown sentenced - PhillyBurbs",
+          "NCAA\u2019s flight delays report: Facts behind airline distruptions - The Sun Nigeria",
+          "MegazoneCloud and Datadog hold hands-on service outage response event - \ub514\uc9c0\ud138\ud22c\ub370\uc774",
+          "Farmer still waiting for weekend supermarket delivery as backlog drags out - Stuff",
+          "iPhone 18 Pro, iPhone 18 Pro Max Delivery: When Will You Get The Gadget? Huge Delay On Cards - esquireindia.co.in",
+          "Retail Drinks hits out at new SA delivery laws - theshout.com.au"
+        ],
+        "n_news_in_window": 158,
+        "app_versions_in_window": {
+          "4.648.10003": 96,
+          "8.125.0": 62,
+          "4.647.10002": 35,
+          "2026.35.3.1788938800": 17,
+          "8.124.0": 15
+        }
+      }
+    },
+    {
+      "event_type": "engagement_spike",
+      "scope": "ride_hailing",
+      "metric": "n",
+      "date": "2026-09-11",
+      "value": 113.0,
+      "baseline_median": 17.0,
+      "ratio_to_median": 6.65,
+      "robust_z": 12.95,
+      "sentiment_mean": -0.5752,
+      "negative_share": 0.7168,
+      "evidence": {
+        "window": [
+          "2026-09-09",
+          "2026-09-13"
+        ],
+        "n_in_window": 404,
+        "distinctive_terms": [
+          {
+            "term": "uber",
+            "z": 4.9,
+            "focus_count": 148,
+            "background_count": 303
+          },
+          {
+            "term": "nhi",
+            "z": 3.13,
+            "focus_count": 19,
+            "background_count": 24
+          },
+          {
+            "term": "felt",
+            "z": 3.05,
+            "focus_count": 7,
+            "background_count": 2
+          },
+          {
+            "term": "ticket",
+            "z": 2.9,
+            "focus_count": 16,
+            "background_count": 20
+          },
+          {
+            "term": "gas",
+            "z": 2.81,
+            "focus_count": 6,
+            "background_count": 2
+          },
+          {
+            "term": "upi",
+            "z": 2.78,
+            "focus_count": 6,
+            "background_count": 1
+          },
+          {
+            "term": "want",
+            "z": 2.76,
+            "focus_count": 30,
+            "background_count": 53
+          },
+          {
+            "term": "original",
+            "z": 2.74,
+            "focus_count": 8,
+            "background_count": 6
+          },
+          {
+            "term": "trash",
+            "z": 2.74,
+            "focus_count": 8,
+            "background_count": 6
+          },
+          {
+            "term": "rapido",
+            "z": 2.68,
+            "focus_count": 71,
+            "background_count": 162
+          },
+          {
+            "term": "destination",
+            "z": 2.68,
+            "focus_count": 21,
+            "background_count": 33
+          },
+          {
+            "term": "appointment",
+            "z": 2.66,
+            "focus_count": 6,
+            "background_count": 3
+          },
+          {
+            "term": "que",
+            "z": 2.61,
+            "focus_count": 7,
+            "background_count": 5
+          },
+          {
+            "term": "upfront",
+            "z": 2.52,
+            "focus_count": 5,
+            "background_count": 2
+          },
+          {
+            "term": "refunded",
+            "z": 2.51,
+            "focus_count": 11,
+            "background_count": 13
+          }
+        ],
+        "delay_type_mix": {
+          "unspecified_delay": 243,
+          "cancelled": 64,
+          "long_wait": 38,
+          "late_delivery": 35,
+          "never_arrived": 9,
+          "support_delay": 7
+        },
+        "reaction_type_mix": {
+          "neutral_report": 251,
+          "anger": 78,
+          "escalation": 45,
+          "churn_threat": 10,
+          "refund_demand": 9,
+          "resigned": 9
+        },
+        "top_brands": {
+          "Uber": 205,
+          "Rapido": 139,
+          "Lyft": 38,
+          "Ola": 22
+        },
+        "incidents": [
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-11 17:46",
+            "title": "Media Proxy Latency High",
+            "reason": "degraded_performance"
+          },
+          {
+            "entity": "Discord",
+            "kind": "Discord",
+            "started": "2026-09-11 06:42",
+            "title": "Issue with establishing voice calls",
+            "reason": "other"
+          },
+          {
+            "entity": "Dropbox",
+            "kind": "Dropbox",
+            "started": "2026-09-09 22:35",
+            "title": "Some customers are unable to access certain website routes and features.",
+            "reason": "other"
+          },
+          {
+            "entity": "Squarespace",
+            "kind": "Squarespace",
+            "started": "2026-09-10 11:00",
+            "title": "Acuity Scheduling: scheduled maintenance",
+            "reason": "maintenance"
+          }
+        ],
+        "n_incidents_in_window": 4,
+        "news_headlines": [
+          "South Korea's Lotte Super Returns to Quick Commerce After 3 Years and 7 Months, Reigniting Battle for No. 2 SSM Spot - finance.big",
+          "Pefindo downgrades INKA\u2019s rating amid commuter train delivery delays - The Jakarta Post",
+          "Ola Electric told to refund Rs 1.34 lakh over EV delivery delay; Rs 1 lakh compensation ordered - The Times of India",
+          "More delays expected across UK after air traffic glitch cancels over 1,000 flights - The Times of India",
+          "Delays and Cancellations Persist After Major Disruption at U.K. Airports - The New York Times",
+          "Airlines scramble to dig out from tech problems that canceled 1,750 flights in the UK - ABC News - Breaking News, Latest News and "
+        ],
+        "n_news_in_window": 90,
+        "app_versions_in_window": {
+          "4.646.10004": 101,
+          "8.124.0": 66,
+          "4.647.10002": 43,
+          "8.123.0": 26,
+          "7.5.8": 16
+        }
+      }
+    }
+  ]
+}

@@ -99,8 +99,14 @@ def apply_rules(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 def load_round2():
     """Load the Round 2 bundle, with its own modules importable."""
+    # APPEND, never insert(0): the Round 2 package contains modules whose names
+    # collide with ours (config.py, build_notebook.py). Putting it first on the
+    # path silently shadows this round's modules - which is exactly what it did
+    # the first time, and the failure surfaced three steps later in an unrelated
+    # script. Appending keeps Round 2 importable for joblib without letting it
+    # win a name contest.
     if str(ROUND2_SRC) not in sys.path:
-        sys.path.insert(0, str(ROUND2_SRC))
+        sys.path.append(str(ROUND2_SRC))
     if not Path(ROUND2_MODEL).exists():
         raise SystemExit(f"Round 2 model not found at {ROUND2_MODEL}")
     import joblib

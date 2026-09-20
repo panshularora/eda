@@ -40,7 +40,14 @@ from scipy import stats
 from config import PROCESSED, RAW, REPORTS
 from fetch import read_jsonl
 
-MIN_SIDE = 60          # records needed on each side of a candidate change point
+# A delay event hits one operator, not the whole market, so the aggregate series
+# is the wrong place to look for it - averaging 44 brands together is exactly how
+# you wash a real shift out. The scan therefore runs at brand and domain level
+# too, with thresholds low enough to include mid-sized brands. That widens the
+# number of tests, which is precisely why every p-value in the scan goes through
+# Benjamini-Hochberg together: the correction scales with the scan, so widening
+# it costs sensitivity rather than buying false positives.
+MIN_SIDE = 40          # records needed on each side of a candidate change point
 WINDOW_DAYS = 3        # comparison half-width, in days
 FDR_Q = 0.05
 SPIKE_Z = 3.5
@@ -364,12 +371,23 @@ def main() -> dict:
     # ---- shifts -----------------------------------------------------------
     shifts = detect_shifts(delay, "overall")
     for dom, g in delay.groupby("delay_domain"):
-        if dom and len(g) >= 1500:
+        if dom and len(g) >= 500:
             shifts += detect_shifts(g, dom)
     for brand, g in delay.groupby("brand"):
-        if brand and len(g) >= 2500:
-            shifts += detect_shifts(g, brand)
-    shifts = sorted(shifts, key=lambda s: -abs(s["cohens_d"]))
+        if brand and len(g) >= 400:
+            shifts += detect_shifts(g, f"brand:{brand}")
+    # A 3-day window catches drifts; a 2-day window catches the sharp step a
+    # single incident produces. Both feed the same FDR pool.
+    for brand, g in delay.groupby("brand"):
+        if brand and len(g) >= 600:
+            shifts += detect_shifts(g, f"brand:{brand}", window_days=2)
+    seen, deduped = set(), []
+    for sh in sorted(shifts, key=lambda s: -abs(s["cohens_d"])):
+        key = (sh["scope"], sh["date"])
+        if key not in seen:
+            seen.add(key)
+            deduped.append(sh)
+    shifts = deduped
     results["sentiment_shifts"] = shifts
     print(f"  sentiment shifts (FDR<{FDR_Q}): {len(shifts)}")
 
@@ -430,9 +448,10 @@ def main() -> dict:
     explained = []
     for ev in shifts[:4]:
         scope = ev["scope"]
+        bare = scope.split("brand:", 1)[-1]
         sub = delay if scope == "overall" else delay[
-            (delay["delay_domain"] == scope) | (delay["brand"] == scope)]
-        brand = scope if scope in set(delay["brand"]) else None
+            (delay["delay_domain"] == scope) | (delay["brand"] == bare)]
+        brand = bare if bare in set(delay["brand"]) else None
         explained.append({"event_type": "sentiment_shift", **ev,
                           "evidence": explain_event(ev, sub, incidents, attention,
                                                     news, brand)})

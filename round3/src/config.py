@@ -214,10 +214,10 @@ WIKI_ARTICLES = [
 # are listed before the generic ones. Patterns are regex, matched case-insensitively
 # against the normalised text.
 DELAY_TYPES: list[tuple[str, str]] = [
-    ("never_arrived",     r"never (?:arriv|came|deliver|show)|not deliver|no[t]? receiv|missing (?:order|parcel|package)|marked (?:as )?deliver(?:ed)? but"),
+    ("never_arrived",     r"never (?:arriv|came|deliver|show|got|receiv)|not deliver|no[t]? receiv|missing (?:order|parcel|package)|marked (?:as )?deliver(?:ed)? but|no (?:food|order|item|parcel|package|delivery)\b.{0,20}(?:deliver|arriv|came)|did ?n[o']?t (?:arrive|come|deliver|show)"),
     ("missing_items",     r"missing item|item[s]? missing|incomplete order|half (?:the )?order|wrong item|items? (?:were|was) not"),
     ("stuck_in_transit",  r"stuck in transit|no (?:tracking )?update|not mov(?:ed|ing)|in transit for|tracking (?:has ?n[o']t|not) updat|same status"),
-    ("cancelled",         r"cancel(?:led|ed|lation)|order was cancel|auto[- ]cancel"),
+    ("cancelled",         r"\bcancel(?:led|ed|lation|s|ling)?\b|auto[- ]cancel"),
     ("refund_delay",      r"refund (?:not|still|hasn'?t|delay|pending)|no refund|waiting for (?:my )?refund|money not (?:refund|credit|return)"),
     ("outage",            r"\b(?:outage|server (?:down|error)|app (?:is )?down|site (?:is )?down|not working|can'?t (?:log ?in|open|access)|crash)"),
     ("support_delay",     r"(?:no|zero|poor) (?:response|reply|support)|support (?:never|not|does ?n[o']t) (?:respond|reply|help)|no one (?:responds|replies|helps)|chatbot"),
@@ -237,12 +237,23 @@ REACTION_TYPES: list[tuple[str, str]] = [
 ]
 
 # A reaction only counts as on-topic if it mentions a delay or service failure.
-# Deliberately broad at the recall end: precision is restored by DELAY_TYPES,
-# and the false-positive rate is measured by hand-audit in reports/.
+#
+# Every alternative below is word-bounded, and that is not stylistic. The first
+# version of this filter was written without boundaries and reproduced, in our
+# own code, precisely the defect we caught in the Round 2 labels: bare `late`
+# matched "chocolate" and "translate", bare `down` matched "download", and bare
+# `eta` matched "retail", "beta" and "meta". A hand audit of the residual bucket
+# found those false positives sitting in the dataset, which is the entire reason
+# to audit a rule rather than trust it. Boundaries fixed it; the audit is
+# reproduced in reports/relevance_audit.md.
 DELAY_RELEVANCE = (
-    r"late|delay|slow|wait|stuck|pending|never (?:arriv|came|deliver)|not deliver|"
-    r"missing|cancel|refund|outage|down(?:time)?|not working|no update|eta|"
-    r"took (?:too )?long|hours|overdue|on time|behind schedule|held up|postpon"
+    r"\blate\b|\bdelay|\bslow\b|\bwait(?:ing|ed|s)?\b|\bstuck\b|\bpending\b|"
+    r"never (?:arriv|came|deliver|show|got|receiv)|\bnot deliver|\bno[t]? receiv|"
+    r"\bmissing\b|\bcancel|\brefund|\boutage\b|\bdown\b|\bdowntime\b|"
+    r"\bnot working\b|\bno update\b|\beta\b|\btook (?:too )?long\b|"
+    r"\b\d+\s*(?:hour|hr|min|minute|day|week)s?\b|\boverdue\b|\bon time\b|"
+    r"\bbehind schedule\b|\bheld up\b|\bpostpon|\bno show\b|"
+    r"\bno (?:food|order|item|parcel|package)\b"
 )
 
 # ---------------------------------------------------------------------------

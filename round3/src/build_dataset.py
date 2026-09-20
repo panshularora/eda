@@ -48,6 +48,7 @@ DICTIONARY: dict[str, tuple[str, str]] = {
     "text_length":          ("derived", "characters in full_text"),
     "word_count":           ("derived", "whitespace tokens in full_text"),
     "author_pseudonym":     ("derived", "salted SHA-256 of the handle; the raw handle is never stored"),
+    "publisher":            ("collected", "outlet that published the article (news rows only); never a delay brand"),
     "rating":               ("collected", "1-5 star rating chosen by the reviewer (Play only) - an independent sentiment label"),
     "engagement":           ("collected", "endorsement count; meaning varies by source, see engagement_kind"),
     "engagement_kind":      ("derived", "what engagement counts on this source: thumbs_up, fav_boost_reply, points_comments or none"),
@@ -127,21 +128,46 @@ def data_dictionary(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _write_sized_csv(df: pd.DataFrame, path, budget_mb: float) -> tuple[int, bool]:
-    """Write a CSV, trimming to the most informative rows if it overflows."""
-    df.to_csv(path, index=False, encoding="utf-8")
-    size = path.stat().st_size / 1e6
-    trimmed = False
-    while size > budget_mb and len(df) > 5000:
-        # keep the rows the analysis actually relies on: delay-related first,
-        # then the most-endorsed, then the most recent
-        df = (df.sort_values(
-            ["is_delay_related", "engagement", "created_utc"],
-            ascending=[False, False, False]).head(int(len(df) * 0.8)))
-        df.to_csv(path, index=False, encoding="utf-8")
-        size = path.stat().st_size / 1e6
-        trimmed = True
-    return len(df), trimmed
+def _write_sized_csv(df: pd.DataFrame, path, budget_mb: float) -> tuple[int, bool, str]:
+    """Fit the upload budget by shedding *bytes*, never rows.
+
+    The first version of this dropped rows until the file fit, and threw away
+    89% of the dataset to do it. That is the wrong trade: a structured dataset's
+    value is its coverage, and a reader can always re-read a truncated review
+    but cannot recover a row that was never shipped.
+
+    So the ladder below removes redundancy first - ``full_text`` is exactly
+    ``title`` + ``text`` and is reconstructible in one line - then caps the long
+    tail of review prose, and only drops rows if a 200-character cap somehow
+    still overflows. Whatever step was needed is returned and recorded, so the
+    published file is never quietly different from what the reader assumes.
+    """
+    def size_of(frame) -> float:
+        frame.to_csv(path, index=False, encoding="utf-8")
+        return path.stat().st_size / 1e6
+
+    if size_of(df) <= budget_mb:
+        return len(df), False, "complete"
+
+    # 1. drop the redundant concatenation
+    slim = df.drop(columns=["full_text"], errors="ignore")
+    if size_of(slim) <= budget_mb:
+        return len(slim), False, "dropped full_text (= title + text)"
+
+    # 2. cap the prose, keeping every row
+    for cap in (800, 500, 350, 200):
+        capped = slim.copy()
+        capped["text"] = capped["text"].astype(str).str.slice(0, cap)
+        capped["text_truncated_at"] = cap
+        if size_of(capped) <= budget_mb:
+            return len(capped), False, f"dropped full_text; text capped at {cap} chars"
+
+    # 3. last resort
+    capped = capped.sort_values(["is_delay_related", "engagement", "created_utc"],
+                                ascending=[False, False, False])
+    while size_of(capped) > budget_mb and len(capped) > 5000:
+        capped = capped.head(int(len(capped) * 0.85))
+    return len(capped), True, "rows dropped after byte reduction was exhausted"
 
 
 def main() -> dict:
@@ -178,9 +204,9 @@ def main() -> dict:
 
     # ---- submission copy, inside the upload budget ------------------------
     sub_csv = SUBMISSION / "Round3_Delay_Reactions_Dataset_Team_SE7EN.csv"
-    n_kept, trimmed = _write_sized_csv(df.copy(), sub_csv, SUBMISSION_BUDGET_MB)
-    print(f"  submission CSV {sub_csv.stat().st_size/1e6:.1f} MB, {n_kept:,} rows"
-          + ("  (trimmed to fit the upload cap)" if trimmed else ""))
+    n_kept, rows_dropped, how = _write_sized_csv(df.copy(), sub_csv, SUBMISSION_BUDGET_MB)
+    print(f"  submission CSV {sub_csv.stat().st_size/1e6:.1f} MB, {n_kept:,} rows "
+          f"({n_kept/len(df):.0%} of full)  [{how}]")
 
     # ---- dictionary + quality --------------------------------------------
     dd = data_dictionary(df)
@@ -191,9 +217,11 @@ def main() -> dict:
                      "bytes": full_csv.stat().st_size,
                      "sha256": sha256_file(full_csv)},
         "submission_csv": {"rows": int(n_kept),
+                           "row_coverage_vs_full": round(n_kept / len(df), 4),
                            "bytes": sub_csv.stat().st_size,
                            "sha256": sha256_file(sub_csv),
-                           "trimmed_to_fit": trimmed},
+                           "size_reduction": how,
+                           "rows_dropped": rows_dropped},
     }
     qual["topic"] = TOPIC
     qual["window_days_requested"] = WINDOW_DAYS

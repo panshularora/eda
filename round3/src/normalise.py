@@ -241,7 +241,7 @@ COLUMNS = [
     "is_thin_text",
     "created_utc", "date", "hour_utc", "collected_utc",
     "title", "text", "full_text", "text_length", "word_count",
-    "author_pseudonym", "rating", "engagement", "engagement_kind",
+    "author_pseudonym", "publisher", "rating", "engagement", "engagement_kind",
     "app_version", "company_replied", "company_reply_utc", "url",
 ]
 

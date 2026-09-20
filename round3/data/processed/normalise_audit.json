@@ -1,17 +1,22 @@
 {
-  "input_rows": 120465,
-  "dropped_too_short": 47409,
+  "input_rows": 123195,
+  "dropped_empty_text": 2655,
+  "flagged_thin_text": 44754,
   "dropped_unparseable_time": 0,
-  "dropped_outside_window": 2127,
-  "brand_attributed_from_text": 0,
-  "rows_without_brand": 0,
-  "dropped_duplicate_native_id": 0,
-  "dropped_duplicate_text": 3760,
-  "output_rows": 67169,
+  "dropped_outside_window": 2845,
+  "brand_attributed_from_text": 1783,
+  "rows_without_brand": 1329,
+  "dropped_duplicate_native_id": 48,
+  "dropped_duplicate_text": 41524,
+  "output_rows": 76123,
   "by_source": {
-    "google_play": 67169
+    "google_play": 74015,
+    "mastodon": 523,
+    "hackernews": 691,
+    "news": 619,
+    "reddit": 275
   },
-  "window_start": "2026-08-06 08:24:12+00:00",
-  "window_end": "2026-09-19 10:23:02+00:00",
-  "span_days": 44.08
+  "window_start": "2026-08-06 08:39:18+00:00",
+  "window_end": "2026-09-20 08:20:59+00:00",
+  "span_days": 44.99
 }

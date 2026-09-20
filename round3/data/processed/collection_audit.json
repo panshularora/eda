@@ -1,0 +1,121 @@
+{
+  "topic": "Reaction to a Major Delivery or Service Delay",
+  "started_utc": "2026-09-20T08:19:47+00:00",
+  "finished_utc": "2026-09-20T08:30:23+00:00",
+  "elapsed_seconds": 635.5,
+  "window_days": 45,
+  "records_by_source": {
+    "google_play": 120465,
+    "reddit": 275,
+    "mastodon": 1120,
+    "news": 636,
+    "hackernews": 699,
+    "incidents": 244,
+    "attention_rows": 1440
+  },
+  "total_reaction_records": 123195,
+  "http": {
+    "hosts": {
+      "discordstatus.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 34053
+      },
+      "hn.algolia.com": {
+        "live_requests": 6,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 1759350
+      },
+      "mastodon.social": {
+        "live_requests": 14,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 2895755
+      },
+      "mstdn.social": {
+        "live_requests": 14,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 3026626
+      },
+      "nasstatus.faa.gov": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 1619
+      },
+      "news.google.com": {
+        "live_requests": 14,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 964663
+      },
+      "status.aws.amazon.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 56406
+      },
+      "status.datadoghq.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 48652
+      },
+      "status.dropbox.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 29568
+      },
+      "status.squarespace.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 38183
+      },
+      "status.twilio.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 32609
+      },
+      "status.zoom.us": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 39004
+      },
+      "wikimedia.org": {
+        "live_requests": 32,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 218132
+      },
+      "www.cloudflarestatus.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 35627
+      },
+      "www.githubstatus.com": {
+        "live_requests": 1,
+        "cache_hits": 0,
+        "failures": 0,
+        "bytes": 85488
+      },
+      "www.reddit.com": {
+        "live_requests": 11,
+        "cache_hits": 0,
+        "failures": 8,
+        "bytes": 505862
+      }
+    },
+    "total_live_requests": 101,
+    "total_cache_hits": 0,
+    "total_failures": 9,
+    "total_bytes": 9771597
+  }
+}

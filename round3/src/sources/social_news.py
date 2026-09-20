@@ -55,6 +55,7 @@ def _blank(**kw) -> dict:
         source="", source_id="", store_country="", brand="", delay_domain="",
         record_native_id="", created_utc="", collected_utc=_iso(datetime.now(timezone.utc)),
         title="", text="", author_pseudonym="", rating=None, thumbs_up=0,
+        publisher="",
         app_version="", company_replied=False, company_reply_utc="",
         company_reply_text="", url="",
     )
@@ -153,9 +154,14 @@ def collect_news(queries=None) -> list[dict]:
             except Exception:
                 pub = ""
             src_el = it.find("source")
+            # The publisher is NOT the brand. "The Times of India" is who wrote
+            # about the delay, not who caused it; putting it in `brand` produced
+            # 417 spurious brands. It goes in `publisher`, and `brand` is left
+            # empty so normalise.py attributes it from the text like any other
+            # source that does not carry it.
             out.append(_blank(
                 source="news", source_id=q.strip('"'),
-                brand=(src_el.text if src_el is not None else "") or "",
+                publisher=(src_el.text if src_el is not None else "") or "",
                 record_native_id=txt("guid"),
                 created_utc=pub,
                 title=_strip_html(txt("title")),
