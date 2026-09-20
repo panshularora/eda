@@ -16,3 +16,6 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# Round 3: HTTP cache (regenerable, large)
+round3/data/raw/_httpcache/

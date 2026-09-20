@@ -1,0 +1,18 @@
+# Round 3 - live collection and analysis. Python 3.11 (tested).
+pandas==2.2.2
+numpy==1.26.4
+scipy==1.17.1
+scikit-learn==1.5.1
+matplotlib==3.10.9
+joblib==1.4.2
+
+# Google Play review collection
+google-play-scraper>=1.2.7
+
+# Parquet (falls back to CSV if absent)
+pyarrow>=15.0
+
+# Only needed to re-execute the analysis notebook
+nbformat>=5.10
+nbclient>=0.10
+ipykernel>=6.29
