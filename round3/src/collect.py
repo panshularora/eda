@@ -33,7 +33,7 @@ def _stamp() -> str:
 def main(skip_play: bool = False) -> dict:
     import attention
     import incidents
-    import play_reviews
+    import play_census
     import social_news
 
     started = _stamp()
@@ -51,17 +51,28 @@ def main(skip_play: bool = False) -> dict:
         results["google_play"] = len(play_reviews.collect())
         print()
 
-    print("[2/4] Social and news")
+    print("[2/5] Social and news")
     social = social_news.collect()
     results.update({k: len(v) for k, v in social.items()})
     print()
 
-    print("[3/4] Ground-truth incidents")
+    print("[3/5] Ground-truth incidents")
     results["incidents"] = len(incidents.collect())
     print()
 
-    print("[4/4] Attention (Wikipedia pageviews)")
+    print("[4/5] Attention (Wikipedia pageviews)")
     results["attention_rows"] = len(attention.collect())
+    print()
+
+    # [5/5] Record what this run added that no previous run had seen. A single
+    # pull is a retrospective snapshot; only the increment between waves is
+    # genuinely live, and only the increment is described as live in the report.
+    print("[5/5] Wave bookkeeping")
+    import waves
+    wave = waves.record_wave()
+    results["new_records_this_wave"] = wave["total_new_this_wave"]
+    print(f"      wave {wave['wave']}: {wave['total_new_this_wave']:,} records "
+          f"not seen in any previous wave")
     print()
 
     audit = {
@@ -73,7 +84,9 @@ def main(skip_play: bool = False) -> dict:
         "records_by_source": results,
         "total_reaction_records": sum(
             v for k, v in results.items()
-            if k not in ("incidents", "attention_rows")),
+            if k not in ("incidents", "attention_rows", "new_records_this_wave",
+                         "google_play_census_days")),
+        "wave": wave,
         "http": LEDGER.summary(),
     }
     (PROCESSED / "collection_audit.json").write_text(

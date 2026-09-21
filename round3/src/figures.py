@@ -60,13 +60,18 @@ def fig_timeline(daily: pd.DataFrame, shifts, spikes) -> str:
     ax.fill_between(d["date"], d["n"], color=ACCENT, alpha=0.25)
     ax.plot(d["date"], d["n"], color=ACCENT, lw=1.4)
     ax.set_ylabel("delay-related reactions / day")
-    ax.set_title("Activity: volume of delay-related reactions")
-    for s in [x for x in spikes if x["scope"] == "overall" and x["metric"] == "n"][:5]:
+    ax.set_title("Activity: delay-related reactions per day, balanced panel")
+    # Labels alternate between two rows. The first version stacked every
+    # annotation at the same height, so markers on adjacent days overlapped
+    # into an unreadable smear.
+    picked_spikes = [x for x in spikes
+                     if x["scope"] == "overall" and x["metric"] == "n"][:5]
+    for i, s in enumerate(picked_spikes):
         x = pd.Timestamp(s["date"])
         ax.axvline(x, color=WARN, ls="--", lw=1.1, alpha=0.9)
-        ax.annotate(f"spike z={s['robust_z']:.1f}\n{s['ratio_to_median']:.1f}x median",
-                    xy=(x, d["n"].max()), xytext=(0, -26),
-                    textcoords="offset points", ha="center", fontsize=6.8,
+        ax.annotate(f"{s['ratio_to_median']:.1f}x median\nz={s['robust_z']:.1f}",
+                    xy=(x, d["n"].max()), xytext=(0, -20 - 24 * (i % 2)),
+                    textcoords="offset points", ha="center", fontsize=6.6,
                     color=WARN, fontweight="bold")
     despine(ax)
 
@@ -81,17 +86,26 @@ def fig_timeline(daily: pd.DataFrame, shifts, spikes) -> str:
     ax2.set_ylabel("negative share", color=WARN)
     ax2.tick_params(axis="y", colors=WARN)
     ax2.grid(False)
-    for s in [x for x in shifts if x["scope"] == "overall"][:6]:
+    # The label quotes the RECORD-level d. The first version quoted the
+    # daily-series d, which reads "large effect" for a 0.12-star move.
+    picked = [x for x in shifts if x["scope"] == "overall"][:6]
+    for i, s in enumerate(picked):
         x = pd.Timestamp(s["date"])
         col = "#b23a48" if s["direction"] == "deterioration" else GOOD
+        dr = s.get("cohens_d_records")
         ax.axvline(x, color=col, ls="-", lw=1.3, alpha=0.75)
-        ax.annotate(f"{'▼' if s['direction']=='deterioration' else '▲'} "
-                    f"d={s['cohens_d']:+.2f}",
-                    xy=(x, ax.get_ylim()[1]), xytext=(0, -12),
-                    textcoords="offset points", ha="center", fontsize=6.8,
+        arrow = "v" if s["direction"] == "deterioration" else "^"
+        label = f"{arrow} d={dr:+.2f}" if dr is not None else str(s["date"])
+        bp = (s.get("balanced_panel_check") or {}).get("survives")
+        if bp is False:
+            label += "\n(fails panel control)"
+        ax.annotate(label, xy=(x, ax.get_ylim()[1]),
+                    xytext=(0, -12 - 20 * (i % 2)),
+                    textcoords="offset points", ha="center", fontsize=6.6,
                     color=col, fontweight="bold")
     ax.set_ylabel("mean sentiment  (-1 neg .. +1 pos)")
-    ax.set_title("Sentiment, with FDR-significant shifts marked")
+    ax.set_title("Sentiment on the balanced panel, with change points marked "
+                 "(d = effect on reviewers)")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
     despine(ax)
     fig.autofmt_xdate(rotation=0, ha="center")
@@ -103,6 +117,15 @@ def fig_timeline(daily: pd.DataFrame, shifts, spikes) -> str:
 def fig_delay_types(analysis) -> str:
     rows = pd.DataFrame(analysis["sentiment_by_delay_type"]).sort_values("n", ascending=True)
     rows = rows[rows["delay_type"] != ""]
+    # `unspecified_delay` is excluded from the chart of delay *types* because
+    # it is not one - it is the rows that describe a delay reaction without
+    # naming a failure mode, overwhelmingly refunds that never came and support
+    # that never answered. Leaving it in makes the largest bar in a chart
+    # titled "how the delay was described" mean "it wasn't", which reads as a
+    # broken taxonomy rather than as an honest residual. Its size and contents
+    # are reported in the text and in `analysis.json:unspecified_profile`.
+    n_unspec = int(rows.loc[rows["delay_type"] == "unspecified_delay", "n"].sum())
+    rows = rows[rows["delay_type"] != "unspecified_delay"]
     fig, axes = plt.subplots(1, 2, figsize=(9.2, 3.4))
     ax = axes[0]
     ax.barh(rows["delay_type"], rows["n"], color=ACCENT, alpha=0.9)
@@ -125,6 +148,11 @@ def fig_delay_types(analysis) -> str:
     despine(ax)
     fig.suptitle("Different delays draw different reactions", fontsize=10.5,
                  fontweight="bold", y=1.03)
+    fig.text(0.5, -0.06,
+             f"A further {n_unspec:,} delay-related reactions name no failure "
+             f"mode (mostly refunds that never came and support that never "
+             f"answered) and are excluded from this chart of delay types.",
+             ha="center", fontsize=7, color=MUTED)
     return save(fig, "fig02_delay_types.png")
 
 
@@ -320,6 +348,125 @@ def fig_ratings_vs_sentiment(df: pd.DataFrame) -> str:
 
 
 # ---------------------------------------------------------------------------
+def fig_panel_artefact(analysis, df: pd.DataFrame) -> str:
+    """The control chart: how much of the trend was the collector.
+
+    This is the first figure in the report because it is the one that decides
+    whether any of the others mean anything. Left: brand coverage, one bar per
+    brand, showing which were observable for the whole window. Right: daily
+    delay-related volume for all brands against the balanced panel. If the two
+    lines diverge, the divergence is the sampling artefact, in the units of the
+    thing being claimed.
+    """
+    cov = (analysis.get("coverage") or {}).get("by_brand")
+    diag = (analysis.get("coverage") or {}).get("panel_diagnostics")
+    if not cov:
+        return ""
+
+    fig, axes = plt.subplots(1, 2, figsize=(10.4, 4.4),
+                             gridspec_kw={"width_ratios": [1, 1.35]})
+
+    ax = axes[0]
+    items = sorted(cov.items(), key=lambda kv: kv[1]["coverage_share"])
+    names = [k for k, _ in items]
+    shares = [v["coverage_share"] for _, v in items]
+    inpanel = [v["in_balanced_panel"] for _, v in items]
+    colours = [GOOD if p else WARN for p in inpanel]
+    ax.barh(range(len(names)), shares, color=colours, height=0.78)
+    ax.set_yticks(range(len(names)))
+    ax.set_yticklabels(names, fontsize=5.6)
+    ax.set_xlim(0, 1.02)
+    ax.set_xlabel("share of window days on which the brand appears")
+    ax.set_title("Brand coverage of the window", loc="left")
+    ax.axvline(0.95, color=INK, lw=0.8, ls="--")
+    n_in = sum(inpanel)
+    ax.text(0.5, -2.4, f"{n_in} of {len(names)} brands cover the window "
+                       f"(green) and form the balanced panel",
+            fontsize=7, color=MUTED, ha="center")
+    despine(ax)
+
+    ax = axes[1]
+    d = df.copy()
+    d["date"] = pd.to_datetime(d["date"])
+    play = d[d["source"] == "google_play"]
+    dly = play[play["is_delay_related"]]
+    panel = [k for k, v in cov.items() if v["in_balanced_panel"]]
+    allv = dly.groupby("date").size()
+    balv = dly[dly["brand"].isin(panel)].groupby("date").size().reindex(
+        allv.index, fill_value=0)
+    ax.plot(allv.index, allv.values, color=WARN, lw=1.8,
+            label="all brands (what we first reported)")
+    ax.plot(balv.index, balv.values, color=GOOD, lw=1.8,
+            label="balanced panel (what the report uses)")
+    ax.fill_between(allv.index, balv.values, allv.values,
+                    color=WARN, alpha=0.13)
+    ax.set_ylabel("delay-related reactions per day")
+    ax.set_title("Daily activity: the shaded area is the sampling artefact",
+                 loc="left")
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
+    ax.legend(loc="upper left")
+    if diag:
+        ra = diag["all_brands"]["pearson_r_with_day_index"]
+        rb = diag["balanced_panel"]["pearson_r_with_day_index"]
+        ax.text(0.99, 0.04,
+                f"correlation with day index:  all brands r = {ra:+.2f}"
+                f"   balanced panel r = {rb:+.2f}",
+                transform=ax.transAxes, ha="right", fontsize=7.2, color=INK)
+    despine(ax)
+    fig.suptitle("Before any finding: is the trend in the public, or in our scraper?",
+                 fontsize=10.5, fontweight="bold", x=0.007, ha="left", y=1.02)
+    return save(fig, "fig00_panel_artefact.png")
+
+
+def fig_spike_anatomy(analysis, df: pd.DataFrame) -> str:
+    """What an endorsement spike is actually made of.
+
+    A ratio-to-median of 12.35x sounds like a conversation taking off. Drawing
+    the day's contributors shows whether it was, and on the largest spike in
+    this corpus it was two reviews holding 88% of the endorsement while the
+    median review that day got zero.
+    """
+    end = [s for s in analysis.get("engagement_spikes", [])
+           if s.get("kind") == "endorsement"]
+    if not end:
+        return ""
+    top = end[0]
+    d = df.copy()
+    d["date"] = pd.to_datetime(d["date"])
+    day = d[(d["date"] == pd.Timestamp(top["date"])) & d["is_delay_related"]]
+    if day.empty:
+        return ""
+    vals = np.sort(day["engagement"].fillna(0).to_numpy())[::-1]
+
+    fig, axes = plt.subplots(1, 2, figsize=(9.4, 3.7))
+    ax = axes[0]
+    k = min(30, len(vals))
+    ax.bar(range(k), vals[:k], color=[WARN if i < 2 else ACCENT for i in range(k)])
+    ax.set_xlabel(f"the {k} most-endorsed reactions of {top['date']}")
+    ax.set_ylabel("thumbs-up")
+    ax.set_title(f"{top['date']}: {top['ratio_to_median']}x the median day", loc="left")
+    conc = top.get("concentration") or {}
+    if conc.get("top1_share") is not None:
+        ax.text(0.97, 0.9, f"top 1 = {conc['top1_share']:.0%} of the day\n"
+                           f"top 5 = {conc['top5_share']:.0%}\n"
+                           f"median reaction = "
+                           f"{top.get('median_engagement_that_day', 0):.0f} thumbs",
+                transform=ax.transAxes, ha="right", va="top", fontsize=7.6, color=INK)
+    despine(ax)
+
+    ax = axes[1]
+    cum = np.cumsum(vals) / max(vals.sum(), 1)
+    ax.plot(np.arange(1, len(cum) + 1), cum, color=ACCENT, lw=1.8)
+    ax.axhline(0.8, color=MUTED, lw=0.8, ls="--")
+    ax.set_xscale("log")
+    ax.set_ylim(0, 1.02)
+    ax.set_xlabel("reactions, ranked by endorsement (log scale)")
+    ax.set_ylabel("cumulative share of the day's endorsement")
+    ax.set_title("A spike this concentrated is a post, not a conversation", loc="left")
+    despine(ax)
+    return save(fig, "fig12_spike_anatomy.png")
+
+
 def main() -> dict:
     analysis = json.loads((REPORTS / "analysis.json").read_text(encoding="utf-8"))
     transfer_path = REPORTS / "round2_transfer.json"
@@ -335,8 +482,11 @@ def main() -> dict:
     hourly = pd.read_csv(PROCESSED / "timeseries_hourly.csv")
 
     made = {}
+    # First, because it decides whether the rest means anything.
+    made["panel_artefact"] = fig_panel_artefact(analysis, df)
     made["timeline"] = fig_timeline(daily, analysis["sentiment_shifts"],
                                     analysis["engagement_spikes"])
+    made["spike_anatomy"] = fig_spike_anatomy(analysis, df)
     made["delay_types"] = fig_delay_types(analysis)
     made["reaction_types"] = fig_reactions(analysis)
     made["domains"] = fig_domains(by_dom)

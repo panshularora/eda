@@ -1,0 +1,48 @@
+{
+  "wave": 1,
+  "label": "wave 1",
+  "collected_utc": "2026-09-20T17:16:37+00:00",
+  "by_source": {
+    "play_reviews": {
+      "in_raw": 91192,
+      "new_this_wave": 91192,
+      "already_seen": 0
+    },
+    "reddit": {
+      "in_raw": 275,
+      "new_this_wave": 275,
+      "already_seen": 0
+    },
+    "lemmy": {
+      "in_raw": 621,
+      "new_this_wave": 621,
+      "already_seen": 0
+    },
+    "mastodon": {
+      "in_raw": 2775,
+      "new_this_wave": 2775,
+      "already_seen": 0
+    },
+    "news": {
+      "in_raw": 645,
+      "new_this_wave": 645,
+      "already_seen": 0
+    },
+    "news_brand": {
+      "in_raw": 2098,
+      "new_this_wave": 2098,
+      "already_seen": 0
+    },
+    "hackernews": {
+      "in_raw": 709,
+      "new_this_wave": 709,
+      "already_seen": 0
+    },
+    "incidents": {
+      "in_raw": 194,
+      "new_this_wave": 194,
+      "already_seen": 0
+    }
+  },
+  "total_new_this_wave": 98509
+}

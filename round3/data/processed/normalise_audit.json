@@ -1,22 +1,25 @@
 {
-  "input_rows": 123195,
-  "dropped_empty_text": 2655,
-  "flagged_thin_text": 44754,
+  "input_rows": 98662,
+  "dropped_empty_text": 1881,
+  "flagged_thin_text": 32535,
   "dropped_unparseable_time": 0,
-  "dropped_outside_window": 2847,
-  "brand_attributed_from_text": 2419,
-  "rows_without_brand": 1911,
-  "dropped_duplicate_native_id": 48,
-  "dropped_duplicate_text": 41524,
-  "output_rows": 76121,
+  "dropped_outside_window": 2532,
+  "brand_attributed_from_text": 6223,
+  "rows_without_brand": 3461,
+  "dropped_duplicate_native_id": 269,
+  "dropped_duplicate_text": 1291,
+  "dedupe_note": "Text-level dedupe is keyed on source+brand+author for the app store and on source+text for the social sources. A single key across all sources collapsed 9,408 reviews reading 'good' into one row and removed a third of the corpus non-randomly, biasing it toward verbose reviewers.",
+  "output_rows": 92689,
   "by_source": {
-    "google_play": 74013,
-    "mastodon": 523,
-    "hackernews": 691,
-    "news": 619,
-    "reddit": 275
+    "google_play": 87978,
+    "mastodon": 706,
+    "hackernews": 700,
+    "lemmy": 136,
+    "news_brand": 1932,
+    "news": 628,
+    "reddit": 609
   },
-  "window_start": "2026-08-06 08:44:11+00:00",
-  "window_end": "2026-09-20 08:20:59+00:00",
-  "span_days": 44.98
+  "window_start": "2026-08-06 17:19:33+00:00",
+  "window_end": "2026-09-20 17:13:42+00:00",
+  "span_days": 45.0
 }

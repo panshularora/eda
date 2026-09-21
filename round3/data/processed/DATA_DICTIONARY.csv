@@ -1,38 +1,50 @@
 column,dtype,provenance,non_null,completeness,distinct,example,meaning
-record_id,object,derived,76121,1.0,76121,b3d1788b86e8025f71c7,SHA-256 of source + native id + text prefix; stable across runs
-source,object,collected,76121,1.0,5,google_play,platform the reaction came from
-source_id,object,collected,76121,1.0,99,com.united.mobile.android,"app id, subreddit, hashtag or query that produced the row"
-brand,object,collected/derived,76121,1.0,45,United,"operator the reaction is about; from the app roster, or matched in text for social sources"
-delay_domain,object,collected/derived,76121,1.0,8,airline,"sector of the delay: food_delivery, quick_commerce, parcel_courier, ecommerce, ride_hailing, airline, telecom_isp"
-store_country,object,collected,76121,1.0,8,us,storefront the review was read from (Play only)
-is_thin_text,bool,derived,76121,1.0,2,False,"text shorter than 15 characters; still valid for volume and rating, too thin to mine"
-created_utc,"datetime64[ns, UTC]",collected,76121,1.0,74505,2026-08-06 08:44:11+00:00,"when the reaction was published, in UTC"
-date,object,derived,76121,1.0,46,2026-08-06,UTC calendar date of created_utc
-hour_utc,object,derived,76121,1.0,1081,2026-08-06 08:00,UTC hour bucket of created_utc
-collected_utc,object,derived,76121,1.0,141,2026-09-20T04:54:41.915663+00:00,when our collector retrieved the row
-title,object,collected,76121,1.0,932,,headline or post title; empty for Play reviews
-text,object,collected,76121,1.0,76092,US permanent resident card scanner still does not work after,"body text as published, whitespace-normalised, URLs stripped"
-full_text,object,derived,76121,1.0,76121,US permanent resident card scanner still does not work after,"title + text, the field all NLP runs on"
-text_length,int64,derived,76121,1.0,925,225,characters in full_text
-word_count,int64,derived,76121,1.0,322,39,whitespace tokens in full_text
-author_pseudonym,object,derived,76121,1.0,70182,u_728cba40bc4a330c,salted SHA-256 of the handle; the raw handle is never stored
-publisher,object,collected,619,0.0081,417,Post Courier,outlet that published the article (news rows only); never a delay brand
-rating,float64,collected,74013,0.9723,5,3.0,1-5 star rating chosen by the reviewer (Play only) - an independent sentiment label
-engagement,int32,collected,76121,1.0,164,0,"endorsement count; meaning varies by source, see engagement_kind"
-engagement_kind,object,derived,76121,1.0,4,thumbs_up,"what engagement counts on this source: thumbs_up, fav_boost_reply, points_comments or none"
-app_version,object,collected,76121,1.0,2269,4.2.88,app version the reviewer was running (Play only)
-company_replied,bool,collected,76121,1.0,2,False,whether the operator publicly replied
-company_reply_utc,object,collected,76121,1.0,24358,,when the operator replied
-url,object,collected,76121,1.0,2148,https://play.google.com/store/apps/details?id=com.united.mob,public link to the reaction or its source
-is_delay_related,bool,derived,76121,1.0,2,False,text matches the delay-relevance pattern
-delay_type,object,derived,76121,1.0,11,,first matching delay pattern; see delay_type_evidence
-delay_type_evidence,object,derived,76121,1.0,686,,the literal span that triggered delay_type - makes the label auditable
-reaction_type,object,derived,76121,1.0,9,escalation,first matching reaction pattern; see reaction_type_evidence
-reaction_type_evidence,object,derived,76121,1.0,255,complaining,the literal span that triggered reaction_type
-stated_delay_hours,float64,derived,3935,0.0517,137,336.0,"largest duration mentioned in the text, in hours; crude severity proxy"
-r2_sentiment,object,model,76121,1.0,3,Negative,Round 2 sentiment model prediction: Negative / Neutral / Positive
-r2_sentiment_confidence,float64,model,76121,1.0,6380,0.7938,calibrated probability of the predicted sentiment class
-r2_topic,object,model,76121,1.0,4,Community_Discussion,Round 2 topic model prediction
-r2_topic_confidence,float64,model,76121,1.0,4340,0.992,calibrated probability of the predicted topic class
-sentiment_score,float64,derived,76121,1.0,3,-1.0,sentiment mapped to -1 / 0 / +1 for time-series arithmetic
-sentiment_score_weighted,float64,derived,76121,1.0,11578,-0.7938,sentiment_score multiplied by model confidence
+record_id,object,derived,92689,1.0,92689,c28ba5d0d101789af8d3,SHA-256 of source + native id + text prefix; stable across runs
+source,object,collected,92689,1.0,7,google_play,platform the reaction came from
+source_id,object,collected,92689,1.0,180,com.zzkko,"app id, subreddit, hashtag or query that produced the row"
+brand,object,collected/derived,92689,1.0,45,SHEIN,"operator the reaction is about; from the app roster, or matched in text for social sources"
+delay_domain,object,collected/derived,92689,1.0,8,ecommerce,"sector of the delay: food_delivery, quick_commerce, parcel_courier, ecommerce, ride_hailing, airline, telecom_isp"
+store_country,object,collected,92689,1.0,8,us,storefront the review was read from (Play only)
+is_thin_text,bool,derived,92689,1.0,2,False,"text shorter than 15 characters; still valid for volume and rating, too thin to mine"
+created_utc,"datetime64[ns, UTC]",collected,92689,1.0,89734,2026-08-06 17:19:33+00:00,"when the reaction was published, in UTC"
+date,object,derived,92689,1.0,46,2026-08-06,UTC calendar date of created_utc
+hour_utc,object,derived,92689,1.0,1081,2026-08-06 17:00,UTC hour bucket of created_utc
+collected_utc,object,derived,92689,1.0,290,2026-09-20T16:42:37.148323+00:00,when our collector retrieved the row
+title,object,collected,92689,1.0,3286,,headline or post title; empty for Play reviews
+text,object,collected,92689,1.0,66344,its very reliable in everything,"body text as published, whitespace-normalised, URLs stripped"
+full_text,object,derived,92689,1.0,66069,its very reliable in everything,"title + text, the field all NLP runs on"
+text_length,int64,derived,92689,1.0,1196,31,characters in full_text
+word_count,int64,derived,92689,1.0,507,5,whitespace tokens in full_text
+author_pseudonym,object,derived,92689,1.0,82929,u_9ef3129c4ed48725,salted SHA-256 of the handle; the raw handle is never stored
+publisher,object,collected,4559,0.0492,1183,,outlet that published the article (news rows only); never a delay brand
+rating,float64,collected,87978,0.9492,5,5.0,1-5 star rating chosen by the reviewer (Play only) - an independent sentiment label
+engagement,int32,collected,92689,1.0,162,0,"endorsement count; meaning varies by source, see engagement_kind"
+engagement_kind,object,derived,92689,1.0,5,thumbs_up,"what engagement counts on this source: thumbs_up, fav_boost_reply, points_comments or none"
+app_version,object,collected,92689,1.0,2331,15.1.4,app version the reviewer was running (Play only)
+company_replied,bool,collected,92689,1.0,2,False,whether the operator publicly replied
+company_reply_utc,object,collected,92689,1.0,33578,,when the operator replied
+url,object,collected,92689,1.0,4724,https://play.google.com/store/apps/details?id=com.zzkko,public link to the reaction or its source
+is_delay_related,bool,derived,92689,1.0,2,False,text matches the delay-relevance pattern
+delay_type,object,derived,92689,1.0,11,,first matching delay pattern; see delay_type_evidence
+delay_type_evidence,object,derived,92689,1.0,769,,the literal span that triggered delay_type - makes the label auditable
+reaction_type,object,derived,92689,1.0,9,unmarked,first matching reaction pattern; see reaction_type_evidence
+reaction_type_evidence,object,derived,92689,1.0,254,,the literal span that triggered reaction_type
+stated_delay_hours,float64,derived,3345,0.0361,154,312.0,"largest duration mentioned in the text, in hours; crude severity proxy"
+r2_sentiment,object,model,92689,1.0,3,Neutral,Round 2 sentiment model prediction: Negative / Neutral / Positive
+r2_sentiment_confidence,float64,model,92689,1.0,6347,0.4621,calibrated probability of the predicted sentiment class
+r2_p_negative,float64,model,92689,1.0,9372,0.1658,Round 2 model P(Negative); kept because the max alone cannot support recalibration
+r2_p_neutral,float64,model,92689,1.0,8017,0.4621,Round 2 model P(Neutral)
+r2_p_positive,float64,model,92689,1.0,9607,0.372,Round 2 model P(Positive)
+r2_topic,object,model,92689,1.0,4,Community_Discussion,"Round 2 topic model prediction. NOT INTERPRETED: Round 2 established this label is a substring switch, and reports/analysis.json measures how closely the model still reproduces it on this corpus. Shipped because the rulebook requires the Round 2 model to be applied."
+r2_topic_confidence,float64,model,92689,1.0,4158,0.9983,calibrated probability of the predicted topic class
+flag_churn_threat,bool,derived,92689,1.0,2,False,"mentions uninstalling, switching or cancelling a subscription; independent of reaction_type"
+flag_refund_demand,bool,derived,92689,1.0,2,False,asks for money back or compensation; independent of reaction_type
+flag_escalation,bool,derived,92689,1.0,2,False,"threatens a complaint, consumer forum or legal action"
+flag_anger,bool,derived,92689,1.0,2,False,uses abusive or outraged vocabulary
+flag_recovery,bool,derived,92689,1.0,2,False,"mentions the issue being resolved, refunded or apologised for"
+flag_repeat_incident,bool,derived,92689,1.0,2,False,says this has happened before
+flag_money_lost,bool,derived,92689,1.0,2,False,"says money was charged, deducted or lost"
+flag_staff_blamed,bool,derived,92689,1.0,2,False,"names a driver, rider, courier or agent"
+competitor_named,object,derived,92689,1.0,765,,"the operator the customer says they are switching to, if any"
+sentiment_score,float64,derived,92689,1.0,3,0.0,sentiment mapped to -1 / 0 / +1 for time-series arithmetic
+sentiment_score_weighted,float64,derived,92689,1.0,11351,0.0,sentiment_score multiplied by model confidence

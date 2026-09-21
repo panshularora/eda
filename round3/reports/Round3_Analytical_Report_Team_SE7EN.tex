@@ -1,0 +1,543 @@
+% =============================================================================
+%  Round 3 Analytical Report -- Team SE7EN -- Data Vortex A'26
+%
+%  Compile with pdfLaTeX (Overleaf's default). Place this file next to a
+%  folder named  figures/  holding the PNGs from  round3/reports/figures/ .
+%  If the folder is missing the document still compiles: every absent image
+%  becomes a labelled placeholder box.
+%
+%  Every number below was read from the pipeline outputs of the 20 September
+%  2026 run: reports/CLAIMS.json, reports/analysis.json,
+%  reports/case_studies.json and reports/round2_transfer.json.
+% =============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage[section]{placeins}   % keeps every float inside its own section
+\usepackage[a4paper,left=2.1cm,right=2.1cm,top=2cm,bottom=2.3cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+\definecolor{accent}{HTML}{1F4E79}
+\definecolor{accentbg}{HTML}{EEF3F8}
+\definecolor{muted}{HTML}{5B6470}
+
+\usepackage[colorlinks=true,linkcolor=accent,urlcolor=accent,citecolor=accent]{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\setlist{itemsep=0.2em,topsep=0.3em,leftmargin=1.4em}
+\captionsetup{font=small,labelfont=bf,skip=5pt}
+\renewcommand{\arraystretch}{1.12}
+% generous float placement: 13 tables and 5 figures sit close to their text
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{5}
+
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.5em}
+\titlespacing*{\subsection}{0pt}{0.9em}{0.3em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[L]{\small\color{muted}Team SE7EN $\cdot$ Round 3 Analytical Report}
+\fancyfoot[R]{\small\color{muted}\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\keybox}[1]{\par\noindent\fcolorbox{accent}{accentbg}{%
+  \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{#1}}\par}
+% \reportfig{file}{width}{caption}{label}
+\newcommand{\reportfig}[4]{%
+  \begin{figure}[htbp]\centering
+  \IfFileExists{figures/#1}%
+    {\includegraphics[width=#2\linewidth]{figures/#1}}%
+    {\fbox{\parbox{0.86\linewidth}{\centering\vspace{2.2em}\small\color{muted}%
+      Figure file \texttt{\detokenize{figures/#1}} not found.\\
+      Upload \texttt{\detokenize{round3/reports/figures/}} next to this file.%
+      \vspace{2.2em}}}}%
+  \caption{#3}\label{#4}
+  \end{figure}}
+
+\begin{document}
+
+% ----------------------------------------------------------------------------
+\begin{center}
+{\small\color{muted}DATA VORTEX A'26 $\cdot$ AARUUSH, SRM INSTITUTE OF SCIENCE AND TECHNOLOGY $\cdot$ ROUND 3}\\[7pt]
+{\LARGE\bfseries Reaction to a Major Delivery or Service Delay}\\[5pt]
+{\large Round 3 Analytical Report --- Rebuilding the Social Engine}\\[9pt]
+{\normalsize\textbf{Team SE7EN}: Tanmay Singh $\cdot$ Panshul Arora}\\[3pt]
+{\small\color{muted}Data collected 20 September 2026 $\cdot$ Window 6 August -- 20 September 2026 $\cdot$ Report 21 September 2026}
+\end{center}
+\vspace{0.4em}
+
+\section*{At a glance}
+
+\keybox{%
+\begin{itemize}[leftmargin=1.2em]
+\item \textbf{Collected as a survey, not a scrape.} All 432,191 Google Play reviews posted in the window across 44 apps and 7 delivery domains were enumerated, and a uniform sample of up to 80 per brand per day was kept (91,192 rows). Reddit, Lemmy, Mastodon, Hacker News and news add the social and trigger layers.
+\item \textbf{The Round 2 model was measured, then repaired.} Against 87,978 reviewer star ratings it agrees 92.2\% on positive versus negative. It over-predicted Neutral 4.4-fold; a threshold on its own probabilities raised held-out accuracy from 0.747 to 0.832 without retraining.
+\item \textbf{Shifts and spikes.} Three sentiment shifts survive Benjamini--Hochberg correction across 2,819 tests, and one further change point survives a composition control. Four spikes were found (three volume, one endorsement), each characterised rather than just counted.
+\item \textbf{The central finding.} Rapido lost about one star twice in ten days. On 27 August the reviews carry an outage signature, and \emph{The Economic Times} and \emph{Dailyhunt} both reported a Rapido app outage that day. On 17--20 August nothing in the text explains the drop; the system says so, and surfaces a same-day drivers' strike as a lead, not a cause.
+\item \textbf{Controls come first.} A first version of this analysis was dominated by sampling artefacts (complaint volume correlated $r=0.89$ with the day index). They are measured, removed and reported in Section~\ref{sec:window}.
+\end{itemize}}
+
+\smallskip
+{\small\textbf{Rulebook map.} Data collection method \S\ref{sec:collection} $\cdot$ time window \S\ref{sec:window} $\cdot$ sentiment \S\ref{sec:sentiment} $\cdot$ activity \S\ref{sec:activity} $\cdot$ topics and entities \S\ref{sec:topic} $\cdot$ trigger explanations \S\ref{sec:triggers}. Minimums: at least two sentiment shifts (four, \S\ref{sec:shifts}); at least one engagement spike (four, \S\ref{sec:activity}); key entities (\S\ref{sec:entities}); reasons behind the changes (\S\ref{sec:triggers}).}
+
+% ----------------------------------------------------------------------------
+\section{Data collection method}\label{sec:collection}
+
+Public reaction to a delivery failure is scattered, and much of it is closed to programmatic reading: X is paid, and Reddit and Bluesky refuse unauthenticated API reads. The collector is therefore built in three layers (Table~\ref{tab:sources}), because ``sentiment moved'' and ``sentiment moved because of X'' are different claims, and only the second is useful to an operator.
+
+\begin{table}[htbp]\centering\small
+\caption{Sources by layer. Counts are rows collected on 20 September 2026.}\label{tab:sources}
+\begin{tabularx}{\linewidth}{@{}l l X r@{}}
+\toprule
+Layer & Source & What it contributes & Rows\\
+\midrule
+L1 reaction & Google Play, 44 apps, 7 countries & text, 1--5 star rating, thumbs-up, app version, operator reply & 432,191 enumerated\\
+ & & & 91,192 kept\\
+ & Reddit, subreddit and topic-search feeds & peer discussion & 622\\
+ & Lemmy, open federated search & peer discussion & 621\\
+ & Mastodon, 6 instances, 14 hashtags & microblogging with favourites and boosts & 2,775\\
+ & Hacker News (Algolia) & outage discussion with points & 709\\
+ & Google News, 14 topic queries & coverage of delays & 645\\
+L2 trigger & Google News, 35 brand failure queries & attribution evidence, held out of the reaction corpus & 2,098\\
+ & FAA register; 7 supply-chain status pages & timestamped incidents & 194\\
+L3 attention & Wikipedia pageviews, 32 articles & attention we did not generate & 1,440 brand-days\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Why Google Play is the backbone.} It is the only open source that supplies, on the same row, the text, a 1--5 star rating written by the same person (an independent sentiment label we did not produce), a thumbs-up count, a precise timestamp, the app version in use, and whether the operator replied. The star ratings are what allow Section~\ref{sec:sentiment} to \emph{measure} the Round~2 model rather than assume it works.
+
+\subsection{A survey, not a scrape}
+
+A first version of this collector paginated each app newest-first until it held 5,000 reviews. That reaches 45 days on a quiet app and five days on a busy one, so 18 of the 44 brands entered the corpus part-way through the window. Daily volume then rose from 59 to 822 rows, correlating $r=0.89$ with the day index and $\rho=-0.06$ with Wikipedia attention to the same brands: it measured our pagination, not the public. It had already produced three false findings --- a rising volume trend, twelve ride-hailing ``spikes'' that were Rapido and Uber entering the sample on 5 and 8 September, and ``newly distinctive'' words that were those brands' names.
+
+The collector was rebuilt as a two-stage survey:
+\begin{enumerate}
+\item \textbf{Census.} Every review in the window is enumerated and counted per brand-day, with its rating, thumbs-up and reply status: 432,191 reviews over 2,186 page requests. Flipkart alone contributes 75,285.
+\item \textbf{Quota sample.} At most 80 reviews per brand-day are kept, chosen by reservoir sampling so that they are a uniform sample of the whole day rather than its most recent hour: 91,192 rows, 21.1\% of the frame.
+\end{enumerate}
+Text volume becomes a design constant, and the census turns the sample back into a population estimate. For brand $b$ on day $t$ with $N_{bt}$ enumerated reviews, $n_{bt}$ sampled and a delay-related share $\hat p_{bt}$ in the sample,
+\[
+\widehat{D}_{bt}=N_{bt}\,\hat p_{bt},\qquad
+\mathrm{SE}\big(\widehat{D}_{bt}\big)=N_{bt}\sqrt{\frac{\hat p_{bt}(1-\hat p_{bt})}{n_{bt}}}\;\sqrt{\frac{N_{bt}-n_{bt}}{N_{bt}-1}},
+\]
+so activity can be stated as \emph{estimated complaints}, not as rows we happened to keep. Forty-three of the 44 apps reached the start of the window; Bluedart's review feed ended early, with 66 reviews in the window.
+
+\subsection{Cleaning and structure}
+
+\begin{table}[htbp]\centering\small
+\caption{From collected rows to the analysed corpus.}\label{tab:clean}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Step & Rows\\
+\midrule
+Collected (reaction layer and brand-news evidence) & 98,662\\
+\quad empty text & $-$1,881\\
+\quad outside the window & $-$2,532\\
+\quad duplicate platform identifier & $-$269\\
+\quad duplicate text (same author, or a cross-post) & $-$1,291\\
+\midrule
+Analysed & \textbf{92,689}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+One cleaning rule had to be rewritten because it was deleting real people. Duplicates were keyed on source and text alone, so identical short reviews from different people collapsed into a single row. Applied to this collection it would have removed 30,079 rows --- a third of the Play sample --- including 9,408 separate reviews reading ``good'' and 63 different authors who each wrote ``worst app''. Short texts go first, so the survivors skew verbose, and verbose skews angry. Play issues one immutable identifier per review, so app-store rows are now deduplicated on that identifier and, for genuine double posts, on brand, author and text. Cross-posting on the social platforms is still deduplicated on text.
+
+After cleaning the corpus holds 87,978 Play reviews, 706 Mastodon posts, 700 Hacker News items, 628 news items, 609 Reddit posts and 136 Lemmy posts, plus 1,932 brand-constrained headlines held out of the reaction corpus as trigger evidence. Mastodon and Lemmy shrink most, because one post federates to several instances and much of Lemmy's search history predates the window.
+
+Every row carries its brand and delay domain, a UTC timestamp, a pseudonymised author, rating and engagement (with what engagement counts on that source), the Round~2 model's label, confidence and full probability vector, the delay and reaction labels \emph{together with the literal text span that fired each rule}, eight independent reaction flags, and any delay duration the text states. A data dictionary generated from the frame documents every column.
+
+\subsection{Sources tested and found unusable}
+
+\begin{table}[htbp]\centering\small
+\caption{Negative results, reported rather than dropped.}\label{tab:unusable}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+Source & Outcome\\
+\midrule
+Apple customer-review RSS & HTTP 200 with an empty entry list for every app, country and sort order\\
+Bluesky & HTTP 403 from both public API hosts for every query and User-Agent; 401 without a session\\
+Reddit JSON API & HTTP 403 to unauthenticated readers, including search with a browser User-Agent\\
+X / Twitter & not free to read; not attempted and not claimed\\
+Operator status pages & \code{status.doordash.com}, \code{status.uber.com}, \code{status.zomato.com} and \code{status.lyft.com} do not resolve\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Reddit's Atom feeds are open but rate-limit unpredictably, so both Reddit collectors run under a wall-clock budget and record what answered: 11 of 18 subreddit feeds and 6 of 21 topic searches.
+
+\textbf{Conduct.} Every request carries an identifying User-Agent with a contact address; per-host minimum intervals are enforced, back-off honours \code{Retry-After}, and an on-disk cache prevents repeat requests. Only public, unauthenticated endpoints are read. Author handles are replaced with salted SHA-256 pseudonyms at the moment of collection, so no raw identifier is ever written to disk.
+
+% ----------------------------------------------------------------------------
+\section{Time window}\label{sec:window}
+
+The window runs from 6 August 2026, 16:51 UTC to 20 September 2026, 08:20 UTC --- 45.0 days --- and was collected on 20 September. Forty-five days gives every brand several weeks of baseline against which a single bad day is visible, and is still short enough to enumerate every review of the busiest apps (Blinkit has 63,612 in the window).
+
+\textbf{Coverage is measured, not assumed.} Thirty-nine of the 44 brands appear from the first day to the last on at least 95\% of days, and form the \emph{balanced panel} on which every time series in this report is computed. The five outside it --- Southwest, Bluedart, Wish, DHL and IndiGo --- are too quiet to be observed every day (Southwest has 67 reviews in 45 days); for four of them the collector reached the window edge, and Bluedart's feed ended early.
+
+\reportfig{fig00_panel_artefact.png}{0.98}{The control that decides whether anything else counts. Left: the share of the window on which each brand appears; green brands form the balanced panel. Right: daily delay-related reactions for all brands and for the balanced panel on this collection. The two lines now coincide; on the first collection they diverged.}{fig:panel}
+
+\begin{table}[htbp]\centering\small
+\caption{Correlation of daily delay volume with the day index.}\label{tab:panel}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Collection & All brands & Balanced panel\\
+\midrule
+First (5,000 reviews per app) & $r=+0.891$ & $r=+0.037$\\
+This one (census and quota) & $r=+0.214$ & $r=+0.223$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On the first collection the whole trend lived in the brands that entered mid-window: removing them removed it. Now the two agree, because there are no late entrants left to remove. That agreement is the evidence that the artefact is gone, not evidence that it never existed. On the balanced panel the sample averages 216.8 delay-related reactions a day, with a coefficient of variation of 0.12.
+
+\textbf{Real time, stated honestly.} A single pull reconstructs 45 days from what the platforms still hold; it is a baseline, not live monitoring. Collection therefore runs in \emph{waves} (\code{src/waves.py}): each run is appended to an archive keyed on record identifier, and only what a wave adds that no earlier wave saw is treated as live. Each wave also measures arrival latency and \emph{backfill} --- records dated before the previous wave that surfaced only later, which is how much yesterday's figure will still move. The analysis in this report is on the baseline wave of 98,509 records.
+% UPDATE the sentence above if further waves are recorded before submission.
+
+\textbf{A timestamp caveat.} Google Play timestamps a review at its latest edit, and users do edit (``updating my review: earlier I gave 3 now I'm giving 1''). Edited reviews therefore drift toward the end of the window, which may account for part of the small late-window volume spikes in Section~\ref{sec:activity}.
+
+% ----------------------------------------------------------------------------
+\section{Sentiment analysis}\label{sec:sentiment}
+
+\subsection{Applying the Round 2 model, and measuring it}
+
+The Round~2 sentiment model is applied unchanged to every row, returning a label, a confidence and the full class-probability vector. It was trained on 2015-era tweets and is here reading 2026 app-store reviews, so before any curve is drawn it is graded against the one label we did not produce: the reviewer's own stars, mapped 1--2 Negative, 3 Neutral, 4--5 Positive (Table~\ref{tab:transfer}).
+
+\begin{table}[htbp]\centering\small
+\caption{Round 2 model against 87,978 independent star labels. Right: confusion matrix, rows are the stars.}\label{tab:transfer}
+\begin{minipage}[t]{0.53\linewidth}\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+Three-class accuracy & 0.745\\
+Macro-F1 / Cohen's $\kappa$ & 0.574 / 0.558\\
+Positive vs negative (Neutral dropped) & \textbf{0.922}, $\kappa=0.836$\\
+Accuracy at confidence $\geq0.7$ (59.6\% of rows) & 0.906\\
+Neutral recall / precision & 0.23 / 0.05\\
+Weakest / strongest domain & airline 0.62 / quick commerce 0.77\\
+\bottomrule
+\end{tabular}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.43\linewidth}\centering
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Stars & Neg & Neu & Pos\\
+\midrule
+1--2 & 24,388 & 6,115 & 2,217\\
+3 & 1,501 & 814 & 1,160\\
+4--5 & 3,230 & 8,226 & 40,327\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\end{table}
+
+Positive versus negative transfers well across a change of domain, register and decade. The model's own confidence is informative --- accuracy rises from 39\% below 0.5 to 95\% above 0.9 --- so it can be used as a gate. Transfer is uneven by domain, so a per-domain claim is weaker than an aggregate one.
+
+\reportfig{fig05_round2_transfer.png}{0.88}{The Round 2 model measured against 87,978 independent star labels.}{fig:transfer}
+
+\subsection{Repairing the class that broke, without retraining}
+
+Neutral does not transfer. The model makes 15,155 Neutral predictions against 3,475 three-star reviews --- 4.4 times too many --- and because a sentiment score maps Neutral to zero, every misrouted row pulls a daily mean toward zero. A retrained model would no longer be the Round~2 deliverable, so only the \emph{decision rule} applied to its probabilities was changed: predict Neutral only when $P(\text{Neutral})\geq\tau$, otherwise the larger of Negative and Positive. The threshold $\tau=0.66$ was fitted on half the star-labelled rows (split on a hash of the record identifier), and Table~\ref{tab:recal} is measured on the other half, which the fitting never saw.
+
+\begin{table}[htbp]\centering\small
+\caption{Recalibrating the decision rule, on 43,915 held-out rows.}\label{tab:recal}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Rule & Accuracy & Cohen's $\kappa$ & Macro-F1 & Neutral predictions\\
+\midrule
+Argmax, as shipped & 0.747 & 0.561 & 0.576 & 7,530\\
+Recalibrated, $\tau=0.66$ & \textbf{0.832} & \textbf{0.674} & 0.590 & 1,606\\
+Truth & -- & -- & -- & 1,741\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A single threshold adds 8.6 points of accuracy and 0.11 of $\kappa$, and the Neutral count falls from more than four times the truth to almost exactly it. Neutral's own F1 stays poor (0.09 to 0.06); the gain comes from no longer emitting the class where it does not belong. The alternative is to abstain: at confidence $\geq0.7$ the model is 90.6\% accurate on 59.6\% of rows, and the confident rows are markedly more negative (mean $-0.92$ against $-0.77$ for all delay reactions) --- the dilution the Neutral problem causes, made visible.
+
+\subsection{How shifts are detected}
+
+Two detectors run on two instruments, the model's sentiment and the reviewer's stars. \textbf{PELT} change-point detection (L2 cost, BIC-scaled penalty, minimum four-day segment) segments each daily series. A \textbf{day-by-day Welch comparison} of the three days before and after every date runs as a deliberately conservative second opinion, with a single Benjamini--Hochberg correction across all 2,819 tests at every scope, metric and date.
+
+Every break is reported with two effect sizes whose names say what they measure: $d_{\text{daily}}$, computed on daily means, which is large for any clean step, and $d_{\text{records}}$, computed on the reviews themselves, which is the effect on people. The first version of this analysis reported only the first, as $d=1.54$ --- ``a large effect'' --- for a 0.12-star move whose effect on reviewers was $d=0.10$. Selection and ranking now use $d_{\text{records}}$, and every break is re-tested on the balanced panel so that it cannot be a change in which brands were sampled.
+
+\subsection{The shifts}\label{sec:shifts}
+
+\begin{table}[htbp]\centering\small
+\caption{Sentiment shifts. $d$ is computed over reviews.}\label{tab:shifts}
+\begin{tabularx}{\linewidth}{@{}l l l l l r X@{}}
+\toprule
+Detector & Date & Scope & Measure & Before $\to$ after & $d$ & Note\\
+\midrule
+BH scan & 21 Aug & Rapido & stars & 2.44 $\to$ 3.70 & $+0.68$ & $p=6.4\times10^{-13}$; recovery from the 17--20 Aug collapse\\
+BH scan & 27 Aug & Rapido & stars & 3.81 $\to$ 3.06 & $-0.41$ & $p=1.1\times10^{-5}$; one-day outage\\
+BH scan & 4 Sep & Temu & sentiment & $+0.34\to+0.04$ & $-0.34$ & $p\approx2\times10^{-4}$\\
+PELT & 10 Aug & e-commerce & stars & 1.77 $\to$ 1.51 & $-0.20$ & $d_{\text{daily}}=-1.22$; survives the composition control\\
+PELT & 17 Sep & quick commerce & sentiment & $-0.80\to-0.74$ & $+0.11$ & $d_{\text{daily}}=+0.24$; fails the control, not a shift\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Three shifts survive the multiplicity correction, where the first version's scan found none, and all three are brand-level. The two for Rapido bracket the episode analysed in Section~\ref{sec:triggers}: the recovery on 21 August from a four-day collapse, and the one-day outage on 27 August. Temu's model sentiment fell from $+0.34$ to $+0.04$ on 4 September. Of the two change points, the e-commerce deterioration of 10 August survives the composition control; the quick-commerce move of 17 September does not, and is reported as a detection that is not a behavioural shift. Against the rulebook's minimum of two, four shifts are defensible.
+
+\reportfig{fig01_timeline.png}{0.95}{The balanced panel over the window. Top: delay-related reactions per day, with the three volume spikes marked. Bottom: mean model sentiment and negative share. The shifts in Table~\ref{tab:shifts} are brand- and domain-level and are not drawn on this aggregate series.}{fig:timeline}
+
+% ----------------------------------------------------------------------------
+\section{Activity analysis}\label{sec:activity}
+
+Activity is measured on the balanced panel, and two kinds of spike are kept apart because they mean different things: \emph{volume} (more people posted) and \emph{endorsement} (the posts that existed were upvoted harder). Spikes are found with a median/MAD robust $z$-score above 3.5, since a spike inflates the very mean and standard deviation a conventional $z$-score would test it against. Endorsement is read from the census, which counts the thumbs-up on every review in the window, not only on the sampled ones.
+
+\begin{table}[htbp]\centering\small
+\caption{Spikes on the balanced panel.}\label{tab:spikes}
+\begin{tabularx}{\linewidth}{@{}l l r r r r X@{}}
+\toprule
+Date & Kind & Value & Median & Ratio & Robust $z$ & Character\\
+\midrule
+16 Sep & volume & 321 & 232.5 & 1.38 & 5.19 & 286 authors, no brand dominant\\
+19 Sep & volume & 308 & 232.5 & 1.32 & 4.43 & 284 authors, no brand dominant\\
+18 Sep & volume & 298 & 232.5 & 1.28 & 3.84 & 277 authors, no brand dominant\\
+15 Sep & endorsement & 6,503 & 2,732 & 2.38 & 3.75 & top reaction 61.2\%, top five 92.5\%; median reaction 0\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{The endorsement spike is one post.} 15 September carries 2.38 times the median day's endorsement, but 61.2\% of it sits on a single reaction and 92.5\% on five; the median reaction that day received none, and the Gini coefficient is 0.98 (Figure~\ref{fig:spike}). One complaint drawing most of a day's endorsement is worth reporting, and it is not a conversation taking off. Thumbs-up accumulate until collection, so older days have had longer to gather them; that bias works \emph{against} a recent spike, which makes this one conservative.
+
+\textbf{The volume spikes are broad but small.} 16, 18 and 19 September run 1.28--1.38 times the median, spread over 277--286 distinct authors with no brand dominant, and no external evidence corroborates them. They are consistent both with a real late-window rise and with the edit-timestamp effect of Section~\ref{sec:window}, and the report does not choose between them.
+
+For comparison, the first version of this analysis reported 27 ``engagement spikes'': 23 were volume, 12 of those were two brands entering the sample, and its headline 12.35-fold spike was two reviews holding 88\% of the day.
+
+\reportfig{fig12_spike_anatomy.png}{0.9}{Anatomy of the 15 September endorsement spike. Left: the day's most-endorsed reactions. Right: cumulative share of the day's endorsement; five reactions hold 92.5\% of it.}{fig:spike}
+
+% ----------------------------------------------------------------------------
+\section{Topic and entity analysis}\label{sec:topic}
+
+\subsection{Is the corpus on topic?}
+
+Whether a reaction concerns a delay or service failure is decided by a word-bounded pattern that also requires a \emph{sense}: a negation around ``on time'', a delay word in the same clause as a duration, a service noun before ``down''. Its first version admitted praise --- ``on time'' alone selected 735 reviews averaging 4.2 stars, among them ``Fast, safe, efficient \& always on time!''. The filter is audited three ways (Table~\ref{tab:relevance}): against the star ratings, which were not used to build it; by hand, on 120 randomly drawn selected rows; and by regression tests that fail the build if a known false-positive family returns.
+
+\begin{table}[htbp]\centering\small
+\caption{Auditing the topic filter against independent star ratings (measured on the first corpus).}\label{tab:relevance}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Filter & Rows selected & Mean stars & Five-star share\\
+\midrule
+Word-bounded only (first version) & 15,207 & 1.600 & 8.9\%\\
+Sense-checked (this version) & 12,796 & \textbf{1.401} & \textbf{4.3\%}\\
+Rows not selected & 63,325 & 3.132 & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hand adjudication found 105 of 120 rows correct --- precision 0.875, 95\% Wilson interval 0.803--0.923 --- and three false-positive families that no reading of the pattern had revealed: ``late'' in \emph{late night} and \emph{late-payment fees}; ``wait'' in \emph{can't wait to see}; and genuine delays that are off topic, such as a postponed space mission reached through the open-web sources. The first two are fixed and covered by regression tests. The third is a source-scope issue, and is why no claim in this report rests on a single social-media row. On the final corpus, 10,918 of 92,689 rows (11.8\%) are delay-related.
+
+\subsection{Types of delay}
+
+\begin{table}[htbp]\centering\small
+\caption{Delay types among the 10,918 delay-related reactions.}\label{tab:delaytypes}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Delay type & Reactions & Mean stars & Model sentiment\\
+\midrule
+cancelled & 2,468 & 1.29 & $-0.87$\\
+late delivery & 2,180 & 1.64 & $-0.54$\\
+never arrived & 1,322 & 1.25 & $-0.94$\\
+outage & 740 & 1.34 & $-0.74$\\
+long wait & 513 & 1.34 & $-0.75$\\
+missing items & 280 & 1.31 & $-0.95$\\
+refund delay & 224 & 1.14 & $-0.96$\\
+support delay & 171 & 1.13 & $-0.94$\\
+stuck in transit & 57 & 1.08 & $-0.97$\\
+\midrule
+no failure mode named & 2,963 & 1.55 & $-0.74$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{People forgive lateness more readily than silence.} Plain late delivery draws the mildest ratings of any delay type (1.64 stars). The harshest go to what happens \emph{after} the failure: a refund that does not arrive (1.14), support that does not answer (1.13), a parcel stuck in transit (1.08). The residual bucket (2,963 rows, 27\%) is not noise: 1,550 of its rows mention a refund and 743 mention support or a complaint --- genuine delay reactions that name no delivery failure mode. It is reported here and kept out of the delay-type chart so that it cannot read as a broken taxonomy.
+
+\reportfig{fig02_delay_types.png}{0.95}{Delay types by volume (left) and by mean model sentiment with mean stars (right). The reactions that name no failure mode are excluded and described in the text.}{fig:delaytypes}
+
+\subsection{Reactions}
+
+Each reaction carries an ordered first-match label (churn threat, refund demand, escalation, anger, sarcasm, resignation, recovery acknowledged, informational, unmarked) and, alongside it, eight independent flags, because an ordered taxonomy cannot say how often people demand a refund: \emph{anger} outranks \emph{refund demand} and takes every complaint containing ``worst'' with it. Every label ships with the literal span that fired it. Two labels were corrected: \code{praise_recovery} fired on ``but it never gets fixed'' --- all 17 of its rows were complaints --- and is now \code{recovery_acknowledged} with a negation guard (14 rows, averaging 3.1 stars); \code{neutral_report}, which averaged 1.9 stars, is now \code{unmarked}.
+
+\begin{table}[htbp]\centering\small
+\caption{Independent reaction flags on delay-related reactions.}\label{tab:flags}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Flag & Reactions & Share & Mean stars\\
+\midrule
+anger & 3,053 & 28.0\% & 1.08\\
+driver, rider or agent named & 1,590 & 14.6\% & 1.27\\
+repeat incident & 597 & 5.5\% & 1.17\\
+refund demand & 544 & 5.0\% & 1.22\\
+escalation threat & 503 & 4.6\% & 1.22\\
+recovery mentioned & 435 & 4.0\% & 1.45\\
+churn threat & 426 & 3.9\% & 1.08\\
+money lost & 141 & 1.3\% & 1.07\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The words that most distinguish delay reactions from all others (log-odds with an informative Dirichlet prior) are \emph{refund, cancel, late, said, wait, hours, delivered, told}. Two of the eight are verbs of reported speech: delay complaints are narratives of conversations with the operator.
+
+\subsection{Entities the text supplies}\label{sec:entities}
+
+Counting the brands we chose to collect describes our roster, not the conversation, so entities are read from the text.
+\begin{itemize}
+\item \textbf{Where.} The cities named most are New York (55), London (47), Delhi (43), Hyderabad (21), Toronto (16) and Bangalore (13); the airports, JFK, DFW and MIA.
+\item \textbf{Who answered.} Operators replied publicly to 32.8\% of delay reactions, and the split is stark: Domino's answered 200 of 200, and Meesho, Airtel and bigbasket 97--99\%, while DoorDash answered none of 741, Lyft none of 283 and Instacart none of 149. Replied-to reviews average 1.30 stars against 1.49 for the rest; operators answer the worst, so this is selection, not the effect of replying.
+\item \textbf{How bad.} 2,004 reactions (18.4\%) state a duration, with a median of three hours. Stars sit near their floor at every duration (1.1--1.7), but endorsement roughly doubles with severity: 1.6 thumbs-up on average for waits under an hour, 3.4 for three to seven days. Severity shows in what other users endorse, not in the stars.
+\item \textbf{Who they are leaving for.} 310 reactions name a switch target; among roster brands, Uber, Jio and Zomato are named most often.
+\item \textbf{Which operators and sectors.} Food delivery (3,400 reactions) and e-commerce (2,955) lead; the brands with the most delay reactions in the sample are Amazon India, Uber Eats, DoorDash, Amazon and Zepto.
+\end{itemize}
+
+\subsection{The Round 2 topic head}
+
+Round~2 found that its topic labels were not annotations at all: a case-insensitive substring switch (\emph{app, down, update, crash, \ldots} $\to$ Technical Issues) reproduced 9,000 of 9,000 of them. Round~3 can test whether that switch travelled. Replayed over these reviews --- a corpus it was never fitted to --- the learned topic head agrees with the switch on \textbf{92.4\%} of delay reactions, and labels 2,959 of the 3,040 that contain the word ``app'' as Technical Issues. The head is applied because the rulebook requires the Round~2 model, and it is not interpreted anywhere in this report. The topic layer that is interpreted is the delay and reaction taxonomy above, which ships the span that fired every label.
+
+% ----------------------------------------------------------------------------
+\section{Trigger explanations}\label{sec:triggers}
+
+\subsection{How a cause is admitted}
+
+Temporal proximity is not relevance: something is always broken somewhere. Evidence is therefore tiered and gated.
+\begin{itemize}
+\item \textbf{Internal evidence} --- distinctive vocabulary, delay-type mix, reaction flags, app versions --- is always available and directly about the event.
+\item \textbf{Incidents} count only when their entity names a brand in the window as a whole word, or when the match is structural (the FAA register for airlines). The whole-word rule exists because the FAA's Chicago entry, ``ORD'', once matched inside ``doordash'' --- the Round~2 substring defect, reappearing in our own gate. Supply-chain status pages (Shippo, AfterShip, ShipStation, Olo, Stripe) are shown as context only: they post incidents most weeks, and a signal that fires every week corroborates nothing.
+\item \textbf{Headlines} count only when returned by \emph{that brand's own} failure query, naming the brand, describing a failure of its service, and not about a trial, a share price, traffic or television --- and only for brands that make up at least a quarter of the event. With thirty brands in a market-wide window, some brand always has some failure headline.
+\end{itemize}
+One limit is structural and worth stating plainly: the operators whose delays people react to do not publish machine-readable status pages (Table~\ref{tab:unusable}). Only infrastructure vendors do, so status feeds alone cannot corroborate a food-delivery complaint spike.
+
+\subsection{Which days are events}
+
+A change point says when a level moved; an operator also needs to know what kind of event it was. Every brand-day whose mean rating falls more than 1.5 standard deviations below that brand's own daily median is classified against the brand's own baseline, because a 39\% delay share is alarming for one operator and ordinary for another: \emph{service failure} (outage language jumps: binomial $z\geq4$ and share $\geq8\%$), \emph{delivery delay} (delay-related share jumps: $z\geq3$ and share $\geq10\%$), or \emph{no service signature} (neither moves). Of 85 such brand-days, 51 carry no service signature, 29 are mixed, four are delivery delays and one is a service failure. Most daily dips are noise, and a monitor that named a cause for every one would be ignored within a week.
+
+\subsection{Three events}
+
+\begin{table}[htbp]\centering\small
+\caption{Three brand events, each against the brand's own baseline.}\label{tab:cases}
+\begin{tabularx}{\linewidth}{@{}l X X X@{}}
+\toprule
+ & Rapido, 17--20 Aug & Rapido, 27 Aug & Domino's, 7 Aug\\
+\midrule
+Reactions & 312 & 79 & 72\\
+Mean stars & 3.60 $\to$ 2.51 & 3.53 $\to$ 2.49 & 3.97 $\to$ 3.32\\
+Effect on reviewers & $d=-0.59$, $p=3\times10^{-20}$ & $d=-0.56$, $p=5\times10^{-6}$ & $d=-0.38$, $p=0.004$\\
+One-star share & 29.8\% $\to$ 59.3\% & 31.9\% $\to$ 57.0\% & 19.3\% $\to$ 34.7\%\\
+Delay-related share & 7.6\% $\to$ 6.1\% & 7.3\% $\to$ \textbf{15.2\%} & 5.7\% $\to$ \textbf{16.7\%}\\
+Outage language & 1.4\% $\to$ 0.6\% & 1.0\% $\to$ \textbf{17.7\%} & 0.5\% $\to$ 2.8\%\\
+One-star length (characters) & 135 $\to$ 78 & 127 $\to$ 97 & 113 $\to$ 114\\
+Signature & none & service failure & delivery delay\\
+External evidence & drivers' strike, Bhubaneswar (lead) & two outlets, same day & none passed the gates\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Rapido, 27 August --- a service failure, confirmed.} The share of reviews using outage language (``not working'', ``unable to'', ``something went wrong'') rose from 1.0\% to 17.7\%, the delay-related share doubled, and the rating fell a full star before returning to 3.4 the next day. Reviewers described it directly: \emph{``Rapido app is having some technical glitch. At first not accepting rides. then all of a sudden accepting rides after very long time.''} Only then was the outside world checked. Rapido's own failure query returned two reports dated the same day: \emph{The Economic Times}, ``Rapido faces tech outage, users report issues in several cities'', and \emph{Dailyhunt}, ``Rapido faces app outage as ride booking issue hit users''. The event was found in public reaction first, and the news agrees on both the day and the kind of failure.
+
+\textbf{Rapido, 17--20 August --- the same drop, with no service signature.} Over four days the mean rating fell 1.09 stars ($d=-0.59$, $p=3\times10^{-20}$), bottoming at 1.97 on 19 August with 70\% one-star reviews. Yet the delay-related share \emph{fell} and outage language did not move. The one-star reviews grew shorter (135 to 78 characters) and angrier (anger flag 9.5\% to 15.7\%, churn threats 1.1\% to 2.9\%). The system does not name a cause the text does not support. An early draft called this episode reputational on the strength of six reviews mentioning a ban or a boycott; the aggregate did not support that, and the label was withdrawn. The external layer surfaces a dated lead instead: on 19 August, Odisha TV reported an Ola--Uber--Rapido drivers' strike in Bhubaneswar, with fifty drivers arrested. A strike fits the text --- \emph{``Accepted the ride, made me wait nearly 40 minutes, kept showing `Captain on the way', and then asked me to cancel because he had no petrol''} --- but it was regional against a national review base, and a similar strike in Mumbai on 25 August coincided with an ordinary day for Rapido's rating (3.47). It is reported as a lead for a human, not as the cause.
+
+\textbf{Domino's, 7 August --- a delivery delay.} Delay-related reactions nearly tripled, from 5.7\% to 16.7\% of the day, and the rating fell from 3.97 to 3.32: late deliveries, orders that never arrived, cancellations. No headline or incident passed the gates, so the event is uncorroborated. The text offers its own lead --- \emph{``even if the LPG issue has been resolved they are not delivering the order in 30 min''} --- a cooking-gas supply problem that a human should check.
+
+\subsection{What stayed unexplained}
+
+The three market-wide volume spikes, the 15 September endorsement spike, the e-commerce shift of 10 August and Temu's shift of 4 September all return ``no external corroboration found''. That is the evidence layer working: none of them is dominated by a brand whose own query returned a relevant failure, and the report says so rather than borrowing a coincidence.
+
+% ----------------------------------------------------------------------------
+\section{What the Social Engine should page for}\label{sec:page}
+
+\begin{enumerate}
+\item \textbf{Page operations on an outage signature}, per brand against its own baseline: outage language at 8\% or more with binomial $z\geq4$. On 27 August this fires for Rapido from public reviews alone, and the news confirmed it the same day.
+\item \textbf{Escalate to a human, not to operations}, when a rating collapses with no service signature --- and attach the dated external leads, such as the Bhubaneswar strike, without asserting them.
+\item \textbf{Watch reply rate as a leading indicator.} It is operator-controlled, fast-moving and needs no model; an operator answering none of 741 delay complaints is the silence that draws the harshest ratings in Table~\ref{tab:delaytypes}.
+\item \textbf{Read sentiment where the model is right}: the recalibrated decision rule, or confidence $\geq0.7$ (90.6\% accurate on 60\% of rows).
+\item \textbf{Never alert on a raw ratio.} Check composition (has a new brand entered the sample?) and concentration (is the spike two posts?) first.
+\end{enumerate}
+
+% ----------------------------------------------------------------------------
+\section{Limitations, and what a first version got wrong}\label{sec:limits}
+
+\begin{itemize}
+\item \textbf{App-store reviews are a slow, effortful medium.} A short outage may never reach them, which caps how real-time a review monitor can be; this is why the social layer exists, though it remains thin (Reddit answered 6 of 21 searches within its time budget).
+\item \textbf{Transfer is uneven} (airline accuracy 0.62), and Neutral remains hard even after recalibration.
+\item \textbf{The relevance audit measures precision, not recall}, and was adjudicated by a single annotator; the 120 rows and every verdict are published so they can be re-read.
+\item \textbf{Language.} Reviews were requested with the English filter; Hinglish in Latin script is present, and other scripts are under-represented.
+\item \textbf{Edit timestamps} can move reviews toward the end of the window (Section~\ref{sec:window}).
+\end{itemize}
+
+Each correction below was found by testing rows rather than reading outputs, and each is now guarded by a check in \code{src/preflight.py}.
+
+\begin{table}[htbp]\centering\small
+\caption{Corrections to a first version of this analysis.}\label{tab:corrections}
+\begin{tabularx}{\linewidth}{@{}X X X@{}}
+\toprule
+First version reported & What was measured & Now\\
+\midrule
+Rising complaint volume & $r=0.89$ with the day index; 18 brands entering the sample & census and quota sample; balanced panel\\
+27 engagement spikes & 23 were volume, 12 of them two brands entering & 4 spikes, typed, with concentration\\
+A shift with $d=1.54$, ``large'' & $d=0.10$ over reviews, for a 0.12-star move & both effect sizes; ranked on reviews\\
+A 12.35-fold engagement spike & two reviews held 88\% of the day & top-1 and top-5 share on every spike\\
+``9 survive FDR'' printed in the notebook & none did; the field held the PELT count & fixed; 3 now survive 2,819 tests\\
+238 of 244 incidents from Discord, Zoom, GitHub and similar & none could affect a delivery & supply-chain roster; brand-named only\\
+Delay filter & 545 five-star ``on time'' reviews inside it & sense-checked; precision 0.875\\
+Text deduplication & would delete 30,079 rows from different people & keyed on brand and author\\
+\code{praise_recovery} label & all 17 rows were complaints & negation guard; renamed\\
+Round 2 topic labels applied & a substring switch & agreement measured (92.4\%); not interpreted\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ----------------------------------------------------------------------------
+\appendix
+\section{Deliverables and reproduction}\label{sec:repro}
+
+\begin{table}[htbp]\centering\small
+\caption{Submitted files.}\label{tab:files}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+File & Contents\\
+\midrule
+\code{Round3_Delay_Reactions_Dataset_Team_SE7EN.csv} & every delay-related row with its text intact, labels, evidence spans and model outputs (9.4 MB)\\
+\code{Round3_Collection_Script_Team_SE7EN.py} & the complete collector as one runnable script\\
+\code{Round3_Analysis_Notebook_Team_SE7EN.ipynb} & the executed analysis notebook, every table and figure\\
+\code{companion_play_census.csv} & 1,933 enumerated brand-days: the sampling frame\\
+\code{companion_incidents.csv}, \code{companion_attention.csv} & the trigger and attention layers\\
+\code{relevance_audit.md}, \code{relevance_audit_sample.csv} & the topic-filter audit and the 120 rows read\\
+\code{DATA_DICTIONARY.md} & every column: type, completeness and provenance\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Collection is the only step that touches the network; everything after it is a pure function of the raw files, so the analysis reproduces from the published data long after the live endpoints have moved on.
+
+\begin{verbatim}
+pip install -r round3/requirements.txt
+python round3/run_round3.py              # collect, analyse, build everything
+python round3/run_round3.py --offline    # rebuild from the raw files only
+python round3/run_round3.py --wave       # record a new collection wave
+python round3/src/preflight.py           # check the submission before upload
+\end{verbatim}
+
+\end{document}

@@ -1,5 +1,7 @@
 {
+  "panel_artefact": "fig00_panel_artefact.png",
   "timeline": "fig01_timeline.png",
+  "spike_anatomy": "fig12_spike_anatomy.png",
   "delay_types": "fig02_delay_types.png",
   "reaction_types": "fig03_reaction_types.png",
   "domains": "fig04_domains.png",

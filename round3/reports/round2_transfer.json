@@ -1,8 +1,8 @@
 {
-  "n": 74013,
-  "accuracy": 0.694472592652642,
-  "macro_f1": 0.5520380467205249,
-  "cohen_kappa": 0.49582934161369796,
+  "n": 87978,
+  "accuracy": 0.7448339357566665,
+  "macro_f1": 0.5736011075640952,
+  "cohen_kappa": 0.5583163250356676,
   "labels": [
     "Negative",
     "Neutral",
@@ -10,128 +10,173 @@
   ],
   "confusion_matrix": [
     [
-      29058,
-      6750,
-      2034
+      24388,
+      6115,
+      2217
     ],
     [
-      1851,
-      959,
-      668
+      1501,
+      814,
+      1160
     ],
     [
-      3931,
-      7379,
-      21383
+      3230,
+      8226,
+      40327
     ]
   ],
-  "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.83      0.77      0.80     37842\n     Neutral       0.06      0.28      0.10      3478\n    Positive       0.89      0.65      0.75     32693\n\n    accuracy                           0.69     74013\n   macro avg       0.60      0.57      0.55     74013\nweighted avg       0.82      0.69      0.75     74013\n",
+  "classification_report": "              precision    recall  f1-score   support\n\n    Negative       0.84      0.75      0.79     32720\n     Neutral       0.05      0.23      0.09      3475\n    Positive       0.92      0.78      0.84     51783\n\n    accuracy                           0.74     87978\n   macro avg       0.60      0.59      0.57     87978\nweighted avg       0.86      0.74      0.79     87978\n",
   "star_distribution": {
-    "1": 34157,
-    "2": 3685,
-    "3": 3478,
-    "4": 4401,
-    "5": 28292
+    "1": 29423,
+    "2": 3297,
+    "3": 3475,
+    "4": 6158,
+    "5": 45625
   },
   "predicted_distribution": {
-    "Negative": 34840,
-    "Positive": 24085,
-    "Neutral": 15088
+    "Positive": 43704,
+    "Negative": 29119,
+    "Neutral": 15155
   },
   "polarity_only": {
-    "n": 56406,
-    "accuracy": 0.8942488387760167,
-    "cohen_kappa": 0.784756049827142
+    "n": 70162,
+    "accuracy": 0.9223653829708389,
+    "cohen_kappa": 0.8363175389466222
   },
   "per_domain": {
-    "quick_commerce": {
-      "n": 10746,
-      "accuracy": 0.7069607295737949,
-      "macro_f1": 0.5586929442016361,
-      "negative_recall": 0.759018456375839
-    },
     "food_delivery": {
-      "n": 18748,
-      "accuracy": 0.6971410283763602,
-      "macro_f1": 0.5551735302343985,
-      "negative_recall": 0.7709513023782559
+      "n": 22035,
+      "accuracy": 0.738688450192875,
+      "macro_f1": 0.5786371227718222,
+      "negative_recall": 0.7417440103604576
     },
-    "ecommerce": {
-      "n": 25506,
-      "accuracy": 0.7027366109934917,
-      "macro_f1": 0.5531858309578186,
-      "negative_recall": 0.7995452478399272
-    },
-    "ride_hailing": {
-      "n": 7954,
-      "accuracy": 0.6791551420668845,
-      "macro_f1": 0.5472627580450894,
-      "negative_recall": 0.7413264101958933
-    },
-    "parcel_courier": {
-      "n": 1916,
-      "accuracy": 0.7160751565762005,
-      "macro_f1": 0.5377968071489709,
-      "negative_recall": 0.7880184331797235
+    "quick_commerce": {
+      "n": 14763,
+      "accuracy": 0.7707782970940865,
+      "macro_f1": 0.5770505515983625,
+      "negative_recall": 0.7248528282569746
     },
     "telecom_isp": {
-      "n": 7105,
-      "accuracy": 0.6750175932441942,
-      "macro_f1": 0.5198605552637916,
-      "negative_recall": 0.731245011971269
+      "n": 8238,
+      "accuracy": 0.7329448895362952,
+      "macro_f1": 0.5730102960500659,
+      "negative_recall": 0.7215128884606119
+    },
+    "ecommerce": {
+      "n": 28297,
+      "accuracy": 0.7530480262925399,
+      "macro_f1": 0.5711162654568726,
+      "negative_recall": 0.7817374350086655
+    },
+    "ride_hailing": {
+      "n": 10004,
+      "accuracy": 0.7413034786085566,
+      "macro_f1": 0.569957182361475,
+      "negative_recall": 0.715216258467952
+    },
+    "parcel_courier": {
+      "n": 2135,
+      "accuracy": 0.726463700234192,
+      "macro_f1": 0.5563944217109064,
+      "negative_recall": 0.7825763216679077
     },
     "airline": {
-      "n": 2038,
-      "accuracy": 0.6079489695780177,
-      "macro_f1": 0.5031242254332244,
-      "negative_recall": 0.694206008583691
+      "n": 2506,
+      "accuracy": 0.6221069433359936,
+      "macro_f1": 0.5113911954063003,
+      "negative_recall": 0.6866734486266531
     }
   },
   "confidence_bands": [
     {
       "band": "0.0-0.5",
-      "n": 9607,
-      "accuracy": 0.40262308733215363
+      "n": 9455,
+      "accuracy": 0.3916446324695928
     },
     {
       "band": "0.5-0.6",
-      "n": 13294,
-      "accuracy": 0.48540695050398674
+      "n": 12023,
+      "accuracy": 0.4705148465441238
     },
     {
       "band": "0.6-0.7",
-      "n": 14004,
-      "accuracy": 0.6066123964581548
+      "n": 14107,
+      "accuracy": 0.6174239739136599
     },
     {
       "band": "0.7-0.8",
-      "n": 15784,
-      "accuracy": 0.7988469336036492
+      "n": 14578,
+      "accuracy": 0.814583619152147
     },
     {
       "band": "0.8-0.9",
-      "n": 15624,
-      "accuracy": 0.924347158218126
+      "n": 19560,
+      "accuracy": 0.9335378323108384
     },
     {
       "band": "0.9-1.0",
-      "n": 5700,
-      "accuracy": 0.970701754385965
+      "n": 18255,
+      "accuracy": 0.9490002738975624
     }
   ],
   "accuracy_at_conf_ge_0.6": {
-    "n": 51112,
-    "coverage": 0.6905813843513977,
-    "accuracy": 0.8037055877289091
+    "n": 66500,
+    "coverage": 0.7558707858782877,
+    "accuracy": 0.8446466165413534
   },
   "accuracy_at_conf_ge_0.7": {
-    "n": 37108,
-    "coverage": 0.5013713807033899,
-    "accuracy": 0.8780855880133663
+    "n": 52393,
+    "coverage": 0.5955238809702426,
+    "accuracy": 0.9058271143091634
   },
   "accuracy_at_conf_ge_0.8": {
-    "n": 21324,
-    "coverage": 0.28811154797130234,
-    "accuracy": 0.9367379478521853
+    "n": 37815,
+    "coverage": 0.4298233649321421,
+    "accuracy": 0.9410022477852704
+  },
+  "recalibration": {
+    "available": true,
+    "method": "post-hoc decision rule on the Round 2 model's own probabilities; the model itself is unchanged",
+    "tau_fitted": 0.66,
+    "fit_macro_f1": 0.5886789824759303,
+    "n_fit": 44063,
+    "n_test": 43915,
+    "true_neutral_in_test": 1741,
+    "argmax": {
+      "accuracy": 0.7465330752590231,
+      "macro_f1": 0.575570860891063,
+      "cohen_kappa": 0.5605149901041987,
+      "neutral_f1": 0.09082083917592493,
+      "predicted_neutral": 7530
+    },
+    "recalibrated": {
+      "accuracy": 0.8322668791984515,
+      "macro_f1": 0.5900877083920967,
+      "cohen_kappa": 0.6741534992010423,
+      "neutral_f1": 0.05796235434717657,
+      "predicted_neutral": 1606
+    },
+    "abstain": [
+      {
+        "threshold": 0.6,
+        "coverage": 0.7564841170442901,
+        "accuracy": 0.8443755455886337,
+        "macro_f1": 0.6206340907765036
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.5959239439826939,
+        "accuracy": 0.9058846006878105,
+        "macro_f1": 0.6399251635817415
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.4299897529318001,
+        "accuracy": 0.9403696446539215,
+        "macro_f1": 0.6409919946829917
+      }
+    ],
+    "macro_f1_gain": 0.0145,
+    "interpretation": "The gain comes almost entirely from the Neutral class, and it is bought by predicting Neutral far less often. That is the right direction for this corpus: three-star reviews are genuinely rare in delay complaints, and a model that produces four times as many Neutral labels as there are three-star reviews is not undecided, it is wrong in a way that quietly flattens every time series built on it. The rule is a post-hoc threshold, so the Round 2 deliverable is still the model that ships; what changed is how its output is read."
   }
 }

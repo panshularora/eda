@@ -23,14 +23,17 @@ concatenated without special-casing downstream.
 from __future__ import annotations
 
 import html
+import time
 import re
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
-from config import (HN_QUERIES, MASTODON_INSTANCES, MASTODON_TAGS, NEWS_QUERIES,
-                    RAW, REDDIT_SUBS, WINDOW_DAYS, window_start)
+from config import (BLUESKY_STATUS, HN_QUERIES, LEMMY_INSTANCES, LEMMY_QUERIES,
+                    MASTODON_INSTANCES, MASTODON_TAGS, NEWS_BRAND_QUERY_BRANDS,
+                    NEWS_BRAND_TERMS, NEWS_QUERIES, RAW, REDDIT_SEARCH_QUERIES,
+                    REDDIT_SUBS, WINDOW_DAYS, window_start)
 from fetch import anonymise, get, get_json, write_jsonl
 
 ATOM = {"a": "http://www.w3.org/2005/Atom"}
@@ -64,16 +67,36 @@ def _blank(**kw) -> dict:
 
 
 # ---------------------------------------------------------------------------
-def collect_reddit(subs=None) -> list[dict]:
-    """Subreddit Atom feeds. Reddit's JSON API rejects unauthenticated reads
-    (HTTP 403); the RSS surface is still open, so that is what we use."""
+def collect_reddit(subs=None, deadline_s: float = 300.0) -> list[dict]:
+    """Subreddit Atom feeds, under a wall-clock budget.
+
+    Reddit's JSON API rejects unauthenticated reads (HTTP 403) and so does
+    `search.json`; the Atom surface is the only open one. It also rate-limits
+    hard and unpredictably - the same query can return 429 twice and then 200 a
+    few seconds later - so the polite retry ladder in `fetch.get` can spend
+    four minutes on a single URL that was never going to answer.
+
+    A wall-clock deadline is therefore part of the collector rather than
+    something the operator watches for. When it expires the run stops and
+    reports how many feeds answered, which is a smaller dataset honestly
+    described; without it a single hostile host can hold the whole pipeline.
+    """
     subs = subs or REDDIT_SUBS
     out: list[dict] = []
+    t0 = time.time()
+    asked = answered = 0
     for sub in subs:
-        raw = get(f"https://www.reddit.com/r/{sub}/new/.rss", max_age=900)
+        if time.time() - t0 > deadline_s:
+            print(f"      ! reddit budget of {deadline_s:.0f}s spent after "
+                  f"{asked}/{len(subs)} subreddits", flush=True)
+            break
+        asked += 1
+        raw = get(f"https://www.reddit.com/r/{sub}/new/.rss", max_age=900,
+                  max_attempts=2)
         if not raw:
             print(f"      - r/{sub}: unavailable", flush=True)
             continue
+        answered += 1
         try:
             root = ET.fromstring(raw)
         except ET.ParseError:
@@ -96,6 +119,108 @@ def collect_reddit(subs=None) -> list[dict]:
             ))
             n += 1
         print(f"      r/{sub:22s} {n:3d} posts", flush=True)
+    print(f"      subreddit feeds: {answered}/{asked} answered "
+          f"in {time.time() - t0:.0f}s", flush=True)
+    return out
+
+
+# ---------------------------------------------------------------------------
+def collect_reddit_search(queries=None, deadline_s: float = 420.0) -> list[dict]:
+    """Reddit's search Atom feed - the surface that actually returns our topic.
+
+    The first version read only `/r/<sub>/new/.rss`, which returns the newest
+    ~25 posts of a community regardless of subject. Across nineteen subreddits
+    that yielded 275 rows, of which 110 were delay-related: a social layer in
+    name. `search.rss` takes a query, so asking for "doordash late" returns
+    posts about DoorDash being late.
+
+    Reddit's JSON API answers 403 to unauthenticated readers and `search.json`
+    answers 403 even with a browser User-Agent, so the Atom surface is the only
+    open one. It rate-limits hard - a second request within a few seconds
+    returns 429 - which is why the host interval is nine seconds and the query
+    list is short. Failures are counted in the ledger, not hidden.
+    """
+    queries = queries or REDDIT_SEARCH_QUERIES
+    out: list[dict] = []
+    ok = 0
+    t0 = time.time()
+    asked = 0
+    for q in queries:
+        if time.time() - t0 > deadline_s:
+            print(f"      ! reddit search budget of {deadline_s:.0f}s spent after "
+                  f"{asked}/{len(queries)} queries", flush=True)
+            break
+        asked += 1
+        raw = get("https://www.reddit.com/search.rss?q="
+                  f"{urllib.parse.quote(q)}&sort=new&limit=50&t=month",
+                  max_age=900, max_attempts=2)
+        if not raw:
+            print(f"      - search '{q}': unavailable", flush=True)
+            continue
+        try:
+            root = ET.fromstring(raw)
+        except ET.ParseError:
+            continue
+        n = 0
+        for e in root.findall("a:entry", ATOM):
+            def txt(tag):
+                el = e.find(f"a:{tag}", ATOM)
+                return el.text if el is not None and el.text else ""
+            link = e.find("a:link", ATOM)
+            author = e.find("a:author/a:name", ATOM)
+            cat = e.find("a:category", ATOM)
+            out.append(_blank(
+                source="reddit", source_id=f"search:{q}",
+                record_native_id=txt("id"),
+                created_utc=txt("published") or txt("updated"),
+                title=_strip_html(txt("title")),
+                text=_strip_html(txt("content")),
+                author_pseudonym=anonymise(author.text if author is not None else ""),
+                publisher=cat.get("label", "") if cat is not None else "",
+                url=link.get("href") if link is not None else "",
+            ))
+            n += 1
+        ok += 1
+        print(f"      search {q:34s} {n:3d} posts", flush=True)
+    print(f"      reddit search: {ok}/{asked} attempted queries answered "
+          f"in {time.time() - t0:.0f}s", flush=True)
+    return out
+
+
+# ---------------------------------------------------------------------------
+def collect_lemmy(queries=None, instances=None, limit: int = 40) -> list[dict]:
+    """Lemmy: an open federated aggregator with an unauthenticated search API.
+
+    Reddit will not let us search its corpus without credentials. Lemmy is the
+    same genre - threaded peer-to-peer discussion with a score - and its API is
+    open, so it is collected as a substitute rather than pretending the genre
+    is covered by nineteen `new` feeds.
+    """
+    queries = queries or LEMMY_QUERIES
+    instances = instances or LEMMY_INSTANCES
+    out: list[dict] = []
+    for inst in instances:
+        for q in queries:
+            data = get_json(f"https://{inst}/api/v3/search?q={urllib.parse.quote(q)}"
+                            f"&type_=Posts&sort=New&limit={limit}", max_age=1800)
+            if not data:
+                continue
+            posts = data.get("posts", []) or []
+            for it in posts:
+                post = it.get("post", {}) or {}
+                counts = it.get("counts", {}) or {}
+                creator = (it.get("creator") or {}).get("name", "")
+                out.append(_blank(
+                    source="lemmy", source_id=f"{inst}:{q}",
+                    record_native_id=str(post.get("id", "")),
+                    created_utc=post.get("published", ""),
+                    title=_strip_html(post.get("name", "")),
+                    text=_strip_html(post.get("body", "") or ""),
+                    author_pseudonym=anonymise(creator),
+                    thumbs_up=(counts.get("score") or 0) + (counts.get("comments") or 0),
+                    url=post.get("ap_id") or post.get("url") or "",
+                ))
+            print(f"      lemmy {inst}:{q:24s} {len(posts):3d} posts", flush=True)
     return out
 
 
@@ -173,6 +298,58 @@ def collect_news(queries=None) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+def collect_news_by_brand(brands=None, terms: str = "") -> list[dict]:
+    """Brand-constrained news: the external corroboration instrument.
+
+    ``collect_news`` above asks Google News about the *topic*, which is what the
+    corpus is about. That is the wrong instrument for attribution, because a
+    topic query plus a brand-name substring match downstream will happily offer
+    "Amazon Air cargo plane crash at MIA" and "Flipkart widens lead over Amazon
+    in quick commerce" as the reason a delivery-sentiment series moved.
+
+    These queries name one brand and require a failure word in the same query,
+    and each row records which brand's query returned it. Attribution then has
+    a real question to ask - "did this brand's own query return a failure story
+    in this window?" - instead of a substring test.
+    """
+    brands = brands or NEWS_BRAND_QUERY_BRANDS
+    terms = terms or NEWS_BRAND_TERMS
+    out: list[dict] = []
+    for b in brands:
+        q = f'"{b}" ({terms})'
+        url = ("https://news.google.com/rss/search?q="
+               f"{urllib.parse.quote(q)}+when:{WINDOW_DAYS}d&hl=en-US&gl=US&ceid=US:en")
+        raw = get(url, max_age=1800)
+        if not raw:
+            continue
+        try:
+            root = ET.fromstring(raw)
+        except ET.ParseError:
+            continue
+        items = root.findall(".//item")
+        for it in items:
+            def txt(tag):
+                el = it.find(tag)
+                return el.text or "" if el is not None else ""
+            try:
+                pub = _iso(parsedate_to_datetime(txt("pubDate")))
+            except Exception:
+                pub = ""
+            src_el = it.find("source")
+            out.append(_blank(
+                source="news_brand", source_id=b,
+                publisher=(src_el.text if src_el is not None else "") or "",
+                record_native_id=txt("guid"),
+                created_utc=pub,
+                title=_strip_html(txt("title")),
+                text=_strip_html(txt("description")),
+                url=txt("link"),
+            ))
+        print(f"      news[{b:18s}] {len(items):3d} articles", flush=True)
+    return out
+
+
+# ---------------------------------------------------------------------------
 def collect_hackernews(queries=None, per_query: int = 200) -> list[dict]:
     """Algolia's HN index: full text, precise timestamps, points and comments."""
     queries = queries or HN_QUERIES
@@ -205,18 +382,27 @@ def collect_hackernews(queries=None, per_query: int = 200) -> list[dict]:
 
 # ---------------------------------------------------------------------------
 def collect() -> dict[str, list[dict]]:
-    print("    reddit:", flush=True)
+    print("    reddit (subreddit feeds):", flush=True)
     reddit = collect_reddit()
+    print("    reddit (topic search):", flush=True)
+    reddit += collect_reddit_search()
+    print("    lemmy:", flush=True)
+    lemmy = collect_lemmy()
     print("    mastodon:", flush=True)
     masto = collect_mastodon()
-    print("    news:", flush=True)
+    print("    news (topic):", flush=True)
     news = collect_news()
+    print("    news (brand-constrained):", flush=True)
+    news_brand = collect_news_by_brand()
     print("    hacker news:", flush=True)
     hn = collect_hackernews()
-    for name, rows in (("reddit", reddit), ("mastodon", masto),
-                       ("news", news), ("hackernews", hn)):
+    print(f"    bluesky: {BLUESKY_STATUS}", flush=True)
+    for name, rows in (("reddit", reddit), ("lemmy", lemmy), ("mastodon", masto),
+                       ("news", news), ("news_brand", news_brand),
+                       ("hackernews", hn)):
         write_jsonl(rows, RAW / f"{name}.jsonl")
-    return {"reddit": reddit, "mastodon": masto, "news": news, "hackernews": hn}
+    return {"reddit": reddit, "lemmy": lemmy, "mastodon": masto, "news": news,
+            "news_brand": news_brand, "hackernews": hn}
 
 
 if __name__ == "__main__":

@@ -1,121 +1,46 @@
 {
   "topic": "Reaction to a Major Delivery or Service Delay",
-  "started_utc": "2026-09-20T08:19:47+00:00",
-  "finished_utc": "2026-09-20T08:30:23+00:00",
-  "elapsed_seconds": 635.5,
+  "started_utc": "2026-09-20 (collection ran as several passes, not one timed run)",
+  "finished_utc": "2026-09-20T17:18:33+00:00",
+  "elapsed_seconds": "not recorded as a single figure - see per-source audits",
   "window_days": 45,
+  "collection_mode": "census + per-brand-day quota sample for Google Play; wall-clock budgeted collectors for Reddit",
   "records_by_source": {
-    "google_play": 120465,
-    "reddit": 275,
-    "mastodon": 1120,
-    "news": 636,
-    "hackernews": 699,
-    "incidents": 244,
+    "google_play": 91192,
+    "google_play_reviews_enumerated": 432191,
+    "google_play_apps_reaching_window_edge": 43,
+    "reddit": 622,
+    "lemmy": 621,
+    "mastodon": 2775,
+    "news_topic_queries": 645,
+    "news_brand_queries": 2098,
+    "hackernews": 709,
+    "incidents": 194,
     "attention_rows": 1440
   },
-  "total_reaction_records": 123195,
+  "total_reaction_records": 98662,
+  "sources_tested_and_unavailable": {
+    "apple_review_rss": "HTTP 200 with an empty entry list for every app, country and sort order",
+    "bluesky": "HTTP 403 from public.api.bsky.app and api.bsky.app on every query and User-Agent",
+    "reddit_json_api": "HTTP 403 to unauthenticated readers, including search.json with a browser User-Agent",
+    "x_twitter": "not free to read; not attempted and not claimed"
+  },
   "http": {
-    "hosts": {
-      "discordstatus.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 34053
+    "total_live_requests": "not aggregated across passes",
+    "total_cache_hits": "not aggregated across passes",
+    "total_failures": "not aggregated across passes",
+    "measured": {
+      "reddit_final_pass": {
+        "live_requests": 9,
+        "cache_hits": 8,
+        "refusals": 22,
+        "feeds_answered": "11/18 subreddit feeds, 6/21 search queries (wall-clock budget)"
       },
-      "hn.algolia.com": {
-        "live_requests": 6,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 1759350
-      },
-      "mastodon.social": {
-        "live_requests": 14,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 2895755
-      },
-      "mstdn.social": {
-        "live_requests": 14,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 3026626
-      },
-      "nasstatus.faa.gov": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 1619
-      },
-      "news.google.com": {
-        "live_requests": 14,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 964663
-      },
-      "status.aws.amazon.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 56406
-      },
-      "status.datadoghq.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 48652
-      },
-      "status.dropbox.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 29568
-      },
-      "status.squarespace.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 38183
-      },
-      "status.twilio.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 32609
-      },
-      "status.zoom.us": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 39004
-      },
-      "wikimedia.org": {
-        "live_requests": 32,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 218132
-      },
-      "www.cloudflarestatus.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 35627
-      },
-      "www.githubstatus.com": {
-        "live_requests": 1,
-        "cache_hits": 0,
-        "failures": 0,
-        "bytes": 85488
-      },
-      "www.reddit.com": {
-        "live_requests": 11,
-        "cache_hits": 0,
-        "failures": 8,
-        "bytes": 505862
+      "google_play_census": {
+        "pages_requested": 2186,
+        "apps_reaching_window_edge": 43
       }
     },
-    "total_live_requests": 101,
-    "total_cache_hits": 0,
-    "total_failures": 9,
-    "total_bytes": 9771597
+    "note": "Only counts that were actually measured are reported. Collection ran as several passes (Play census, then social and news, then Reddit under a wall-clock budget), and the per-pass ledgers were not summed, so no single total is claimed."
   }
 }

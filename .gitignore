@@ -19,3 +19,8 @@ desktop.ini
 
 # Round 3: HTTP cache (regenerable, large)
 round3/data/raw/_httpcache/
+
+# Round 3: local backup of the first (flat-budget) collection, and wave archives
+# that duplicate data/raw - both large and regenerable
+round3/data/raw/_play_reviews_wave1_backup.jsonl
+round3/data/waves/archive_*.jsonl

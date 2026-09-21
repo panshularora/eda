@@ -6,10 +6,13 @@ Data Vortex A'26 @ Aaruush, SRM Institute of Science & Technology
 **Assigned topic:** *Reaction to a Major Delivery or Service Delay*
 
 Round 2 restored the Social Engine's ability to read meaning. It still could not
-watch a conversation **move**. Round 3 collects live public reaction to delivery
-and service failures, applies the Round 2 model to it, and answers the question a
-monitoring system actually exists to answer: *when did the mood change, and what
-changed it?*
+watch a conversation **move**. Round 3 collects public reaction to delivery and
+service failures, applies the Round 2 model to it, and answers the question a
+monitoring system exists to answer: *when did the mood change, what changed it,
+and who should be woken up?*
+
+Every number below is read from `reports/CLAIMS.json`, which the pipeline
+writes. Nothing in this file is typed by hand.
 
 ---
 
@@ -20,7 +23,7 @@ changed it?*
 | 1 | Self-Collected Structured Dataset | [`SUBMISSION/Round3_Delay_Reactions_Dataset_Team_SE7EN.csv`](SUBMISSION/Round3_Delay_Reactions_Dataset_Team_SE7EN.csv) |
 | 2 | Data Collection / Scraping Code | [`SUBMISSION/Round3_Collection_Script_Team_SE7EN.py`](SUBMISSION/Round3_Collection_Script_Team_SE7EN.py) |
 | 3 | Analysis Notebook | [`SUBMISSION/Round3_Analysis_Notebook_Team_SE7EN.ipynb`](SUBMISSION/Round3_Analysis_Notebook_Team_SE7EN.ipynb) |
-| 4 | Round 3 Analytical Report | *(PDF)* |
+| 4 | Round 3 Analytical Report | *(PDF — built separately)* |
 
 ---
 
@@ -28,167 +31,426 @@ changed it?*
 
 | | |
 |---|---|
-| Reaction records collected | **123,195** across 5 platforms |
-| After normalisation & dedupe | **76,121** rows, 44.98 days (2026-08-06 → 2026-09-20) |
-| Delay-related | **15,207** (20.0%) |
-| Brands · distinct authors | 45 · 70,182 |
-| Ground-truth incidents | 244 |
-| Attention series | 1,440 daily brand-days |
-| Live HTTP requests · failures | 101 · 9 |
+| Reviews **enumerated** in the window | **432,191** |
+| Reviews **kept** (quota sample) | **91,192** (21.1% of the frame) |
+| Apps reaching the full window | **43 / 44** |
+| Corpus after normalisation | **92,689** rows, 45.0 days (2026-08-06 → 2026-09-20) |
+| Delay-related | **10,918** (11.8%) |
+| Brands · brands in the balanced panel | 44 · **39** |
 
-**Sentiment shifts: 9** change points at |Cohen's *d*| ≥ 0.20, in both directions.
-**Engagement spikes: 27** at robust *z* > 3.5 — the largest being
-2026-09-15 at **12.35× the median** (*z* = 20.5).
+---
 
-Both exceed the rulebook's minimum of two shifts and one spike.
+## The finding the round is built around
 
-### Does the Round 2 model still work here?
+Two rating collapses of near-identical size, in the same brand, ten days apart.
 
-It is measured, not assumed — Google Play hands us an answer key, because every
-review carries a star rating written by the same person as the text.
+| | Rapido 2026-08-19 - no_service_signature | Rapido 2026-08-27 - service_failure |
+|---|---|---|
+| mean rating | 3.54 → 1.97 | 3.53 → 2.49 |
+| effect on reviewers | *d* = -0.90 | *d* = -0.56 |
+| delay-related share | 7.5% → **7.8%** | 7.3% → **15.2%** |
+| outage language | 1.4% → 0.0% | 1.0% → **17.7%** |
+
+**The same drop. Different events, needing opposite responses.** A sentiment
+series reports both as "about one star down". The second is an app, login or
+payment failure — operations should have been paged. The first is not explained
+by anything in the text.
+
+That last sentence is the point. An earlier draft called the first event
+*reputational*, on the strength of six reviews containing `ban`, `shame` and
+`boycott`. The aggregate did not support it — safety vocabulary did not move —
+so the label was withdrawn. The classifier returns `no_service_signature`,
+which is what is actually known, and ships the diagnostics so a human can form
+a hypothesis the system is not entitled to assert.
+
+### Then the outside world was checked — independently
+
+Both events were passed to the external-evidence layer, which only accepts a
+headline that was returned by **that brand's own failure query**, names the
+brand, describes a service failure, and is not about a trial, a share price or
+a TV show.
+
+- **27 August — confirmed by two outlets, same day.** *The Economic Times*:
+  "Rapido faces tech outage, users report issues in several cities".
+  *Dailyhunt*: "Rapido faces app outage as ride booking issue hit users". The
+  outage was detected from public reaction text alone, before the news was
+  consulted, and the news agrees on the day and on the kind of failure.
+- **17–20 August — a candidate, not a finding.** On 19 August, the trough day,
+  Odisha outlets report an Ola–Uber–Rapido **driver strike** in Bhubaneswar,
+  with fifty drivers arrested. A strike would produce exactly what the text
+  shows — short, angry one-stars about rides not being accepted, with no outage
+  language. But the strike is regional and the review base is national, so the
+  system surfaces it as a dated lead for a human to verify rather than naming it
+  as the cause. That is the correct behaviour for a monitor that does not know.
+
+Every market-wide event in the window — the volume spikes and domain-level
+shifts — returns **"no external corroboration found"**. That is not a failure
+of the evidence layer. With thirty-plus brands in a window, *some* brand always
+has *some* failure headline, so only brands that dominate an event are eligible
+to explain it.
+
+Of 85 brand-days where a rating fell more than 1.5 SD below that
+brand's own median, most carry **no signature at all**. A monitor that named a
+cause for every dip would emit a finding a day and be ignored by week two.
+
+---
+
+## Before any finding: is the trend in the public, or in the scraper?
+
+This is the control that decides whether anything else counts, and the first
+version of this work failed it.
+
+Reviews were paginated newest-first on a flat 5,000-per-app budget. A quiet app
+reached the window edge on that budget; a busy one ran out after five days.
+**Eighteen of forty-four brands entered the corpus part-way through the
+window.** Daily volume climbed from 59 rows to 822 — correlating **r = 0.89
+with the day index** and **ρ = −0.06 with Wikipedia pageviews for the same
+brands**. It was a picture of our own pagination, and it had already produced
+three findings that were not findings:
+
+- a volume trend that was a pagination curve;
+- twelve "ride-hailing engagement spikes" that were Rapido appearing on 5
+  September and Uber on 8 September (Lyft and Ola, present throughout, were
+  flat at 5–11 rows a day);
+- a set of "newly distinctive" words at the headline change point — *rapido*,
+  *jio*, *bigbasket*, *zepto* — which were the names of the brands that had
+  just arrived.
+
+**The collector was rebuilt as a survey.** It now *enumerates* every review in
+the window and keeps a **quota sample of at most 80 per
+brand-day**, drawn by reservoir sampling so the kept rows are a uniform sample
+of the day rather than its most recent hour.
+
+The test is whether restricting to the balanced panel still *changes* the
+series. On the first collection it changed it completely. On this one it barely
+moves it — which is what a corpus without an entry bias looks like.
+
+| daily delay volume vs the day index | all brands | balanced panel |
+|---|---:|---:|
+| first collection (flat 5,000/app budget) | **r = +0.891** | r = +0.037 |
+| this collection (census + quota sample) | **0.214** | 0.223 |
+
+On the first corpus the entire trend lived in the brands that entered
+mid-window: remove them and it vanished. On this one the two agree, because
+there are no brands entering mid-window left to remove. That agreement is the
+evidence the artefact is gone — not evidence it never existed. The panel
+restriction stays in place anyway, because it is what makes the claim
+checkable rather than asserted.
+
+On the balanced panel the series now averages 216.80 delay-related
+reactions a day at a coefficient of variation of 0.12.
+
+Census counts and quota shares combine into a ratio estimator, so the activity
+series is an estimate of **how many people actually complained** rather than of
+how many rows we kept — with a finite-population-corrected binomial interval
+attached.
+
+### What the control cost, and what it bought
+
+| | first version | after the fix |
+|---|---:|---:|
+| PELT change points | 9 | 2 |
+| "engagement spikes" | 27 | 4 (3 volume, 1 endorsement) |
+| shifts surviving Benjamini–Hochberg over the whole scan | **0** | **3** of 2,819 tests |
+
+Cleaning the sampling did not cost findings. It converted fake ones into real
+ones: the conservative multiplicity-corrected scan went from finding *nothing*
+to finding 3 shifts that survive correction across
+2,819 tests.
+
+---
+
+## Three numbers the first version reported that were wrong
+
+**1. Cohen's *d* was computed on daily means.** PELT segments a daily series, so
+its *d* divides by the SD of ~14 daily averages — small by construction. The
+headline break was reported as **d = 1.54, "a large effect"**, for a shift of
+**0.12 stars on a five-point scale**. Recomputed over the reviews themselves it
+is **d = 0.10**. Both are now reported, under names that say which is which
+(`cohens_d_daily`, `cohens_d_records`), and selection and ranking use the one
+that describes people.
+
+**2. A "12.35× engagement spike" was two reviews.** 88% of that day's
+endorsement came from the top two reactions; the median reaction received zero
+thumbs-up. Every endorsement spike now ships its top-1 and top-5 concentration
+and a Gini coefficient, and volume spikes are separated from endorsement spikes
+because 23 of the original 27 were volume.
+
+**3. The notebook printed a number that contradicted the paragraph above it.**
+`significant_after_fdr` was assigned the PELT count, so the notebook printed
+"1,793 tests, 9 survive pooled FDR<0.05" directly beneath a paragraph
+explaining that nothing survived. Fixed.
+
+---
+
+## Does the Round 2 model still work here?
+
+Measured, not assumed — Google Play hands us an answer key, because every review
+carries a star rating written by the same person as the text.
 
 | | |
 |---|---|
-| Independent labels | **74,013** star ratings |
-| Three-class accuracy | 0.6945 (macro-F1 0.5520, κ 0.4958) |
-| **Polarity only** (Neutral dropped) | **0.8942** on 56,406 rows, κ 0.785 |
+| Independent labels | **87,978** star ratings |
+| Three-class accuracy | 0.7448 (macro-F1 0.5736, κ 0.5583) |
+| **Polarity only** (Neutral dropped) | **0.9224** on 70,162 rows, κ 0.836 |
+| At confidence ≥ 0.70 | accuracy 0.906, covering 59.6% of rows |
 
-A model trained on 2015-era tweets reaches **89.4% agreement on
-positive-vs-negative** in 2026 app-store reviews — a completely different domain.
-It struggles on Neutral, which is where a tweet-trained three-class model is
-least at home, and that limitation is carried forward explicitly rather than
-hidden behind the aggregate.
+A model trained on 2015-era tweets reaches **0.9224 agreement on
+positive-vs-negative** in 2026 app-store reviews — from a completely different
+domain, register and decade.
 
-### How the shifts were found — and one method that failed
+**Neutral is where it breaks.** Recall 0.23, precision
+0.05, and it emits **15,155** Neutral
+predictions where there are only **3,475** three-star reviews —
+over-emitting the class by 4.36×. Because
+`sentiment_score` maps Neutral to 0.0, every one of those misrouted rows drags
+a daily mean toward zero by an amount that varies with text length and brand.
 
-The first approach tested every candidate day with Welch's t-test and corrected
-with Benjamini–Hochberg. Pooled honestly across all **1,793 tests**,
-**nothing survived**. That result is kept in `analysis.json` and reported in the
-notebook rather than quietly dropped, because it is a real property of the data.
+**So the decision rule was repaired without touching the model.** Predict
+Neutral only when *P*(Neutral) ≥ τ, else take the better of Negative and
+Positive. τ = 0.66 is fitted on half the star-labelled rows; every
+number below is measured on the other 43,915, which the fitting never
+saw.
 
-The diagnosis is that the question was being asked wrongly: *"when did the level
-change?"* is one segmentation question, and turning it into ~1,800 significance
-questions guarantees that an honest multiplicity correction rejects everything.
-**PELT change-point detection** asks it directly and finds 9.
+| held-out | accuracy | Cohen's κ | Neutral predictions |
+|---|---:|---:|---:|
+| argmax (as shipped) | 0.7465 | 0.5605 | 7,530 |
+| recalibrated | **0.8323** | **0.6742** | 1,606 |
+| *truth* | — | — | *1,741* |
 
-Two instruments run independently — the Round 2 model's sentiment, and the
-reviewer's own star rating — so a break appearing in both is corroborated rather
-than resting on the model whose transfer we just measured at 0.69.
+**+0.0857 accuracy and +0.1136 κ from a single
+threshold**, and the Neutral prediction count goes from over four times the
+truth to almost exactly it. The Round 2 deliverable ships unchanged; what
+changed is how its output is read. Retraining would have been out of scope —
+a fine-tuned model is no longer the Round 2 model.
 
-### Trigger evidence is relevance-gated
+### The topic head, applied and then put down
 
-Temporal proximity is not relevance. Something is always broken somewhere, so a
-±2-day window over ten status pages will always return *an* incident. An earlier
-version offered a Discord media-proxy outage as the reason Amazon India's
-delivery sentiment moved — exactly the plausible-sounding story this pipeline
-exists to avoid.
+Round 2's central finding was that `topic_category` was not an annotation: a
+case-insensitive substring switch reproduced 9,000 of 9,000 labels exactly.
+Round 3 can ask a question Round 2 could not — **did the switch travel?**
+Replaying the recovered rule over this corpus, which it was never fitted to,
+the learned topic head agrees with it on **92.4% of rows**.
 
-Evidence is now tiered. **Internal** evidence (distinctive vocabulary, delay-type
-mix, app versions in the field) is always available and directly about the event.
-**External** corroboration counts only when it actually names a brand in the
-window, and every event carries an explicit verdict — including *"no external
-corroboration found"*, which is what several honestly report.
-
-### The submitted dataset
-
-**15,207 rows — 100% of all delay-related reactions, text intact**, at
-9.0 MB. 76,000 rows of real review prose is ~50 MB of CSV and cannot fit a
-9.5 MB cap with readable text, so the choice was made on what the dataset is
-*for*: the delay-related rows **are** the assigned topic. The full corpus —
-including the non-delay comparison baseline — ships in the repo as
-`round3_delay_reactions_full.csv.gz` and `.json.gz`.
+So `r2_topic` ships because the rulebook requires the Round 2 model to be
+applied, and it is **not interpreted anywhere**. Reporting "6,806 reactions
+about Technical Issues" would be reporting a substring count with a topic's
+name on it. The topic layer that *is* interpreted is the delay/reaction
+taxonomy, which ships the literal span that fired every label.
 
 ---
 
 ## Why the dataset is built in three layers
 
-Most answers to "explain this spike" are a plausible story told over a chart. A
-plausible story is not evidence. So the collector gathers three independent
-kinds of data, and the analysis is designed backwards from the requirement to
-*attribute* a change rather than merely notice one.
-
 | layer | question it answers | sources |
 |---|---|---|
-| **L1 reaction** | what did people say, when, and did others endorse it? | Google Play reviews (44 apps), Reddit, Mastodon, Google News, Hacker News |
-| **L2 trigger** | what actually broke, and at what time? | FAA national airspace delay register, 10 public status pages |
+| **L1 reaction** | what did people say, when, and did others endorse it? | Google Play (44 apps, census + quota sample), Reddit (feeds + topic search), Lemmy, Mastodon (6 instances), Google News, Hacker News |
+| **L2 trigger** | what actually broke, and at what time? | FAA airspace delay register; status pages restricted to vendors in the delivery and commerce chain |
 | **L3 attention** | did the outside world notice too? | Wikipedia pageviews |
 
-L2 is what turns *"sentiment dropped"* into *"sentiment dropped **because**"*.
-L3 is the check against fooling ourselves: if a volume spike in our scraped text
-coincides with a pageview spike recorded by a third party, the spike is about the
-world and not about our scraper.
+### The trigger layer, rebuilt — and a structural limit worth reporting
 
-### Why Google Play is the backbone
+The first roster was Discord, Dropbox, Twilio, Squarespace, Datadog, Zoom and
+GitHub. It returned 238 of 244 incidents and **not one of them could make
+somebody's dinner late.** After the relevance gate they contributed nothing, so
+the layer was ornamental.
 
-It is the only source that supplies four things at once:
+The reason is a finding about the topic rather than about the code:
+**the operators whose delays the public reacts to do not publish
+machine-readable status.** `status.doordash.com`, `status.uber.com`,
+`status.zomato.com` and `status.lyft.com` do not resolve. Only infrastructure
+vendors run public Statuspage instances. A trigger layer built from status feeds
+therefore cannot, *even in principle*, corroborate a food-delivery spike.
 
-- a **1–5 star rating** written by the same person as the text — an *independent
-  sentiment label* on ~100k rows, which is what lets us **measure** whether the
-  Round 2 model survived the domain change instead of assuming it;
-- a **thumbs-up count** — an engagement signal with a real denominator;
-- a **precise timestamp**, so reactions bin hourly;
-- an **app version** and any **company reply**, giving two candidate trigger
-  mechanisms beyond the incident feeds.
+The roster is now restricted to vendors that sit in the delivery and commerce
+chain, each tagged `direct` or `infra`, and the structural limit is reported
+rather than papered over with a coincidence.
 
-Apple's customer-review RSS was tested first and is deprecated — it returns HTTP
-200 with an empty entry list for every app, country and sort order. That negative
-result is recorded rather than quietly dropped.
+### Two gates now stand between a headline and the word "trigger"
+
+The first version required only that a headline in the window contain a brand
+name, and so offered *"Flipkart widens lead over Amazon in India as quick
+commerce surges"* as corroboration that delivery sentiment had moved. A brand
+appearing in a business story is not evidence its service failed. A headline now
+has to **name the brand** *and* **describe a failure**, and news is collected
+per brand with the failure terms in the query rather than by free-text topic
+search.
+
+---
+
+## Sources tested and found unusable
+
+Reported rather than quietly dropped, because a source roster that lists only
+what worked is not a method section.
+
+| source | status |
+|---|---|
+| **Apple customer-review RSS** | deprecated — HTTP 200 with an empty entry list for every app, country and sort order |
+| **Bluesky** | HTTP 403 from `public.api.bsky.app` and `api.bsky.app` on every query and User-Agent; `bsky.social` returns 401 without a session |
+| **Reddit JSON API** | 403 to unauthenticated readers, including `search.json` with a browser User-Agent |
+| **X / Twitter** | not free to read; not attempted, and not claimed |
+
+Reddit's *Atom* surface is open and is what we use, but it rate-limits
+unpredictably — the same query returns 429 twice and 200 seconds later. The
+polite retry ladder can therefore spend minutes on a URL that was never going to
+answer, so both Reddit collectors run under a **wall-clock budget** and report
+how many feeds answered. A smaller dataset honestly described beats a pipeline
+one hostile host can hold.
 
 ---
 
 ## Delay and reaction taxonomies
 
-The brief asks about *reaction to delay*, so every row carries two labels applied
-as ordered first-match rules — and, crucially, the **literal text span that
-fired the rule**, in `delay_type_evidence` and `reaction_type_evidence`. Anyone
-can read why a row is labelled the way it is and disagree. An unsupervised
-clustering would look more sophisticated and be impossible to defend to a judge
-asking "why is this row in that bucket?".
+Every row carries two labels applied as ordered first-match rules, **plus the
+literal span that fired the rule**, in `delay_type_evidence` and
+`reaction_type_evidence`. Anyone can read why a row is labelled the way it is
+and disagree.
 
 **Delay types:** `never_arrived` · `missing_items` · `stuck_in_transit` ·
 `cancelled` · `refund_delay` · `outage` · `support_delay` · `long_wait` ·
 `late_delivery` · `unspecified_delay`
 
 **Reaction types:** `churn_threat` · `refund_demand` · `escalation` · `anger` ·
-`sarcasm_humour` · `resigned` · `praise_recovery` · `informational` ·
-`neutral_report`
+`sarcasm_humour` · `resigned` · `recovery_acknowledged` · `informational` ·
+`unmarked`
 
-**Delay domains:** `food_delivery` · `quick_commerce` · `parcel_courier` ·
-`ecommerce` · `ride_hailing` · `airline` · `telecom_isp`
+Two of those names changed, for cause:
+
+- **`praise_recovery` → `recovery_acknowledged`.** The rule had no guard against
+  the recovery verb being negated, so it fired on *"but it never gets fixed"*
+  and *"but still haven't refunded me"*. All 17 rows it selected were
+  complaints, mean sentiment −0.88. A label that says the opposite of the text.
+- **`neutral_report` → `unmarked`.** This is the residual bucket, and calling it
+  *neutral* asserted something false: its mean star rating was 1.9.
+
+An ordered taxonomy is also mutually exclusive by construction, so it cannot
+answer "how often do people demand a refund" — `anger` outranks
+`refund_demand` and takes every complaint containing "worst" with it. Eight
+**independent co-occurrence flags** now sit beside it, plus `competitor_named`,
+which records who the customer says they are switching to. That last is
+invisible to a brand-count entity analysis, because the brand named is not the
+brand being reviewed.
+
+---
+
+## The relevance filter is audited, not trusted
+
+`is_delay_related` decides which rows are the assigned topic, so everything
+downstream inherits its errors. Three checks, in `reports/relevance_audit.md`:
+
+**Word boundaries.** The first draft matched `late` inside *chocolate*, `down`
+inside *download*, `eta` inside *retail* — the same class of defect the team
+documented in the Round 2 labels.
+
+**Validation against the star ratings**, which were never used to build it:
+
+| | rows | mean stars | five-star share |
+|---|---:|---:|---:|
+| word-bounded only (first submission) | 15,207 | 1.600 | 8.9% |
+| after the audit | **10,918** | **1.40** | **4.3%** |
+| non-selected baseline | — | 3.13 | — |
+
+The contrast against the baseline widens from 1.53 stars to **1.73**, and the
+five-star share inside the "delay" corpus halves. Recall was paid for
+precision, deliberately.
+
+**Hand adjudication of 120 random rows: precision 0.875** (95% Wilson
+[0.803, 0.923]). Reading them found three false-positive families that no amount
+of staring at the regex had:
+
+> *"Though **late night** food is not good, we still have Royal Dominos doing
+> their duties sincerely"* — five stars, in the delay corpus because "late
+> night" contains "late".
+
+> *"Have place my very first order, **can't wait** to see how the results will
+> be"* — anticipation, not a delay.
+
+> *"...incurred **late-payment** or overdraft fees"* — and the hyphen is a word
+> boundary, so the first attempt at a guard still let it through.
+
+All three are now regression tests in `src/audit_relevance.py`.
+
+---
+
+## One more defect worth naming: the dedupe rule was deleting real people
+
+Text-level deduplication was keyed on `source | normalised_text`. Every review
+whose text was "good" collapsed to **one row** — across 44 brands, 45 days and
+9,408 different people. "worst app" was written by **63 distinct authors with 63
+distinct Play review IDs**, and one survived. On the current corpus that rule
+discarded **1,291 rows non-randomly**: short, common texts
+go first, so the survivors skew verbose, and verbose skews angry.
+
+Cross-posting is real on social platforms and is still deduped there. It is not
+real on an app store, where Play issues one immutable `reviewId` per review.
+The key is now `source + brand + author` for the store and `source + text` for
+the social sources.
 
 ---
 
 ## Method
 
-**Sentiment shifts** are located with **PELT change-point detection** (L2 cost,
-BIC-scaled penalty, minimum 4-day segment) on the daily series, run separately
-over two instruments — the Round 2 model's sentiment and the reviewer's own star
-rating. Cohen's *d* is reported beside each break, with a floor of 0.20, so a
-detectable-but-trivial move is visible as trivial.
+**Shifts** are located with **PELT** change-point detection on the daily series,
+run over two instruments — the Round 2 model's sentiment and the reviewer's own
+star rating — so a break appearing in both is corroborated rather than resting
+on the model whose transfer we just measured. Every break carries **both**
+effect sizes, and a **balanced-panel re-test** that asks whether it survives
+with composition held fixed.
 
-The Welch/Benjamini–Hochberg scan is retained as a deliberately conservative
-second opinion and its result — *nothing survives* — is published rather than
-discarded. See "How the shifts were found" above for why that is a statement
-about the framing of the question rather than about the data being flat.
+A day-by-day Welch scan with a single pooled Benjamini–Hochberg family runs
+alongside as a deliberately conservative second opinion. On the first corpus it
+found nothing; on this one it finds **3** across
+2,819 tests.
 
-Welch p-values attached to change points are **uncorrected** and labelled as
-such: they describe the size of a break PELT located, they do not certify its
-discovery.
-
-**Engagement spikes** use a median/MAD robust z-score. A spike inflates the very
-mean and standard deviation a conventional z-score would test it against, which
-systematically under-detects the events we are hunting.
+**Spikes** use a median/MAD robust *z*, separated into **volume** and
+**endorsement**, each with concentration diagnostics. Note a bias we state
+rather than discover later: thumbs-up is cumulative to the moment of
+collection, so older days have had longer to accrue it. That works *against*
+finding a recent spike, which makes any late-window endorsement spike a
+conservative finding.
 
 **Distinctive vocabulary** uses log-odds with an informative Dirichlet prior
-(Monroe et al.), whose z-scores are comparable across words of very different
+(Monroe et al.), whose *z*-scores are comparable across words of very different
 frequency — raw counts and ratios are not.
 
-**Trigger attribution** searches a ±2-day window around each event, but counts
-external evidence only when it is *about* the brands in that window — an
-incident whose entity names one of them, or a headline that does. Temporal
-coincidence alone is discarded, and the discard count is published. Every event
-carries an explicit verdict, *including when no external corroboration is
-found*.
+**Events** are classified per brand-day against **that brand's own baseline**,
+because a 39% delay share is alarming for Domino's and an ordinary Tuesday for
+Amazon India.
+
+---
+
+## Fields the collector gathered and the first analysis never opened
+
+| field | filled on | what it says |
+|---|---|---|
+| `company_replied` | 32.8% of delay rows | whether the operator answered — operator-controlled, fast-moving, needs no model to read |
+| `stated_delay_hours` | 18.4% of delay rows | median 3.00 h — the severity axis polarity cannot see |
+| `app_version` | most Play rows | whether a release landed in the window |
+
+A one-star review saying "late" and a one-star review saying "eleven days late,
+still nothing" are the same point to a three-class sentiment model and very
+different points to whoever has to decide what to do.
+
+---
+
+## Real-time, honestly
+
+A single pull, however deep, is a **retrospective snapshot**: it reconstructs
+45 days from whatever the platforms still hold today. Collection therefore runs
+in **waves** (`src/waves.py`), appended to a per-source archive keyed on record
+id. Only what a wave *adds* is genuinely live, and only that increment is
+described as live anywhere in this submission.
+
+Each wave measures **arrival latency** (how long after writing we see a
+reaction) and **backfill** — records dated *before* the previous wave that only
+surfaced now. Play moderates and releases reviews with a lag, so yesterday's
+number keeps changing after yesterday. A monitoring system that reports a daily
+figure without knowing its backfill rate is reporting a figure that will move
+underneath it.
+
+```bash
+python round3/run_round3.py --wave     # record a wave without rebuilding
+```
 
 ---
 
@@ -197,7 +459,10 @@ found*.
 Every request carries one identifying User-Agent with a contact address. Per-host
 minimum intervals are enforced globally, backoff respects `Retry-After`, and an
 on-disk cache prevents re-runs from re-requesting. Only public, unauthenticated
-endpoints are read.
+endpoints are read. The Play census made **2,186 page requests**;
+Reddit's final pass recorded 22 refusals under its wall-clock budget. Only
+measured counts are reported — collection ran as several passes and no
+cross-pass total is claimed.
 
 Author handles are replaced with salted SHA-256 pseudonyms **at the point of
 collection** — no raw identifier is ever written to disk. The dataset studies
@@ -219,6 +484,7 @@ files long after the live endpoints have moved on.
 ```bash
 python round3/run_round3.py --skip-play   # reuse reviews already on disk
 python round3/run_round3.py --offline     # analyse on-disk data, fetch nothing
+python round3/src/audit_relevance.py      # reproduce the topic-filter audit
 ```
 
 ---
@@ -229,18 +495,20 @@ python round3/run_round3.py --offline     # analyse on-disk data, fetch nothing
 |---|---|
 | `src/config.py` | topic, pinned app roster, taxonomies, rate limits |
 | `src/fetch.py` | polite HTTP: throttling, backoff, cache, ledger, anonymisation |
-| `src/sources/play_reviews.py` | L1 primary — Google Play, 44 apps |
-| `src/sources/social_news.py` | L1 secondary — Reddit, Mastodon, News, Hacker News |
-| `src/sources/incidents.py` | L2 triggers — FAA register, status pages |
+| `src/sources/play_census.py` | L1 primary — Google Play census + per-brand-day quota sample |
+| `src/sources/social_news.py` | L1 secondary — Reddit, Lemmy, Mastodon, News, Hacker News |
+| `src/sources/incidents.py` | L2 triggers — FAA register, supply-chain status pages |
 | `src/sources/attention.py` | L3 attention — Wikipedia pageviews |
-| `src/collect.py` | orchestration + source audit |
-| `src/normalise.py` | five schemas → one, dedupe, brand attribution |
-| `src/classify.py` | delay/reaction taxonomies + Round 2 model application |
-| `src/validate.py` | Round 2 transfer measured against star ratings |
-| `src/analyse.py` | shift/spike detection, distinctive terms, trigger attribution |
-| `src/figures.py` | every chart |
-| `src/build_dataset.py` | published tables, data dictionary, quality report |
+| `src/waves.py` | append-only wave bookkeeping: what each run actually added |
+| `src/normalise.py` | schemas → one, dedupe, brand attribution |
+| `src/classify.py` | delay/reaction taxonomies, flags, Round 2 model |
+| `src/validate.py` | Round 2 transfer measured against stars, plus recalibration |
+| `src/panel.py` | coverage, the balanced panel, the population estimator |
+| `src/analyse.py` | shifts, spikes, distinctive terms, trigger attribution |
+| `src/cases.py` | which brand-days are events, and what kind |
+| `src/audit_relevance.py` | reproduces the topic-filter audit and its regression tests |
+| `src/claims.py` | every reported number, written to `reports/CLAIMS.json` |
 | `data/raw/` | one JSONL per source, exactly as collected |
-| `data/processed/` | dataset, dictionary, time series |
-| `reports/` | `analysis.json`, `round2_transfer.json`, `data_quality.json`, figures |
+| `data/waves/` | per-wave archives and the increment each run added |
+| `reports/` | `analysis.json`, `case_studies.json`, `CLAIMS.json`, audits, figures |
 | `SUBMISSION/` | the files to upload |

@@ -116,7 +116,7 @@ def collect_statuspages(feeds=None) -> list[dict]:
     """Incident histories from public status pages (Atlassian Statuspage etc.)."""
     feeds = feeds or STATUSPAGE_FEEDS
     out: list[dict] = []
-    for name, url in feeds:
+    for name, url, tier in feeds:
         raw = get(url, max_age=1800)
         if not raw:
             print(f"      - {name}: unavailable", flush=True)
@@ -136,8 +136,15 @@ def collect_statuspages(feeds=None) -> list[dict]:
             body = _clean(_text(it, "description"))
             title = _clean(_text(it, "title"))
             out.append({
+                # `tier` records how this vendor could reach a consumer
+                # delay at all: `direct` means an outage here stops orders or
+                # parcels moving, `infra` means it can take an operator's app
+                # down with it. The attribution step uses the tier; without it
+                # every status feed looked equally relevant, which is how a
+                # Discord outage was once offered as the reason Amazon India's
+                # delivery sentiment moved.
                 "source": "statuspage", "incident_kind": name,
-                "entity": name, "sector": "platform_service",
+                "entity": name, "sector": "platform_service", "tier": tier,
                 "started_utc": started, "observed_utc": started,
                 "title": title, "detail": body[:800],
                 "impact_reason": _classify_incident(f"{title} {body}"),

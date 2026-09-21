@@ -29,6 +29,7 @@ import unicodedata
 from collections import Counter
 from datetime import datetime, timezone
 
+import numpy as np
 import pandas as pd
 
 from config import PLAY_APPS, PROCESSED, RAW, window_start
@@ -40,8 +41,10 @@ from fetch import read_jsonl
 ENGAGEMENT_KIND = {
     "google_play": "thumbs_up",          # other users endorsing the review
     "reddit":      "none",               # RSS does not expose score
+    "lemmy":       "score_comments",     # votes + comment count
     "mastodon":    "fav_boost_reply",    # favourites + boosts + replies
     "news":        "none",               # articles have no public reaction count
+    "news_brand":  "none",               # brand-constrained query, same genre
     "hackernews":  "points_comments",    # points + comment count
 }
 
@@ -147,7 +150,8 @@ def record_id(source: str, native: str, text: str) -> str:
 # ---------------------------------------------------------------------------
 def load_raw() -> tuple[pd.DataFrame, dict]:
     frames, counts = [], {}
-    for name in ("play_reviews", "reddit", "mastodon", "news", "hackernews"):
+    for name in ("play_reviews", "reddit", "lemmy", "mastodon", "news",
+                 "news_brand", "hackernews"):
         rows = read_jsonl(RAW / f"{name}.jsonl")
         counts[name] = len(rows)
         if rows:
@@ -210,11 +214,48 @@ def build(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     df = df.drop_duplicates(subset=["source", "record_native_id"], keep="first")
     audit["dropped_duplicate_native_id"] = before - len(df)
 
-    df["text_key"] = (df["source"] + "|" +
-                      df["full_text"].str.lower().str.replace(r"[^a-z0-9 ]", "", regex=True))
+    # Text-level dedupe, and this rule had to be rewritten because the first
+    # one was destroying real data.
+    #
+    # The original key was `source | normalised_text`, so every review whose
+    # text was "good" collapsed to a single row - across all 44 brands, all 45
+    # days and 9,408 different people. "worst app" was written by 63 distinct
+    # authors with 63 distinct Play review IDs, and one survived. On the
+    # current corpus that rule discarded 30,079 rows, a third of the Play
+    # sample, and it discarded them *non-randomly*: short, common texts go
+    # first, which means the survivors skew verbose, and verbose skews angry.
+    # A quota sample that is then filtered by text length is no longer a
+    # sample of anything.
+    #
+    # Cross-posting is a real problem, but it is a problem on social
+    # platforms, where one person broadcasts one complaint to several places.
+    # It is not a problem on an app store: Play issues one immutable reviewId
+    # per review, that field is already deduped above, and two people writing
+    # the same three words are two people.
+    #
+    # So the rule is split by what each source actually does:
+    #   Play      trust the review id; additionally collapse only an identical
+    #             text from the *same pseudonymous author* for the same brand,
+    #             which is a genuine double-post.
+    #   social    keep the original text-level key, because syndication and
+    #             cross-posting there are real and frequent.
+    norm_text = df["full_text"].str.lower().str.replace(r"[^a-z0-9 ]", "", regex=True)
+    is_store = df["source"].eq("google_play")
+    df["text_key"] = np.where(
+        is_store,
+        df["source"] + "|" + df["brand"].astype(str) + "|"
+        + df["author_pseudonym"].astype(str) + "|" + norm_text,
+        df["source"] + "|" + norm_text,
+    )
     before = len(df)
     df = df.drop_duplicates(subset=["text_key"], keep="first").drop(columns=["text_key"])
     audit["dropped_duplicate_text"] = before - len(df)
+    audit["dedupe_note"] = (
+        "Text-level dedupe is keyed on source+brand+author for the app store "
+        "and on source+text for the social sources. A single key across all "
+        "sources collapsed 9,408 reviews reading 'good' into one row and "
+        "removed a third of the corpus non-randomly, biasing it toward "
+        "verbose reviewers.")
 
     # --- identity and ordering -------------------------------------------
     df["record_id"] = [record_id(s, str(n), t) for s, n, t in

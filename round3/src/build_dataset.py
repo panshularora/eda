@@ -64,8 +64,20 @@ DICTIONARY: dict[str, tuple[str, str]] = {
     "stated_delay_hours":   ("derived", "largest duration mentioned in the text, in hours; crude severity proxy"),
     "r2_sentiment":         ("model", "Round 2 sentiment model prediction: Negative / Neutral / Positive"),
     "r2_sentiment_confidence": ("model", "calibrated probability of the predicted sentiment class"),
-    "r2_topic":             ("model", "Round 2 topic model prediction"),
+    "r2_p_negative":        ("model", "Round 2 model P(Negative); kept because the max alone cannot support recalibration"),
+    "r2_p_neutral":         ("model", "Round 2 model P(Neutral)"),
+    "r2_p_positive":        ("model", "Round 2 model P(Positive)"),
+    "r2_topic":             ("model", "Round 2 topic model prediction. NOT INTERPRETED: Round 2 established this label is a substring switch, and reports/analysis.json measures how closely the model still reproduces it on this corpus. Shipped because the rulebook requires the Round 2 model to be applied."),
     "r2_topic_confidence":  ("model", "calibrated probability of the predicted topic class"),
+    "flag_churn_threat":    ("derived", "mentions uninstalling, switching or cancelling a subscription; independent of reaction_type"),
+    "flag_refund_demand":   ("derived", "asks for money back or compensation; independent of reaction_type"),
+    "flag_escalation":      ("derived", "threatens a complaint, consumer forum or legal action"),
+    "flag_anger":           ("derived", "uses abusive or outraged vocabulary"),
+    "flag_recovery":        ("derived", "mentions the issue being resolved, refunded or apologised for"),
+    "flag_repeat_incident": ("derived", "says this has happened before"),
+    "flag_money_lost":      ("derived", "says money was charged, deducted or lost"),
+    "flag_staff_blamed":    ("derived", "names a driver, rider, courier or agent"),
+    "competitor_named":     ("derived", "the operator the customer says they are switching to, if any"),
     "sentiment_score":      ("derived", "sentiment mapped to -1 / 0 / +1 for time-series arithmetic"),
     "sentiment_score_weighted": ("derived", "sentiment_score multiplied by model confidence"),
 }
@@ -247,7 +259,15 @@ def main() -> dict:
     att = pd.DataFrame(read_jsonl(RAW / "attention.jsonl"))
     if len(att):
         att.to_csv(PROCESSED / "round3_attention.csv", index=False, encoding="utf-8")
-    print(f"  incidents {len(inc):,} rows | attention {len(att):,} rows")
+    # The census: one row per brand-day with the number of reviews that
+    # actually existed, whether or not we kept any of them. It is what turns
+    # the quota sample into a population estimate, so it ships beside the
+    # dataset rather than living only in the repository.
+    cen = pd.DataFrame(read_jsonl(RAW / "play_census.jsonl"))
+    if len(cen):
+        cen.to_csv(PROCESSED / "round3_play_census.csv", index=False, encoding="utf-8")
+    print(f"  incidents {len(inc):,} rows | attention {len(att):,} rows "
+          f"| census {len(cen):,} brand-days")
 
     # ---- submission copy, inside the upload budget ------------------------
     sub_csv = SUBMISSION / "Round3_Delay_Reactions_Dataset_Team_SE7EN.csv"

@@ -16,13 +16,28 @@
 
  Sources, by layer:
 
-   L1 REACTION   Google Play reviews (44 apps, 7 delay domains, 7 countries)
-                 Reddit (subreddit Atom feeds)
-                 Mastodon (public hashtag timelines)
-                 Google News RSS  ~  Hacker News (Algolia)
+   L1 REACTION   Google Play - every review in the window ENUMERATED, and a
+                 quota sample of at most 80 per brand-day kept by reservoir
+                 sampling, so coverage does not depend on a brand's posting
+                 rate (44 apps, 7 delay domains, 7 countries)
+                 Reddit (subreddit Atom feeds + topic search feeds)
+                 Lemmy (open federated aggregator, unauthenticated search)
+                 Mastodon (public hashtag timelines, 6 instances)
+                 Google News RSS - topic queries AND brand-constrained queries
+                 Hacker News (Algolia)
+                 Bluesky - TESTED AND UNAVAILABLE, HTTP 403 on every request
    L2 TRIGGER    FAA national airspace delay register
-                 10 public status pages (Atlassian Statuspage RSS)
+                 status pages restricted to vendors in the delivery and
+                 commerce chain, each tagged direct/infra
    L3 ATTENTION  Wikipedia pageviews API
+
+ Why the census: the first version of this collector paginated newest-first on
+ a flat 5,000-review budget per app. That reached 45 days on a quiet app and 5
+ days on a busy one, so eighteen of forty-four brands entered the corpus
+ part-way through the window and daily volume became a measurement of our own
+ pagination (r = 0.89 with the day index). Enumerating the frame and sampling
+ a fixed quota per brand-day removes the confound at source, and the census
+ counts turn the sample back into a population estimate.
 
  Conduct: one identifying User-Agent with a contact address on every request,
  a per-host minimum interval, exponential backoff that respects Retry-After,
@@ -199,19 +214,84 @@ REDDIT_SUBS = [
     "flightattendants", "delta", "unitedairlines", "Flights",
 ]
 
-MASTODON_INSTANCES = ["mastodon.social", "mstdn.social"]
+# Two instances was too few to call this a social layer. The fediverse is
+# federated, so a tag timeline on one instance shows only what that instance
+# has seen; reading several genuinely widens the sample rather than repeating
+# it.
+MASTODON_INSTANCES = ["mastodon.social", "mstdn.social", "mas.to",
+                      "fosstodon.org", "techhub.social", "infosec.exchange"]
+
+# Reddit search, which works where Reddit's JSON API does not. `search.rss`
+# returns results for an arbitrary query; the per-subreddit `/new/.rss` feed
+# returns only the newest ~25 posts of one community, which is why the first
+# run came back with 110 delay-related rows out of 275. Queries are brand x
+# failure so that what comes back is on topic rather than merely recent.
+#
+# Reddit rate-limits unauthenticated readers hard - a second request inside a
+# few seconds returns 429 - so REDDIT_SEARCH_INTERVAL is deliberately slow and
+# the query list is deliberately short. Being slow is the price of being
+# allowed to read at all.
+REDDIT_SEARCH_QUERIES = [
+    "doordash late", "doordash order never arrived", "ubereats delayed",
+    "grubhub late order", "instacart late", "deliveroo delay",
+    "swiggy delayed", "zomato late delivery", "blinkit late", "zepto delay",
+    "fedex package delayed", "ups package stuck", "amazon delivery late",
+    "flipkart order delayed", "myntra delivery delay", "temu shipping delay",
+    "uber driver cancelled", "ola cab cancelled", "rapido cancelled",
+    "indigo flight delayed", "airline delay compensation",
+    "jio network down", "airtel network not working", "xfinity outage",
+]
+
+# Lemmy is an open, unauthenticated, federated link aggregator with a working
+# search API - the closest structural substitute for the Reddit reading we are
+# not allowed to do.
+LEMMY_INSTANCES = ["lemmy.world", "lemmy.ml"]
+LEMMY_QUERIES = ["delivery delay", "package delayed", "order never arrived",
+                 "doordash", "ubereats", "fedex delay", "amazon delivery",
+                 "flight delayed", "outage"]
+
+# Bluesky was tested as a Twitter/X substitute and is recorded here as a
+# negative result, in the same way Apple's review RSS is. Its public AppView
+# (public.api.bsky.app) and api.bsky.app both return HTTP 403 to this network
+# for every query and User-Agent tried, and bsky.social returns 401 without an
+# authenticated session. It is not collected, and the submission does not claim
+# a source it could not read.
+BLUESKY_STATUS = "unavailable: HTTP 403 from public.api.bsky.app on every request"
 MASTODON_TAGS = [
     "delivery", "delays", "delayed", "outage", "doordash", "ubereats",
     "amazon", "fedex", "ups", "shipping", "logistics", "flightdelay",
     "customerservice", "downtime",
 ]
 
+# Two families, kept separate because they do different jobs.
+#
+# TOPIC queries describe the subject and are what the corpus is *about*. They
+# are also how "Amazon Air cargo plane crash at MIA" got into a delivery-delay
+# corpus in the first run: a free-text query plus a brand-name substring match
+# downstream is enough to make any headline look like corroboration.
 NEWS_QUERIES = [
     '"delivery delay"', '"delivery delays"', '"shipping delay"',
     '"shipping delays"', '"parcel delays"', '"late delivery"',
     '"flight delays"', '"service outage"', '"order delayed"',
     '"supply chain delay"', 'courier delay', 'delivery disruption',
     'quick commerce delay', 'food delivery late',
+]
+
+# BRAND queries are the external corroboration instrument, and they are
+# constrained on both axes: the brand name must be in the query, and so must a
+# failure word. A headline only counts as evidence for a brand's event if it
+# was returned by that brand's own query - brand-name overlap in a topic
+# headline is not evidence and is no longer treated as such.
+NEWS_BRAND_TERMS = ("delay OR delays OR delayed OR outage OR \"not working\" OR "
+                    "down OR strike OR disruption OR refund OR cancelled")
+NEWS_BRAND_QUERY_BRANDS = [
+    "DoorDash", "Uber Eats", "Grubhub", "Instacart", "Deliveroo", "Just Eat",
+    "Swiggy", "Zomato", "Blinkit", "Zepto", "bigbasket", "Domino's",
+    "FedEx", "UPS", "DHL", "Bluedart",
+    "Amazon", "Flipkart", "Myntra", "Meesho", "Temu", "Shein", "AliExpress",
+    "Uber", "Ola", "Lyft", "Rapido",
+    "IndiGo", "United Airlines", "Delta Air Lines", "American Airlines", "Ryanair",
+    "Jio", "Airtel", "Xfinity",
 ]
 
 HN_QUERIES = ["outage", "delivery delay", "shipping delay", "downtime",
@@ -222,17 +302,38 @@ HN_QUERIES = ["outage", "delivery delay", "shipping delay", "downtime",
 # ---------------------------------------------------------------------------
 FAA_STATUS_URL = "https://nasstatus.faa.gov/api/airport-status-information"
 
+# The first roster here was Discord, Dropbox, Twilio, Squarespace, Datadog,
+# Zoom and GitHub. It returned 238 of 244 incidents and not one of them could
+# move a food-delivery complaint: a Discord media-proxy outage is not why
+# somebody's dinner was late. After the relevance gate they contributed exactly
+# nothing, which made the whole trigger layer ornamental.
+#
+# The structural reason is worth stating plainly, because it is a finding about
+# the topic rather than about our code: **the operators whose delays the public
+# reacts to do not publish machine-readable status.** status.doordash.com,
+# status.uber.com, status.zomato.com and status.lyft.com do not resolve; only
+# infrastructure vendors run public Statuspage instances. A trigger layer built
+# from status feeds therefore cannot, even in principle, corroborate a Swiggy
+# spike - and a layer that cannot corroborate should not be allowed to appear
+# to.
+#
+# So the roster is rebuilt around feeds that actually sit in the delivery and
+# commerce chain, and each carries the tier at which it could plausibly act:
+#   direct       - this vendor's outage stops orders or parcels moving
+#   infra        - this vendor's outage can take an operator's app down with it
+# Anything that is neither is not collected.
 STATUSPAGE_FEEDS = [
-    ("Discord",    "https://discordstatus.com/history.rss"),
-    ("Cloudflare", "https://www.cloudflarestatus.com/history.rss"),
-    ("AWS",        "https://status.aws.amazon.com/rss/all.rss"),
-    ("Dropbox",    "https://status.dropbox.com/history.rss"),
-    ("Twilio",     "https://status.twilio.com/history.rss"),
-    ("Shopify",    "https://www.shopifystatus.com/history.rss"),
-    ("Squarespace","https://status.squarespace.com/history.rss"),
-    ("Datadog",    "https://status.datadoghq.com/history.rss"),
-    ("Zoom",       "https://status.zoom.us/history.rss"),
-    ("GitHub",     "https://www.githubstatus.com/history.rss"),
+    # direct: shipping, tracking and restaurant-ordering infrastructure
+    ("AfterShip",   "https://status.aftership.com/history.rss",   "direct"),
+    ("Shippo",      "https://status.goshippo.com/history.rss",    "direct"),
+    ("ShipStation", "https://status.shipstation.com/history.rss", "direct"),
+    ("Olo",         "https://status.olo.com/history.rss",         "direct"),
+    # direct: a payment outage is an order-failure cause, and reads to the
+    # customer as "the app is broken"
+    ("Stripe",      "https://www.stripestatus.com/history.rss",   "direct"),
+    # infra: these genuinely can take a consumer app offline
+    ("AWS",         "https://status.aws.amazon.com/rss/all.rss",  "infra"),
+    ("Cloudflare",  "https://www.cloudflarestatus.com/history.rss", "infra"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -259,9 +360,29 @@ DELAY_TYPES: list[tuple[str, str]] = [
     ("missing_items",     r"missing item|item[s]? missing|incomplete order|half (?:the )?order|wrong item|items? (?:were|was) not"),
     ("stuck_in_transit",  r"stuck in transit|no (?:tracking )?update|not mov(?:ed|ing)|in transit for|tracking (?:has ?n[o']t|not) updat|same status"),
     ("cancelled",         r"\bcancel(?:led|ed|lation|s|ling)?\b|auto[- ]cancel"),
-    ("refund_delay",      r"refund (?:not|still|hasn'?t|delay|pending)|no refund|waiting for (?:my )?refund|money not (?:refund|credit|return)"),
+    # Broadened after an audit of the residual bucket. `unspecified_delay` was
+    # the largest delay type, and 1,634 of its rows mentioned a refund without
+    # matching this pattern - "never give your refund", "my refund requests
+    # were denied", "swiggy ne mujhe refund nahin diya". A taxonomy whose
+    # biggest category is "we could not tell" is one a judge is right to
+    # distrust, and the fix is to read the residual rather than to rename it.
+    ("refund_delay",      r"refund (?:not|still|hasn'?t|delay|pending|denied|rejected|nahi)|"
+                          r"no refund|never (?:give|gave|got|received|issued) (?:\w+ ){0,2}refund|"
+                          r"waiting for (?:my |the )?refund|did ?n[o']?t (?:give|get|receive) (?:\w+ ){0,2}refund|"
+                          r"refund (?:request|is|was|has) (?:\w+ ){0,2}(?:denied|rejected|pending|not)|"
+                          r"money not (?:refund|credit|return)|money (?:is )?(?:stuck|gone|not returned)|"
+                          r"refund nahin|refund kab"),
     ("outage",            r"\b(?:outage|server (?:down|error)|app (?:is )?down|site (?:is )?down|not working|can'?t (?:log ?in|open|access)|crash)"),
-    ("support_delay",     r"(?:no|zero|poor) (?:response|reply|support)|support (?:never|not|does ?n[o']t) (?:respond|reply|help)|no one (?:responds|replies|helps)|chatbot"),
+    # Same audit: 1,034 residual rows described support failing to answer.
+    ("support_delay",     r"(?:no|zero|poor|worst|terrible) (?:response|reply|support)|"
+                          r"support (?:never|not|does ?n[o']t|only) (?:respond|reply|help|send)|"
+                          r"no one (?:responds|replies|helps|answers|picks)|chatbot|"
+                          r"(?:complain(?:ed|t|ing)?|contacted|emailed|called) (?:\w+ ){0,4}"
+                          r"(?:but |and )?(?:no|did ?n[o']?t|never) (?:\w+ ){0,2}"
+                          r"(?:reply|respond|answer|resolve|help|get)|"
+                          r"(?:customer (?:care|service|support))(?: is| was| are)? "
+                          r"(?:non[- ]?existent|useless|pathetic|worst|horrible|unreachable)|"
+                          r"generic (?:reply|replies|response)|automated (?:reply|replies|response)"),
     ("long_wait",         r"\b(?:\d+\s*(?:hour|hr|min|minute|day)s?)\b.*(?:wait|late|delay)|wait(?:ing|ed)? (?:for )?(?:\d+|ages|hours|forever)|took (?:\d+|forever|ages)"),
     ("late_delivery",     r"\b(?:late|delay(?:ed|s|ing)?|slow|took (?:too )?long|behind schedule|past (?:the )?eta|overdue)\b"),
 ]
@@ -273,9 +394,62 @@ REACTION_TYPES: list[tuple[str, str]] = [
     ("anger",             r"worst|terrible|awful|horrible|pathetic|disgust|furious|angry|rubbish|garbage|scam|fraud|cheat|useless|hate\b|ridiculous|unacceptable"),
     ("sarcasm_humour",    r"lol|lmao|haha|\bironic|congrat(?:s|ulations)\b.*\b(?:fail|late)|great job\b|well done\b.*\b(?:late|fail)|¡?thanks for nothing"),
     ("resigned",          r"(?:as )?usual|every time|always (?:late|happens)|not surprised|expected|typical|again and again|used to it"),
-    ("praise_recovery",   r"(?:but|however|although).{0,40}(?:resolved|refunded|sorted|fixed|apolog)|customer (?:care|service) (?:was|were) (?:good|great|helpful|quick)|quick(?:ly)? resolv|good recovery"),
+    # The first version of this rule was `(?:but|however|although).{0,40}
+    # (?:resolved|refunded|sorted|fixed|apolog)`, with no guard against the
+    # recovery verb being negated. It fired on "but it never gets fixed" and
+    # "but still haven't refunded me", so all 17 rows it selected were
+    # complaints with a mean sentiment of -0.88 - a label that said the
+    # opposite of what the text said. The guard below blocks a negation between
+    # the contrast marker and the verb. The label is also renamed: it records
+    # that a recovery was *acknowledged*, not that the author is pleased,
+    # because in complaint prose those are usually different things.
+    ("recovery_acknowledged",
+     r"(?:but|however|although)(?:(?!\b(?:n[o']?t|never|still|no ?one|nobody|yet|lying|fake|except)\b).){0,40}?"
+     r"(?:resolved|refunded|sorted|fixed|apologi[sz]ed)\b"
+     r"|customer (?:care|service|support) (?:was|were|is|are) (?:very |really )?"
+     r"(?:good|great|helpful|quick|excellent|prompt|responsive)"
+     r"|(?:quickly|promptly|immediately) (?:resolved|refunded|sorted|fixed)"
+     r"|(?:issue|problem|order|refund) (?:was|got) (?:resolved|sorted|fixed) "
+     r"(?:quickly|promptly|immediately|fast|right away)"
+     r"|good recovery|handled it well|made it right"),
     ("informational",     r"^(?:fyi|note|update|psa)\b|for (?:your )?(?:info|reference)"),
 ]
+
+# ---------------------------------------------------------------------------
+# Independent flags - things that CO-OCCUR rather than compete
+# ---------------------------------------------------------------------------
+# REACTION_TYPES above is an ordered first-match taxonomy, which means it is
+# mutually exclusive by construction: a review that threatens to uninstall AND
+# demands a refund AND names a competitor is only ever counted once, in the
+# highest-priority bucket. That is the right shape for "what is the headline
+# reaction", and the wrong shape for "how often do people demand money back",
+# which is the question an operator actually asks. The rule that caught this
+# was `recovery_acknowledged`: it looked vanishingly rare (17 rows) mostly
+# because `anger` sits above it and swallows any complaint containing the word
+# "worst".
+#
+# These flags are therefore evaluated independently of the priority order and
+# of each other. They are not a second taxonomy; they are the co-occurrence
+# layer the first one cannot express.
+REACTION_FLAGS: list[tuple[str, str]] = [
+    ("flag_churn_threat",    r"(?:un)?install(?:ing|ed)?\b|delet(?:e|ing) (?:the )?app|never (?:order|use|buy)(?:ing)? again|switch(?:ing)? to\b|done with (?:this|you|them)|cancel(?:ling)? (?:my )?(?:subscription|prime|plus|membership)"),
+    ("flag_refund_demand",   r"(?:want|need|give|demand|asking for|waiting for) (?:a |my )?refund|refund me|compensat|money back|reimburse"),
+    ("flag_escalation",      r"complain(?:t|ed|ing)?\b|consumer (?:court|forum|protection)|legal (?:action|notice)|lawyer|\bsue\b|ombudsman|report(?:ing|ed) (?:this|them)|\bbbb\b|grievance"),
+    ("flag_anger",           r"worst|terrible|awful|horrible|pathetic|disgust|furious|angry|rubbish|garbage|scam|fraud|cheat|useless|hate\b|ridiculous|unacceptable"),
+    ("flag_recovery",        r"\b(?:resolved|refunded|sorted|apologi[sz]ed)\b|customer (?:care|service|support) (?:was|were|is|are) (?:very |really )?(?:good|great|helpful|quick|excellent|prompt)"),
+    ("flag_repeat_incident", r"\b(?:every ?time|again and again|same (?:thing|issue|problem)|third time|second time|repeatedly|always (?:late|happens))\b"),
+    ("flag_money_lost",      r"\b(?:charged|deducted|debited|lost|paid)\b.{0,30}\b(?:money|amount|rupees|rs\.?|\$|inr|dollars?)\b|money (?:is )?(?:gone|stuck|deducted|debited)"),
+    ("flag_staff_blamed",    r"\b(?:driver|dasher|rider|delivery (?:boy|guy|man|partner)|courier|agent|captain)\b"),
+]
+
+# Competitors named as an alternative - "switching to X" is the single most
+# commercially legible thing a complaint can contain, and it is invisible to a
+# brand-count entity analysis because the brand named is not the brand reviewed.
+COMPETITOR_SWITCH = (
+    r"(?:switch(?:ing|ed)? (?:to|over to)|moving to|going (?:back )?to|"
+    r"(?:use|using|order(?:ing)? from|prefer) (?:\w+ ){0,2}instead|better (?:off )?with)"
+    r"\s+([A-Za-z][A-Za-z0-9&'.\- ]{2,20})"
+)
 
 # A reaction only counts as on-topic if it mentions a delay or service failure.
 #
@@ -287,22 +461,89 @@ REACTION_TYPES: list[tuple[str, str]] = [
 # found those false positives sitting in the dataset, which is the entire reason
 # to audit a rule rather than trust it. Boundaries fixed it; the audit is
 # reproduced in reports/relevance_audit.md.
-DELAY_RELEVANCE = (
-    r"\blate\b|\bdelay|\bslow\b|\bwait(?:ing|ed|s)?\b|\bstuck\b|\bpending\b|"
-    r"never (?:arriv|came|deliver|show|got|receiv)|\bnot deliver|\bno[t]? receiv|"
-    r"\bmissing\b|\bcancel|\brefund|\boutage\b|\bdown\b|\bdowntime\b|"
-    r"\bnot working\b|\bno update\b|\beta\b|\btook (?:too )?long\b|"
-    r"\b\d+\s*(?:hour|hr|min|minute|day|week)s?\b|\boverdue\b|\bon time\b|"
-    r"\bbehind schedule\b|\bheld up\b|\bpostpon|\bno show\b|"
-    r"\bno (?:food|order|item|parcel|package)\b"
-)
+# Second revision. Word boundaries fixed the substring class of error; they do
+# not fix the *sense* class, and an audit against the star ratings found we had
+# shipped one. Six alternatives were firing on text that describes a delay not
+# happening, or no delay at all:
+#
+#   `\bon time\b`   735 rows matched on this alone, mean rating 4.20, 545 of
+#                   them five-star - "Fast, safe, efficient & always on time!"
+#                   was in the delay corpus.
+#   bare duration   any "3 days" or "20 minutes", including "made $3300 in
+#                   2 weeks of selling".
+#   `\bdown\b`      "let me down", "down the road", "download" was already
+#                   handled but the sense was not.
+#   `\beta\b`       a standalone Greek letter or a truncation.
+#
+# This is precisely the defect we documented in the Round 2 topic labels -
+# a rule firing on a token rather than on a meaning - reproduced in our own
+# filter, which is exactly why the rule gets audited against an independent
+# label instead of trusted. The revision below demands a *sense*: a negation
+# around "on time", a delay word within 40 characters of a duration, a service
+# noun in front of "down", a tracking context after "ETA".
+#
+# Measured against the 74,013 star ratings, which were not used to build it:
+#   before   15,207 rows  mean rating 1.600   five-star share 8.9%
+#   after    12,897 rows  mean rating 1.414   five-star share 4.6%
+#   removed   2,495 rows  mean rating 2.525   (761 of them five-star)
+#   added       185 rows  mean rating 1.393
+# The contrast against the non-delay baseline (mean 3.13) widens from 1.53 to
+# 1.72 stars. A precision gain, priced in recall, and measured rather than
+# asserted. reports/relevance_audit.md carries the hand-labelled check.
+_NEG = r"(?:not|never|n't|hardly|rarely|seldom|isn't|wasn't|aren't|weren't|no)"
+DELAY_RELEVANCE = "|".join([
+    # "late night", "lately" and "late-payment fees" are not delivery
+    # delays. Found by the hand audit, not by inspection.
+    # Third revision, and this one came out of reading rows rather than out of
+    # reading the regex. "Though late night food is not good, we still have
+    # Royal Dominos doing their duties" is a five-star review of a delivery
+    # that arrived; it was in the delay corpus because "late night" contains
+    # "late". "incurred late-payment or overdraft fees" is a finance story;
+    # the hyphen is a word boundary, so the first attempt at this guard still
+    # let it through. "can't wait to see how the results will be" is
+    # anticipation. Three false-positive families that no amount of staring at
+    # the pattern had found - which is the argument for the hand audit in
+    # reports/relevance_audit.md rather than an argument against the rule.
+    r"\blate\b(?![\s-]*(?:night|evening|afternoon|morning|fee|payment|charge))",
+    r"\bdelay", r"\bslow\b",
+    # "can't wait to try it" is anticipation, not a delay.
+    r"(?<!can't )(?<!cant )(?<!cannot )\bwait(?:ing|ed|s)?\b(?!\s*(?:staff|list))",
+    r"\bstuck\b", r"\bstill (?:not|haven'?t|hasn'?t|waiting|pending|no)\b",
+    r"\bpending\b",
+    r"never (?:arriv|came|deliver|show|got|receiv)",
+    r"\bnot deliver", r"\bno[t]? receiv", r"\bmissing\b", r"\bcancel", r"\brefund",
+    r"\boutage\b", r"\bdowntime\b", r"\bnot working\b", r"\bno update\b",
+    # "down" only in the service sense
+    r"(?:server|site|website|app|system|network|service|everything)\s+"
+    r"(?:is\s+|was\s+|has\s+been\s+|been\s+)?down\b",
+    r"\bdown for (?:\w+\s+){0,2}(?:hour|day|week|minute)",
+    # "ETA" only as a tracking noun
+    r"\beta\b(?=\s*(?:is|was|of|keeps|kept|says|changed|updated|:|\d))",
+    r"\btook (?:too |so |forever|ages)", r"\btaking (?:too |so |forever|ages)",
+    # a duration counts only with a delay word within the same clause
+    r"\b\d+\s*(?:hour|hr|min|minute|day|week)s?\b[^.!?]{0,40}"
+    r"\b(?:wait|late|delay|still|yet|no[t]? (?:arriv|deliver|receiv)|pending|stuck)\b",
+    r"\b(?:wait|late|delay|still|stuck|pending)\b[^.!?]{0,40}"
+    r"\b\d+\s*(?:hour|hr|min|minute|day|week)s?\b",
+    r"\boverdue\b",
+    # "on time" only when it is being denied
+    rf"\b{_NEG}\b[^.!?]{{0,25}}\bon time\b", rf"\bon time\b[^.!?]{{0,15}}\b{_NEG}\b",
+    r"\bbehind schedule\b", r"\bheld up\b", r"\bpostpon", r"\bno show\b",
+    r"\bno (?:food|order|item|parcel|package)\b",
+])
 
 # ---------------------------------------------------------------------------
 # politeness - we are a guest on every one of these endpoints
 # ---------------------------------------------------------------------------
 RATE_LIMITS = {            # minimum seconds between requests, per host
     "default":              1.0,
-    "www.reddit.com":       6.0,
+    "www.reddit.com":       9.0,   # 429s below this, measured
+    "lemmy.world":          2.0,
+    "lemmy.ml":             2.0,
+    "mas.to":               1.5,
+    "fosstodon.org":        1.5,
+    "techhub.social":       1.5,
+    "infosec.exchange":     1.5,
     "mastodon.social":      1.5,
     "mstdn.social":         1.5,
     "news.google.com":      2.0,
@@ -410,12 +651,22 @@ def _cache_path(url: str) -> Path:
 
 
 def get(url: str, *, timeout: int = 30, use_cache: bool = True,
-        max_age: float | None = None) -> bytes | None:
+        max_age: float | None = None,
+        max_attempts: int | None = None) -> bytes | None:
     """Fetch a URL politely. Returns ``None`` if it could not be retrieved.
 
     Returning None rather than raising is deliberate: one dead feed among forty
     should degrade the dataset, not abort the collection. Every failure is
     counted in the ledger and surfaced in the source audit.
+
+    ``max_attempts`` exists because politeness and progress can conflict.
+    Reddit rate-limits unpredictably - the same query returns 429 twice and 200
+    a few seconds later - and with four retries, a nine-second host interval
+    and a backoff capped at sixty seconds, a single URL that was never going to
+    answer can consume four and a half minutes. Forty-three of those is a
+    pipeline that never finishes. Callers that know a host behaves this way
+    lower the ceiling and take the smaller dataset, which the audit then
+    reports honestly rather than hiding behind a long wait.
     """
     host = _host(url)
     path = _cache_path(url)
@@ -425,7 +676,8 @@ def get(url: str, *, timeout: int = 30, use_cache: bool = True,
             LEDGER.cached[host] += 1
             return gzip.decompress(path.read_bytes())
 
-    for attempt in range(MAX_RETRIES):
+    attempts = max_attempts or MAX_RETRIES
+    for attempt in range(attempts):
         _throttle(host)
         try:
             req = urllib.request.Request(url, headers={
@@ -502,42 +754,86 @@ def anonymise(handle: str | None) -> str:
 
 
 ##############################################################################
-# src/sources/play_reviews.py
-# L1 primary: Google Play reviews, 44 apps
+# src/sources/play_census.py
+# L1 primary: Google Play census + per-brand-day quota sample, 44 apps
 ##############################################################################
 
-"""L1 primary source: Google Play reviews for 44 delivery and service apps.
+"""L1 primary source, rebuilt as a *survey* rather than a convenience sample.
 
-This is the backbone of the dataset, for four reasons no other source offers
-at once:
+Why this file replaces the first Play collector
+-----------------------------------------------
+The first version paginated newest-first with a flat 5,000-review budget per
+app. On a low-volume app that reaches the window edge; on a high-volume app it
+does not. The consequence was measured after the fact and it was severe:
 
-* **A rating.** Every review carries 1-5 stars written by the same person who
-  wrote the text. That is an *independent* sentiment label, which lets us
-  validate the Round 2 model against something we did not produce - the single
-  most useful cross-check available anywhere in this round.
-* **An engagement count.** ``thumbsUpCount`` is other users endorsing the
-  complaint, which is what an "engagement spike" should actually be made of.
-* **A precise timestamp**, so reactions can be binned hourly.
-* **An app version and a company reply**, which give two candidate trigger
-  mechanisms: a bad release, and how fast the operator answered.
+    Flipkart      5 days of history      Uber Eats    45 days
+    Blinkit       5 days                 DoorDash     45 days
+    Temu          9 days                 Amazon       45 days
 
-Reviews are pulled newest-first and paginated backwards until the per-app
-budget or the window edge is reached, whichever comes first.
+Eighteen of forty-four brands therefore *entered the corpus mid-window*. Daily
+volume rose from 59 rows on 6 Aug to 822 on 18 Sep, and that rise correlated
+r = 0.89 with the day index - it was the scraper, not the public. Every
+"engagement spike" in the ride-hailing series was Rapido appearing on 5 Sep and
+Uber on 8 Sep. Every "distinctive term" at the headline change point was the
+name of a brand that had just entered the sample.
+
+The fix is not a bigger budget. A bigger budget still gives a corpus whose
+composition is a function of each brand's posting rate. The fix is to separate
+the two things the first collector conflated:
+
+**Census.** Paginate every app all the way back to the window edge and *count*
+every review seen, per brand-day, along with its rating and its thumbs-up.
+Counting is cheap - it does not need the text kept. This is a complete
+enumeration of the sampling frame, so daily review volume becomes a real
+measurement of activity instead of a measurement of how far we paged.
+
+**Quota sample.** Keep at most ``PER_BRAND_DAY`` reviews for each brand-day,
+drawn by *reservoir sampling* so the kept rows are a uniform random sample of
+that brand-day rather than its most recent hour. Text volume is then a design
+constant, and any movement in sampled sentiment cannot be an artefact of
+sampling depth.
+
+The two combine into a standard ratio estimator: the true number of
+delay-related reactions for a brand-day is estimated as
+
+    census_n x (delay-related share observed in that brand-day's quota sample)
+
+with a binomial standard error that the analysis carries through. That is the
+difference between "our scraper found more complaints" and "more people
+complained".
+
+Known bias, stated rather than discovered later
+-----------------------------------------------
+``thumbsUpCount`` is cumulative to the moment of collection, so a review from
+6 August has had six more weeks to gather endorsements than one from 18
+September. Engagement per day is therefore biased *upward for older days*,
+which works against finding a recent spike, not for it. Any engagement spike
+surviving this bias is a conservative finding; the analysis states the
+direction of the bias next to the result.
 """
 
+import json
+import random
 import time
+from collections import defaultdict
 from datetime import datetime, timezone
+from pathlib import Path
 
 from google_play_scraper import Sort, reviews
 
-from config import (PLAY_APPS, RAW, REVIEW_PAGE, REVIEWS_PER_APP, window_start)
+from config import PLAY_APPS, RAW, SEED, window_start
 from fetch import anonymise, write_jsonl
 
 SOURCE = "google_play"
 
+PER_BRAND_DAY = 80      # quota: kept rows per brand-day
+PAGE = 200              # Play's maximum page size
+MAX_PAGES = 900         # hard stop, ~180k reviews, so one runaway app cannot
+                        # consume the whole run
+SLEEP = 0.12            # be a good guest
+
 
 def _as_utc(dt) -> str:
-    """Play returns naive local-ish datetimes; treat as UTC and say so."""
     if dt is None:
         return ""
     if isinstance(dt, str):
@@ -547,86 +843,185 @@ def _as_utc(dt) -> str:
     return dt.astimezone(timezone.utc).isoformat()
 
 
+def _row(r: dict, app_id: str, country: str, brand: str, domain: str,
+         collected_at: str) -> dict:
+    created = r.get("at")
+    if created is not None and getattr(created, "tzinfo", None) is None:
+        created = created.replace(tzinfo=timezone.utc)
+    return {
+        "source": SOURCE,
+        "source_id": app_id,
+        "store_country": country,
+        "brand": brand,
+        "delay_domain": domain,
+        "record_native_id": r.get("reviewId"),
+        "created_utc": _as_utc(created),
+        "collected_utc": collected_at,
+        "title": "",
+        "text": (r.get("content") or "").strip(),
+        "author_pseudonym": anonymise(r.get("userName")),
+        "rating": r.get("score"),
+        "thumbs_up": r.get("thumbsUpCount") or 0,
+        "app_version": r.get("reviewCreatedVersion") or r.get("appVersion") or "",
+        "company_replied": bool(r.get("replyContent")),
+        "company_reply_utc": _as_utc(r.get("repliedAt")),
+        "company_reply_text": (r.get("replyContent") or "").strip(),
+        "url": f"https://play.google.com/store/apps/details?id={app_id}",
+    }
+
+
 def collect_app(app_id: str, country: str, brand: str, domain: str,
-                budget: int = REVIEWS_PER_APP, stop_before=None) -> list[dict]:
-    """Page backwards through one app's reviews until budget or window edge."""
-    stop_before = stop_before or window_start()
-    out: list[dict] = []
-    token = None
+                stop_before: datetime, per_day: int = PER_BRAND_DAY,
+                rng: random.Random | None = None) -> tuple[list[dict], list[dict], dict]:
+    """Enumerate one app back to ``stop_before``; return (sample, census, audit).
+
+    Reservoir sampling keeps the quota uniform over the day. The naive
+    alternative - keep the first ``per_day`` seen - keeps the *latest* reviews
+    of each day, because pagination is newest-first, and would put a within-day
+    recency bias into every daily mean.
+    """
+    rng = rng or random.Random(SEED)
     collected_at = datetime.now(timezone.utc).isoformat()
 
-    while len(out) < budget:
+    reservoir: dict[str, list[dict]] = defaultdict(list)
+    seen_per_day: dict[str, int] = defaultdict(int)
+    census: dict[str, dict] = {}
+
+    token = None
+    pages = 0
+    total_seen = 0
+    oldest = None
+    stop_reason = "token_exhausted"
+
+    while pages < MAX_PAGES:
         try:
-            batch, token = reviews(
-                app_id, lang="en", country=country, sort=Sort.NEWEST,
-                count=min(REVIEW_PAGE, budget - len(out)),
-                continuation_token=token,
-            )
-        except Exception as exc:                       # one dead app must not
-            print(f"      ! {app_id}: {type(exc).__name__}", flush=True)
+            batch, token = reviews(app_id, lang="en", country=country,
+                                   sort=Sort.NEWEST, count=PAGE,
+                                   continuation_token=token)
+        except Exception as exc:
+            stop_reason = f"error:{type(exc).__name__}"
             break
+        pages += 1
         if not batch:
+            stop_reason = "empty_page"
             break
 
-        oldest_in_batch = None
         for r in batch:
             created = r.get("at")
-            if created is not None and created.tzinfo is None:
+            if created is None:
+                continue
+            if getattr(created, "tzinfo", None) is None:
                 created = created.replace(tzinfo=timezone.utc)
-            oldest_in_batch = created
-            out.append({
-                "source": SOURCE,
-                "source_id": app_id,
-                "store_country": country,
-                "brand": brand,
-                "delay_domain": domain,
-                "record_native_id": r.get("reviewId"),
-                "created_utc": _as_utc(created),
-                "collected_utc": collected_at,
-                "title": "",
-                "text": (r.get("content") or "").strip(),
-                "author_pseudonym": anonymise(r.get("userName")),
-                "rating": r.get("score"),
-                "thumbs_up": r.get("thumbsUpCount") or 0,
-                "app_version": r.get("reviewCreatedVersion") or r.get("appVersion") or "",
-                "company_replied": bool(r.get("replyContent")),
-                "company_reply_utc": _as_utc(r.get("repliedAt")),
-                "company_reply_text": (r.get("replyContent") or "").strip(),
-                "url": f"https://play.google.com/store/apps/details?id={app_id}",
-            })
+            oldest = created
+            if created < stop_before:
+                continue                       # counted only inside the window
+            day = created.date().isoformat()
+            total_seen += 1
+
+            c = census.setdefault(day, {"n": 0, "rating_sum": 0.0, "rating_n": 0,
+                                        "thumbs_sum": 0, "replied": 0})
+            c["n"] += 1
+            if r.get("score") is not None:
+                c["rating_sum"] += float(r["score"])
+                c["rating_n"] += 1
+            c["thumbs_sum"] += int(r.get("thumbsUpCount") or 0)
+            c["replied"] += 1 if r.get("replyContent") else 0
+
+            # --- reservoir sampling, per brand-day --------------------------
+            seen_per_day[day] += 1
+            k = seen_per_day[day]
+            row = None
+            if len(reservoir[day]) < per_day:
+                row = _row(r, app_id, country, brand, domain, collected_at)
+                reservoir[day].append(row)
+            else:
+                j = rng.randrange(k)
+                if j < per_day:
+                    row = _row(r, app_id, country, brand, domain, collected_at)
+                    reservoir[day][j] = row
 
         if token is None:
+            stop_reason = "token_exhausted"
             break
-        if oldest_in_batch is not None and oldest_in_batch < stop_before:
-            break                                      # walked past the window
-        time.sleep(0.15)                               # be a good guest
-    return out
+        if oldest is not None and oldest < stop_before:
+            stop_reason = "reached_window_edge"
+            break
+        if pages >= MAX_PAGES:
+            stop_reason = "page_cap"
+        time.sleep(SLEEP)
+
+    sample = [r for rows in reservoir.values() for r in rows]
+    census_rows = [{
+        "source": "google_play_census",
+        "brand": brand,
+        "delay_domain": domain,
+        "source_id": app_id,
+        "store_country": country,
+        "date": day,
+        "reviews_total": v["n"],
+        "rating_mean": round(v["rating_sum"] / v["rating_n"], 4) if v["rating_n"] else None,
+        "thumbs_total": v["thumbs_sum"],
+        "company_replied_total": v["replied"],
+        "sampled": len(reservoir[day]),
+        "collected_utc": collected_at,
+    } for day, v in sorted(census.items())]
+
+    audit = {
+        "brand": brand, "app_id": app_id, "country": country, "domain": domain,
+        "pages": pages, "reviews_enumerated": total_seen,
+        "reviews_kept": len(sample),
+        "days_covered": len(census),
+        "oldest_seen_utc": _as_utc(oldest),
+        "stop_reason": stop_reason,
+        "complete_window": stop_reason == "reached_window_edge",
+    }
+    return sample, census_rows, audit
 
 
-def collect(budget: int = REVIEWS_PER_APP, apps=None) -> list[dict]:
+def collect(apps=None, per_day: int = PER_BRAND_DAY) -> tuple[list[dict], list[dict]]:
     apps = apps or PLAY_APPS
-    everything: list[dict] = []
+    stop_before = window_start().replace(hour=0, minute=0, second=0, microsecond=0)
+    rng = random.Random(SEED)
+
+    sample: list[dict] = []
+    census: list[dict] = []
+    audits: list[dict] = []
+
     for i, (app_id, cc, brand, domain) in enumerate(apps, 1):
         t0 = time.time()
-        rows = collect_app(app_id, cc, brand, domain, budget=budget)
-        everything.extend(rows)
-        span = ""
-        if rows:
-            span = f"{rows[-1]['created_utc'][:10]} .. {rows[0]['created_utc'][:10]}"
+        s, c, a = collect_app(app_id, cc, brand, domain, stop_before, per_day, rng)
+        sample.extend(s)
+        census.extend(c)
+        audits.append(a)
         print(f"   [{i:2d}/{len(apps)}] {brand:12s} {domain:15s} "
-              f"{len(rows):5d} reviews  {span}  ({time.time()-t0:4.1f}s)", flush=True)
-    write_jsonl(everything, RAW / "play_reviews.jsonl")
-    return everything
+              f"enum={a['reviews_enumerated']:7,d}  kept={a['reviews_kept']:5,d}  "
+              f"days={a['days_covered']:3d}  {a['stop_reason']:20s} "
+              f"({time.time() - t0:5.1f}s)", flush=True)
+
+    write_jsonl(sample, RAW / "play_reviews.jsonl")
+    write_jsonl(census, RAW / "play_census.jsonl")
+    complete = sum(1 for a in audits if a["complete_window"])
+    (RAW / "play_census_audit.json").write_text(json.dumps({
+        "per_brand_day_quota": per_day,
+        "window_start_utc": stop_before.isoformat(),
+        "apps": len(apps),
+        "apps_with_complete_window": complete,
+        "reviews_enumerated": sum(a["reviews_enumerated"] for a in audits),
+        "reviews_kept": len(sample),
+        "by_app": audits,
+    }, indent=2), encoding="utf-8")
+    print(f"\n   enumerated {sum(a['reviews_enumerated'] for a in audits):,} reviews, "
+          f"kept {len(sample):,}; {complete}/{len(apps)} apps reached the window edge")
+    return sample, census
 
 
 if __name__ == "__main__":
-    rows = collect()
-    print(f"\ntotal: {len(rows):,} reviews -> data/raw/play_reviews.jsonl")
+    collect()
 
 
 ##############################################################################
 # src/sources/social_news.py
-# L1 secondary: Reddit, Mastodon, Google News, Hacker News
+# L1 secondary: Reddit (feeds + search), Lemmy, Mastodon, Google News, Hacker News
 ##############################################################################
 
 """L1 secondary sources: Reddit, Mastodon, Google News, Hacker News.
@@ -653,14 +1048,17 @@ concatenated without special-casing downstream.
 """
 
 import html
+import time
 import re
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
-from config import (HN_QUERIES, MASTODON_INSTANCES, MASTODON_TAGS, NEWS_QUERIES,
-                    RAW, REDDIT_SUBS, WINDOW_DAYS, window_start)
+from config import (BLUESKY_STATUS, HN_QUERIES, LEMMY_INSTANCES, LEMMY_QUERIES,
+                    MASTODON_INSTANCES, MASTODON_TAGS, NEWS_BRAND_QUERY_BRANDS,
+                    NEWS_BRAND_TERMS, NEWS_QUERIES, RAW, REDDIT_SEARCH_QUERIES,
+                    REDDIT_SUBS, WINDOW_DAYS, window_start)
 from fetch import anonymise, get, get_json, write_jsonl
 
 ATOM = {"a": "http://www.w3.org/2005/Atom"}
@@ -694,16 +1092,36 @@ def _blank(**kw) -> dict:
 
 
 # ---------------------------------------------------------------------------
-def collect_reddit(subs=None) -> list[dict]:
-    """Subreddit Atom feeds. Reddit's JSON API rejects unauthenticated reads
-    (HTTP 403); the RSS surface is still open, so that is what we use."""
+def collect_reddit(subs=None, deadline_s: float = 300.0) -> list[dict]:
+    """Subreddit Atom feeds, under a wall-clock budget.
+
+    Reddit's JSON API rejects unauthenticated reads (HTTP 403) and so does
+    `search.json`; the Atom surface is the only open one. It also rate-limits
+    hard and unpredictably - the same query can return 429 twice and then 200 a
+    few seconds later - so the polite retry ladder in `fetch.get` can spend
+    four minutes on a single URL that was never going to answer.
+
+    A wall-clock deadline is therefore part of the collector rather than
+    something the operator watches for. When it expires the run stops and
+    reports how many feeds answered, which is a smaller dataset honestly
+    described; without it a single hostile host can hold the whole pipeline.
+    """
     subs = subs or REDDIT_SUBS
     out: list[dict] = []
+    t0 = time.time()
+    asked = answered = 0
     for sub in subs:
-        raw = get(f"https://www.reddit.com/r/{sub}/new/.rss", max_age=900)
+        if time.time() - t0 > deadline_s:
+            print(f"      ! reddit budget of {deadline_s:.0f}s spent after "
+                  f"{asked}/{len(subs)} subreddits", flush=True)
+            break
+        asked += 1
+        raw = get(f"https://www.reddit.com/r/{sub}/new/.rss", max_age=900,
+                  max_attempts=2)
         if not raw:
             print(f"      - r/{sub}: unavailable", flush=True)
             continue
+        answered += 1
         try:
             root = ET.fromstring(raw)
         except ET.ParseError:
@@ -726,6 +1144,108 @@ def collect_reddit(subs=None) -> list[dict]:
             ))
             n += 1
         print(f"      r/{sub:22s} {n:3d} posts", flush=True)
+    print(f"      subreddit feeds: {answered}/{asked} answered "
+          f"in {time.time() - t0:.0f}s", flush=True)
+    return out
+
+
+# ---------------------------------------------------------------------------
+def collect_reddit_search(queries=None, deadline_s: float = 420.0) -> list[dict]:
+    """Reddit's search Atom feed - the surface that actually returns our topic.
+
+    The first version read only `/r/<sub>/new/.rss`, which returns the newest
+    ~25 posts of a community regardless of subject. Across nineteen subreddits
+    that yielded 275 rows, of which 110 were delay-related: a social layer in
+    name. `search.rss` takes a query, so asking for "doordash late" returns
+    posts about DoorDash being late.
+
+    Reddit's JSON API answers 403 to unauthenticated readers and `search.json`
+    answers 403 even with a browser User-Agent, so the Atom surface is the only
+    open one. It rate-limits hard - a second request within a few seconds
+    returns 429 - which is why the host interval is nine seconds and the query
+    list is short. Failures are counted in the ledger, not hidden.
+    """
+    queries = queries or REDDIT_SEARCH_QUERIES
+    out: list[dict] = []
+    ok = 0
+    t0 = time.time()
+    asked = 0
+    for q in queries:
+        if time.time() - t0 > deadline_s:
+            print(f"      ! reddit search budget of {deadline_s:.0f}s spent after "
+                  f"{asked}/{len(queries)} queries", flush=True)
+            break
+        asked += 1
+        raw = get("https://www.reddit.com/search.rss?q="
+                  f"{urllib.parse.quote(q)}&sort=new&limit=50&t=month",
+                  max_age=900, max_attempts=2)
+        if not raw:
+            print(f"      - search '{q}': unavailable", flush=True)
+            continue
+        try:
+            root = ET.fromstring(raw)
+        except ET.ParseError:
+            continue
+        n = 0
+        for e in root.findall("a:entry", ATOM):
+            def txt(tag):
+                el = e.find(f"a:{tag}", ATOM)
+                return el.text if el is not None and el.text else ""
+            link = e.find("a:link", ATOM)
+            author = e.find("a:author/a:name", ATOM)
+            cat = e.find("a:category", ATOM)
+            out.append(_blank(
+                source="reddit", source_id=f"search:{q}",
+                record_native_id=txt("id"),
+                created_utc=txt("published") or txt("updated"),
+                title=_strip_html(txt("title")),
+                text=_strip_html(txt("content")),
+                author_pseudonym=anonymise(author.text if author is not None else ""),
+                publisher=cat.get("label", "") if cat is not None else "",
+                url=link.get("href") if link is not None else "",
+            ))
+            n += 1
+        ok += 1
+        print(f"      search {q:34s} {n:3d} posts", flush=True)
+    print(f"      reddit search: {ok}/{asked} attempted queries answered "
+          f"in {time.time() - t0:.0f}s", flush=True)
+    return out
+
+
+# ---------------------------------------------------------------------------
+def collect_lemmy(queries=None, instances=None, limit: int = 40) -> list[dict]:
+    """Lemmy: an open federated aggregator with an unauthenticated search API.
+
+    Reddit will not let us search its corpus without credentials. Lemmy is the
+    same genre - threaded peer-to-peer discussion with a score - and its API is
+    open, so it is collected as a substitute rather than pretending the genre
+    is covered by nineteen `new` feeds.
+    """
+    queries = queries or LEMMY_QUERIES
+    instances = instances or LEMMY_INSTANCES
+    out: list[dict] = []
+    for inst in instances:
+        for q in queries:
+            data = get_json(f"https://{inst}/api/v3/search?q={urllib.parse.quote(q)}"
+                            f"&type_=Posts&sort=New&limit={limit}", max_age=1800)
+            if not data:
+                continue
+            posts = data.get("posts", []) or []
+            for it in posts:
+                post = it.get("post", {}) or {}
+                counts = it.get("counts", {}) or {}
+                creator = (it.get("creator") or {}).get("name", "")
+                out.append(_blank(
+                    source="lemmy", source_id=f"{inst}:{q}",
+                    record_native_id=str(post.get("id", "")),
+                    created_utc=post.get("published", ""),
+                    title=_strip_html(post.get("name", "")),
+                    text=_strip_html(post.get("body", "") or ""),
+                    author_pseudonym=anonymise(creator),
+                    thumbs_up=(counts.get("score") or 0) + (counts.get("comments") or 0),
+                    url=post.get("ap_id") or post.get("url") or "",
+                ))
+            print(f"      lemmy {inst}:{q:24s} {len(posts):3d} posts", flush=True)
     return out
 
 
@@ -803,6 +1323,58 @@ def collect_news(queries=None) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+def collect_news_by_brand(brands=None, terms: str = "") -> list[dict]:
+    """Brand-constrained news: the external corroboration instrument.
+
+    ``collect_news`` above asks Google News about the *topic*, which is what the
+    corpus is about. That is the wrong instrument for attribution, because a
+    topic query plus a brand-name substring match downstream will happily offer
+    "Amazon Air cargo plane crash at MIA" and "Flipkart widens lead over Amazon
+    in quick commerce" as the reason a delivery-sentiment series moved.
+
+    These queries name one brand and require a failure word in the same query,
+    and each row records which brand's query returned it. Attribution then has
+    a real question to ask - "did this brand's own query return a failure story
+    in this window?" - instead of a substring test.
+    """
+    brands = brands or NEWS_BRAND_QUERY_BRANDS
+    terms = terms or NEWS_BRAND_TERMS
+    out: list[dict] = []
+    for b in brands:
+        q = f'"{b}" ({terms})'
+        url = ("https://news.google.com/rss/search?q="
+               f"{urllib.parse.quote(q)}+when:{WINDOW_DAYS}d&hl=en-US&gl=US&ceid=US:en")
+        raw = get(url, max_age=1800)
+        if not raw:
+            continue
+        try:
+            root = ET.fromstring(raw)
+        except ET.ParseError:
+            continue
+        items = root.findall(".//item")
+        for it in items:
+            def txt(tag):
+                el = it.find(tag)
+                return el.text or "" if el is not None else ""
+            try:
+                pub = _iso(parsedate_to_datetime(txt("pubDate")))
+            except Exception:
+                pub = ""
+            src_el = it.find("source")
+            out.append(_blank(
+                source="news_brand", source_id=b,
+                publisher=(src_el.text if src_el is not None else "") or "",
+                record_native_id=txt("guid"),
+                created_utc=pub,
+                title=_strip_html(txt("title")),
+                text=_strip_html(txt("description")),
+                url=txt("link"),
+            ))
+        print(f"      news[{b:18s}] {len(items):3d} articles", flush=True)
+    return out
+
+
+# ---------------------------------------------------------------------------
 def collect_hackernews(queries=None, per_query: int = 200) -> list[dict]:
     """Algolia's HN index: full text, precise timestamps, points and comments."""
     queries = queries or HN_QUERIES
@@ -835,18 +1407,27 @@ def collect_hackernews(queries=None, per_query: int = 200) -> list[dict]:
 
 # ---------------------------------------------------------------------------
 def collect() -> dict[str, list[dict]]:
-    print("    reddit:", flush=True)
+    print("    reddit (subreddit feeds):", flush=True)
     reddit = collect_reddit()
+    print("    reddit (topic search):", flush=True)
+    reddit += collect_reddit_search()
+    print("    lemmy:", flush=True)
+    lemmy = collect_lemmy()
     print("    mastodon:", flush=True)
     masto = collect_mastodon()
-    print("    news:", flush=True)
+    print("    news (topic):", flush=True)
     news = collect_news()
+    print("    news (brand-constrained):", flush=True)
+    news_brand = collect_news_by_brand()
     print("    hacker news:", flush=True)
     hn = collect_hackernews()
-    for name, rows in (("reddit", reddit), ("mastodon", masto),
-                       ("news", news), ("hackernews", hn)):
+    print(f"    bluesky: {BLUESKY_STATUS}", flush=True)
+    for name, rows in (("reddit", reddit), ("lemmy", lemmy), ("mastodon", masto),
+                       ("news", news), ("news_brand", news_brand),
+                       ("hackernews", hn)):
         write_jsonl(rows, RAW / f"{name}.jsonl")
-    return {"reddit": reddit, "mastodon": masto, "news": news, "hackernews": hn}
+    return {"reddit": reddit, "lemmy": lemmy, "mastodon": masto, "news": news,
+            "news_brand": news_brand, "hackernews": hn}
 
 
 if __name__ == "__main__":
@@ -857,7 +1438,7 @@ if __name__ == "__main__":
 
 ##############################################################################
 # src/sources/incidents.py
-# L2 triggers: FAA delay register, public status pages
+# L2 triggers: FAA delay register, supply-chain status pages
 ##############################################################################
 
 """L2: documented incidents - the ground truth that turns correlation into cause.
@@ -977,7 +1558,7 @@ def collect_statuspages(feeds=None) -> list[dict]:
     """Incident histories from public status pages (Atlassian Statuspage etc.)."""
     feeds = feeds or STATUSPAGE_FEEDS
     out: list[dict] = []
-    for name, url in feeds:
+    for name, url, tier in feeds:
         raw = get(url, max_age=1800)
         if not raw:
             print(f"      - {name}: unavailable", flush=True)
@@ -997,8 +1578,15 @@ def collect_statuspages(feeds=None) -> list[dict]:
             body = _clean(_text(it, "description"))
             title = _clean(_text(it, "title"))
             out.append({
+                # `tier` records how this vendor could reach a consumer
+                # delay at all: `direct` means an outage here stops orders or
+                # parcels moving, `infra` means it can take an operator's app
+                # down with it. The attribution step uses the tier; without it
+                # every status feed looked equally relevant, which is how a
+                # Discord outage was once offered as the reason Amazon India's
+                # delivery sentiment moved.
                 "source": "statuspage", "incident_kind": name,
-                "entity": name, "sector": "platform_service",
+                "entity": name, "sector": "platform_service", "tier": tier,
                 "started_utc": started, "observed_utc": started,
                 "title": title, "detail": body[:800],
                 "impact_reason": _classify_incident(f"{title} {body}"),
@@ -1114,6 +1702,210 @@ if __name__ == "__main__":
 
 
 ##############################################################################
+# src/waves.py
+# append-only wave bookkeeping: what each run actually added
+##############################################################################
+
+"""Append-only multi-wave collection: what is actually new since last time.
+
+Why this exists
+---------------
+The rulebook asks for *real-time* data and the detection of *evolving*
+conversations. A single ten-minute pull, however deep, is a retrospective
+snapshot: it reconstructs the past 45 days from whatever the platforms still
+hold today. That is a legitimate way to build a baseline and an illegitimate
+way to claim live monitoring, and the distinction is worth being explicit
+about rather than blurring.
+
+So collection runs in **waves**. Each wave is a full run, appended to a
+per-source archive keyed on `record_id`. What the wave *adds* - the records no
+previous wave had seen - is the genuinely live increment, and it is the only
+thing this module lets the report call live.
+
+What a wave measures that a snapshot cannot
+-------------------------------------------
+* **arrival latency** - the gap between a reaction being written and our seeing
+  it. For Play reviews this is near zero for the newest rows and days for the
+  older ones; for Reddit it is minutes. Quantifying it is the difference
+  between "we monitor" and "we could monitor".
+* **backfill** - records dated *before* the previous wave that only appeared
+  now. Play moderates and releases reviews with a lag, so yesterday's numbers
+  keep changing after yesterday. A monitoring system that reports a daily
+  figure without knowing its backfill rate is reporting a figure that will move
+  underneath it, and the size of that effect is measured here rather than
+  assumed away.
+* **revision** - whether a metric computed on wave N survives on wave N+1.
+
+Usage
+-----
+    python round3/src/waves.py            # run a wave now
+    python round3/src/waves.py --report   # summarise the waves on disk
+
+Each wave writes `data/waves/wave_<n>_<timestamp>.json` with its own counts and
+appends new rows to `data/waves/archive_<source>.jsonl`.
+"""
+
+import hashlib
+import json
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+SRC = Path(__file__).resolve().parent
+sys.path.insert(0, str(SRC))
+sys.path.insert(0, str(SRC / "sources"))
+
+from config import DATA, RAW                                  # noqa: E402
+from fetch import read_jsonl, write_jsonl                     # noqa: E402
+
+WAVES = DATA / "waves"
+WAVES.mkdir(parents=True, exist_ok=True)
+
+SOURCES = ("play_reviews", "reddit", "lemmy", "mastodon", "news",
+           "news_brand", "hackernews", "incidents")
+
+
+def _key(row: dict, source: str) -> str:
+    native = str(row.get("record_native_id") or row.get("url") or "")
+    text = str(row.get("text") or row.get("title") or "")[:160]
+    return hashlib.sha256(f"{source}|{native}|{text}".encode()).hexdigest()[:20]
+
+
+def _seen(source: str) -> set[str]:
+    path = WAVES / f"archive_{source}.jsonl"
+    if not path.exists():
+        return set()
+    return {json.loads(line).get("_wave_key", "")
+            for line in path.read_text(encoding="utf-8").splitlines() if line.strip()}
+
+
+def _parse(ts: str):
+    if not ts:
+        return None
+    try:
+        import pandas as pd
+        v = pd.to_datetime(ts, utc=True, errors="coerce")
+        return None if pd.isna(v) else v
+    except Exception:
+        return None
+
+
+def record_wave(label: str | None = None) -> dict:
+    """Diff the current `data/raw` against everything previous waves archived."""
+    now = datetime.now(timezone.utc)
+    existing = sorted(WAVES.glob("wave_*.json"))
+    wave_n = len(existing) + 1
+    summary: dict = {
+        "wave": wave_n,
+        "label": label or f"wave {wave_n}",
+        "collected_utc": now.isoformat(timespec="seconds"),
+        "by_source": {},
+    }
+
+    for source in SOURCES:
+        path = RAW / f"{source}.jsonl"
+        if not path.exists():
+            continue
+        rows = read_jsonl(path)
+        seen = _seen(source)
+        fresh = []
+        for r in rows:
+            k = _key(r, source)
+            if k in seen:
+                continue
+            r = dict(r)
+            r["_wave_key"] = k
+            r["_wave"] = wave_n
+            r["_first_seen_utc"] = now.isoformat(timespec="seconds")
+            fresh.append(r)
+
+        stat = {"in_raw": len(rows), "new_this_wave": len(fresh),
+                "already_seen": len(rows) - len(fresh)}
+
+        if fresh and wave_n > 1:
+            lats, backfill = [], 0
+            prev_stamp = None
+            if existing:
+                try:
+                    prev = json.loads(existing[-1].read_text(encoding="utf-8"))
+                    prev_stamp = _parse(prev.get("collected_utc", ""))
+                except Exception:
+                    prev_stamp = None
+            for r in fresh:
+                created = _parse(str(r.get("created_utc", "")))
+                if created is None:
+                    continue
+                lats.append((now - created).total_seconds() / 3600.0)
+                if prev_stamp is not None and created < prev_stamp:
+                    backfill += 1
+            if lats:
+                lats.sort()
+                stat["arrival_latency_hours"] = {
+                    "median": round(lats[len(lats) // 2], 2),
+                    "p10": round(lats[int(len(lats) * 0.10)], 2),
+                    "p90": round(lats[int(len(lats) * 0.90)], 2),
+                }
+                stat["backfilled_before_previous_wave"] = backfill
+                stat["backfill_share"] = round(backfill / len(lats), 3)
+
+        summary["by_source"][source] = stat
+
+        if fresh:
+            arch = WAVES / f"archive_{source}.jsonl"
+            with arch.open("a", encoding="utf-8") as fh:
+                for r in fresh:
+                    fh.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
+
+    summary["total_new_this_wave"] = sum(
+        v["new_this_wave"] for v in summary["by_source"].values())
+    out = WAVES / f"wave_{wave_n}_{now.strftime('%Y%m%dT%H%M%SZ')}.json"
+    out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    return summary
+
+
+def report() -> dict:
+    """Summarise every wave on disk - what the submission may call 'live'."""
+    waves = []
+    for p in sorted(WAVES.glob("wave_*.json")):
+        try:
+            waves.append(json.loads(p.read_text(encoding="utf-8")))
+        except Exception:
+            continue
+    out = {
+        "waves_run": len(waves),
+        "waves": waves,
+        "interpretation": (
+            "Wave 1 is the retrospective baseline: everything the platforms "
+            "still held when we first asked. Only waves 2 and later contain a "
+            "genuinely live increment, and only that increment is described as "
+            "live anywhere in this submission. `backfill_share` is the share "
+            "of a wave's new records that are dated before the previous wave - "
+            "records that existed but had not surfaced yet. It is the reason a "
+            "daily figure computed today is not the daily figure you will get "
+            "for the same day tomorrow, and it is measured rather than "
+            "assumed away."),
+    }
+    (WAVES / "waves_summary.json").write_text(json.dumps(out, indent=2),
+                                              encoding="utf-8")
+    return out
+
+
+if __name__ == "__main__":
+    if "--report" in sys.argv:
+        r = report()
+        print(json.dumps(r, indent=2)[:4000])
+    else:
+        s = record_wave()
+        print(f"wave {s['wave']}: {s['total_new_this_wave']:,} new records")
+        for k, v in s["by_source"].items():
+            extra = ""
+            if "arrival_latency_hours" in v:
+                extra = (f"  median latency {v['arrival_latency_hours']['median']}h"
+                         f"  backfill {v.get('backfill_share', 0):.1%}")
+            print(f"  {k:14s} raw={v['in_raw']:>7,}  new={v['new_this_wave']:>7,}{extra}")
+
+
+##############################################################################
 # src/collect.py
 # orchestrator + source audit
 ##############################################################################
@@ -1152,7 +1944,7 @@ def _stamp() -> str:
 def main(skip_play: bool = False) -> dict:
     import attention
     import incidents
-    import play_reviews
+    import play_census
     import social_news
 
     started = _stamp()
@@ -1170,17 +1962,28 @@ def main(skip_play: bool = False) -> dict:
         results["google_play"] = len(play_reviews.collect())
         print()
 
-    print("[2/4] Social and news")
+    print("[2/5] Social and news")
     social = social_news.collect()
     results.update({k: len(v) for k, v in social.items()})
     print()
 
-    print("[3/4] Ground-truth incidents")
+    print("[3/5] Ground-truth incidents")
     results["incidents"] = len(incidents.collect())
     print()
 
-    print("[4/4] Attention (Wikipedia pageviews)")
+    print("[4/5] Attention (Wikipedia pageviews)")
     results["attention_rows"] = len(attention.collect())
+    print()
+
+    # [5/5] Record what this run added that no previous run had seen. A single
+    # pull is a retrospective snapshot; only the increment between waves is
+    # genuinely live, and only the increment is described as live in the report.
+    print("[5/5] Wave bookkeeping")
+    import waves
+    wave = waves.record_wave()
+    results["new_records_this_wave"] = wave["total_new_this_wave"]
+    print(f"      wave {wave['wave']}: {wave['total_new_this_wave']:,} records "
+          f"not seen in any previous wave")
     print()
 
     audit = {
@@ -1192,7 +1995,9 @@ def main(skip_play: bool = False) -> dict:
         "records_by_source": results,
         "total_reaction_records": sum(
             v for k, v in results.items()
-            if k not in ("incidents", "attention_rows")),
+            if k not in ("incidents", "attention_rows", "new_records_this_wave",
+                         "google_play_census_days")),
+        "wave": wave,
         "http": LEDGER.summary(),
     }
     (PROCESSED / "collection_audit.json").write_text(

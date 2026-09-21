@@ -28,12 +28,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from config import (DELAY_RELEVANCE, DELAY_TYPES, PROCESSED, REACTION_TYPES,
-                    ROUND2_MODEL, ROUND2_SRC)
+from config import (COMPETITOR_SWITCH, DELAY_RELEVANCE, DELAY_TYPES, PROCESSED,
+                    REACTION_FLAGS, REACTION_TYPES, ROUND2_MODEL, ROUND2_SRC)
 
 _RELEVANCE = re.compile(DELAY_RELEVANCE, re.I)
 _DELAY = [(name, re.compile(pat, re.I)) for name, pat in DELAY_TYPES]
 _REACTION = [(name, re.compile(pat, re.I)) for name, pat in REACTION_TYPES]
+_FLAGS = [(name, re.compile(pat, re.I)) for name, pat in REACTION_FLAGS]
+_SWITCH = re.compile(COMPETITOR_SWITCH, re.I)
 
 # Time expressions are the strongest objective evidence of a *quantified* delay
 _DURATION = re.compile(
@@ -89,10 +91,29 @@ def apply_rules(df: pd.DataFrame) -> pd.DataFrame:
 
     df["stated_delay_hours"] = text.map(extract_delay_hours)
 
+    # Independent co-occurrence flags. The ordered taxonomy above is mutually
+    # exclusive by construction, so "how many complaints demand a refund" is a
+    # question it cannot answer - `anger` outranks `refund_demand` and takes
+    # every complaint containing the word "worst" with it. These flags are
+    # evaluated without regard to priority or to each other.
+    for name, rx in _FLAGS:
+        df[name] = text.map(lambda t, rx=rx: bool(rx.search(t)))
+
+    # Who the customer says they are leaving for. Invisible to a brand-count
+    # entity analysis, because the brand named is not the brand reviewed.
+    df["competitor_named"] = text.map(
+        lambda t: (_SWITCH.search(t).group(1).strip().lower()[:24]
+                   if _SWITCH.search(t) else ""))
+
     # An unmatched but relevant row is "unspecified", not silently blank -
     # blanks and "we looked and found nothing" are different facts.
     df.loc[df["is_delay_related"] & (df["delay_type"] == ""), "delay_type"] = "unspecified_delay"
-    df.loc[df["reaction_type"] == "", "reaction_type"] = "neutral_report"
+    # Named `unmarked`, not `neutral_report`. This is the residual bucket - the
+    # rows where no reaction pattern fired - and calling it "neutral" asserted
+    # something about them that is false: its mean star rating is 1.9 and its
+    # mean model sentiment is -0.54. It is not neutral, it is unlabelled, and
+    # the name now says which.
+    df.loc[df["reaction_type"] == "", "reaction_type"] = "unmarked"
     return df
 
 
@@ -121,17 +142,28 @@ def apply_round2(df: pd.DataFrame, batch: int = 20000) -> pd.DataFrame:
     for task in ("sentiment", "topic"):
         model = bundle["models"][task]
         classes = np.asarray(model.classes_)
-        preds, confs = [], []
+        preds, confs, chunks = [], [], []
         for i in range(0, len(texts), batch):
             chunk = texts[i:i + batch]
             proba = model.predict_proba(chunk)
             idx = proba.argmax(1)
             preds.extend(classes[idx])
             confs.extend(proba.max(1))
+            if task == "sentiment":
+                chunks.append(proba)
             print(f"      {task}: {min(i + batch, len(texts)):,}/{len(texts):,}",
                   end="\r", flush=True)
         df[f"r2_{task}"] = preds
         df[f"r2_{task}_confidence"] = np.round(confs, 4)
+        if task == "sentiment" and chunks:
+            # Keep the whole probability vector, not only its maximum. The
+            # transfer test shows the model's Neutral class is where it breaks
+            # (recall 0.28, precision 0.06), and repairing that needs the
+            # margin *between* classes - which `max(proba)` has already thrown
+            # away. Three float columns buy the recalibration in validate.py.
+            all_proba = np.vstack(chunks)
+            for j, cls in enumerate(classes):
+                df[f"r2_p_{str(cls).lower()}"] = np.round(all_proba[:, j], 4)
         print(f"      {task}: {len(texts):,} scored          ", flush=True)
 
     # A single signed number is what a time series needs.

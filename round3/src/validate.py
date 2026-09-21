@@ -133,6 +133,116 @@ def evaluate(df: pd.DataFrame) -> dict:
     return out
 
 
+def recalibrate(df: pd.DataFrame, seed: int = 42) -> dict:
+    """Repair the class the transfer test shows is broken, without retraining.
+
+    The measurement above says two things at once. Positive-vs-negative
+    transfers well (~89% agreement with the reviewer's own stars). Neutral does
+    not: recall 0.28, precision 0.06, and the model emits roughly four times as
+    many Neutral predictions as there are three-star reviews. Because
+    ``sentiment_score`` maps Neutral to 0.0, those misrouted rows pull every
+    daily mean toward zero by an amount that varies with text length and brand
+    - which is a plausible part of why the aggregate sentiment line is so flat.
+
+    Retraining is out of scope: the rulebook says apply the Round 2 model, and
+    a model fine-tuned here would no longer be the Round 2 deliverable. What is
+    in scope is changing the **decision rule** applied to its probabilities,
+    which leaves the model untouched:
+
+        predict Neutral only when P(Neutral) >= tau,
+        otherwise take the better of Negative and Positive.
+
+    ``tau`` is fitted on half the star-labelled rows, chosen to maximise macro-F1,
+    and every number reported here is measured on the other half, which the
+    fitting never saw. Splitting on a hash of ``record_id`` makes the split
+    deterministic and independent of row order.
+
+    A third rule is reported alongside: **abstain**. Where the model's own
+    confidence is below a threshold, emit nothing rather than a guess. That
+    trades coverage for accuracy explicitly, which is the trade a monitoring
+    system should be making.
+    """
+    need = ["r2_p_negative", "r2_p_neutral", "r2_p_positive"]
+    if any(c not in df.columns for c in need):
+        return {"available": False,
+                "reason": "per-class probabilities not in the corpus; re-run classify.py"}
+
+    rated = df[df["rating"].notna()].copy()
+    rated["star_label"] = rated["rating"].map(stars_to_label)
+    rated = rated[rated["star_label"].notna()]
+    if len(rated) < 2000:
+        return {"available": False, "reason": f"only {len(rated)} rated rows"}
+
+    h = rated["record_id"].astype(str).map(lambda s: int(s[:8], 16) % 2)
+    fit, test = rated[h == 0], rated[h == 1]
+
+    def apply_rule(g: pd.DataFrame, tau: float) -> np.ndarray:
+        pn = g["r2_p_neutral"].to_numpy()
+        neg = g["r2_p_negative"].to_numpy()
+        pos = g["r2_p_positive"].to_numpy()
+        polar = np.where(neg >= pos, "Negative", "Positive")
+        return np.where(pn >= tau, "Neutral", polar)
+
+    taus = np.round(np.arange(0.20, 0.96, 0.01), 2)
+    scores = [(t, f1_score(fit["star_label"], apply_rule(fit, t),
+                           labels=LABELS, average="macro", zero_division=0))
+              for t in taus]
+    best_tau, best_fit_f1 = max(scores, key=lambda kv: kv[1])
+
+    y_true = test["star_label"].to_numpy()
+    y_base = test["r2_sentiment"].to_numpy()
+    y_cal = apply_rule(test, best_tau)
+
+    def score(y_pred) -> dict:
+        return {
+            "accuracy": float(accuracy_score(y_true, y_pred)),
+            "macro_f1": float(f1_score(y_true, y_pred, labels=LABELS,
+                                       average="macro", zero_division=0)),
+            "cohen_kappa": float(cohen_kappa_score(y_true, y_pred, labels=LABELS)),
+            "neutral_f1": float(f1_score(y_true, y_pred, labels=["Neutral"],
+                                         average="macro", zero_division=0)),
+            "predicted_neutral": int((y_pred == "Neutral").sum()),
+        }
+
+    out = {
+        "available": True,
+        "method": ("post-hoc decision rule on the Round 2 model's own "
+                   "probabilities; the model itself is unchanged"),
+        "tau_fitted": float(best_tau),
+        "fit_macro_f1": float(best_fit_f1),
+        "n_fit": int(len(fit)), "n_test": int(len(test)),
+        "true_neutral_in_test": int((y_true == "Neutral").sum()),
+        "argmax": score(y_base),
+        "recalibrated": score(y_cal),
+    }
+
+    # the abstain option, on the same held-out half
+    conf = test["r2_sentiment_confidence"].to_numpy()
+    out["abstain"] = []
+    for thr in (0.6, 0.7, 0.8):
+        m = conf >= thr
+        if m.sum() >= 300:
+            out["abstain"].append({
+                "threshold": thr, "coverage": float(m.mean()),
+                "accuracy": float(accuracy_score(y_true[m], y_base[m])),
+                "macro_f1": float(f1_score(y_true[m], y_base[m], labels=LABELS,
+                                           average="macro", zero_division=0)),
+            })
+
+    gain = out["recalibrated"]["macro_f1"] - out["argmax"]["macro_f1"]
+    out["macro_f1_gain"] = round(float(gain), 4)
+    out["interpretation"] = (
+        "The gain comes almost entirely from the Neutral class, and it is "
+        "bought by predicting Neutral far less often. That is the right "
+        "direction for this corpus: three-star reviews are genuinely rare in "
+        "delay complaints, and a model that produces four times as many "
+        "Neutral labels as there are three-star reviews is not undecided, it "
+        "is wrong in a way that quietly flattens every time series built on "
+        "it. The rule is a post-hoc threshold, so the Round 2 deliverable is "
+        "still the model that ships; what changed is how its output is read.")
+    return out
+
+
 def main() -> dict:
     src = PROCESSED / "reactions_labelled.parquet"
     if not src.exists():
@@ -140,6 +250,7 @@ def main() -> dict:
     df = pd.read_parquet(src) if src.suffix == ".parquet" else pd.read_csv(src)
 
     res = evaluate(df)
+    res["recalibration"] = recalibrate(df)
     (REPORTS / "round2_transfer.json").write_text(
         json.dumps(res, indent=2, default=str), encoding="utf-8")
 
@@ -153,6 +264,21 @@ def main() -> dict:
                   f"on {po['n']:,} rows, kappa {po['cohen_kappa']:.4f}")
         print("    best domains:", list(res["per_domain"])[:3])
         print("    worst domains:", list(res["per_domain"])[-3:])
+    rc = res.get("recalibration") or {}
+    if rc.get("available"):
+        print(f"    recalibration (tau={rc['tau_fitted']}, held-out n={rc['n_test']:,}):")
+        print(f"      argmax        macro-F1 {rc['argmax']['macro_f1']:.4f}  "
+              f"acc {rc['argmax']['accuracy']:.4f}  "
+              f"Neutral-F1 {rc['argmax']['neutral_f1']:.3f}  "
+              f"predicts Neutral {rc['argmax']['predicted_neutral']:,}x")
+        print(f"      recalibrated  macro-F1 {rc['recalibrated']['macro_f1']:.4f}  "
+              f"acc {rc['recalibrated']['accuracy']:.4f}  "
+              f"Neutral-F1 {rc['recalibrated']['neutral_f1']:.3f}  "
+              f"predicts Neutral {rc['recalibrated']['predicted_neutral']:,}x")
+        print(f"      true Neutral in the held-out half: "
+              f"{rc['true_neutral_in_test']:,}")
+    elif rc:
+        print(f"    recalibration unavailable: {rc.get('reason')}")
     return res
 
 
